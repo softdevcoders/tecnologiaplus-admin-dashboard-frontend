@@ -16,7 +16,10 @@ import {
   TextField,
   IconButton,
   Tooltip,
+  Tabs,
+  Tab,
 } from '@mui/material'
+import CodeEditor from './CodeEditor'
 
 interface WYSIWYGEditorProps {
   value: string
@@ -39,18 +42,31 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
   const [linkDialogOpen, setLinkDialogOpen] = useState(false)
   const [linkUrl, setLinkUrl] = useState('')
   const [linkText, setLinkText] = useState('')
+  const [imageDialogOpen, setImageDialogOpen] = useState(false)
+  const [imageUrl, setImageUrl] = useState('')
+  const [imageAlt, setImageAlt] = useState('')
   const [colorDialogOpen, setColorDialogOpen] = useState(false)
   const [selectedColor, setSelectedColor] = useState('#000000')
   const [fontSizeDialogOpen, setFontSizeDialogOpen] = useState(false)
   const [selectedFontSize, setSelectedFontSize] = useState('16px')
+  const [activeTab, setActiveTab] = useState(0) // 0 = Editor, 1 = HTML
+  const [htmlCode, setHtmlCode] = useState(value)
 
   useEffect(() => {
-    if (editorRef.current && editorRef.current.innerHTML !== value) {
+    // Solo actualizar si estamos en la pestaña del editor y hay un cambio real
+    if (editorRef.current && activeTab === 0 && value !== editorRef.current.innerHTML) {
       const selection = window.getSelection()
       const range = selection?.getRangeAt(0)
       const wasAtEnd = range && range.endOffset === range.endContainer.textContent?.length
       
-      editorRef.current.innerHTML = value
+      // Si el valor está vacío, inicializar con un párrafo vacío
+      if (!value || value.trim() === '') {
+        editorRef.current.innerHTML = '<p></p>'
+        setHtmlCode('<p></p>')
+      } else {
+        editorRef.current.innerHTML = value
+        setHtmlCode(value)
+      }
       
       // Restaurar cursor al final si estaba al final
       if (wasAtEnd && editorRef.current.textContent) {
@@ -61,7 +77,16 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
         selection?.addRange(newRange)
       }
     }
-  }, [value])
+  }, [value, activeTab])
+
+  // Inicializar con un párrafo cuando el componente se monta
+  useEffect(() => {
+    if (editorRef.current && (!value || value.trim() === '')) {
+      editorRef.current.innerHTML = '<p></p>'
+      setHtmlCode('<p></p>')
+      onChange('<p></p>')
+    }
+  }, []) // Solo se ejecuta al montar
 
   const execCommand = (command: string, value?: string) => {
     document.execCommand(command, false, value)
@@ -70,8 +95,60 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
   }
 
   const updateContent = () => {
-    if (editorRef.current) {
-      onChange(editorRef.current.innerHTML)
+    if (editorRef.current && activeTab === 0) { // Solo actualizar si estamos en la pestaña del editor
+      let newContent = editorRef.current.innerHTML
+      
+      // Si el contenido está vacío, crear un párrafo vacío
+      if (!newContent || newContent.trim() === '' || newContent === '<br>') {
+        newContent = '<p></p>'
+        editorRef.current.innerHTML = newContent
+      }
+      
+      onChange(newContent)
+      setHtmlCode(newContent)
+    }
+  }
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setActiveTab(newValue)
+    if (newValue === 1) {
+      // Al cambiar a la vista HTML, actualizar el código
+      const currentHtml = editorRef.current?.innerHTML || value
+      setHtmlCode(currentHtml)
+    } else if (newValue === 0) {
+      // Al cambiar al editor, sincronizar el contenido
+      if (editorRef.current && htmlCode !== editorRef.current.innerHTML) {
+        editorRef.current.innerHTML = htmlCode
+      }
+    }
+  }
+
+  const handleHtmlChange = (newHtml: string) => {
+    setHtmlCode(newHtml)
+    onChange(newHtml)
+    // Solo actualizar el editor si estamos en la pestaña HTML
+    if (editorRef.current && activeTab === 1) {
+      editorRef.current.innerHTML = newHtml
+    }
+  }
+
+  const formatHtml = () => {
+    try {
+      // Crear un parser temporal para formatear el HTML
+      const parser = new DOMParser()
+      const doc = parser.parseFromString(htmlCode, 'text/html')
+      const formatted = doc.body.innerHTML
+        .replace(/></g, '>\n<')
+        .replace(/\n\s*\n/g, '\n')
+        .trim()
+      
+      setHtmlCode(formatted)
+      onChange(formatted)
+      if (editorRef.current) {
+        editorRef.current.innerHTML = formatted
+      }
+    } catch (error) {
+      console.error('Error al formatear HTML:', error)
     }
   }
 
@@ -97,6 +174,13 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
         break
       case 'p':
         execCommand('formatBlock', '<p>')
+        // Asegurar que siempre haya al menos un párrafo
+        setTimeout(() => {
+          if (editorRef.current && !editorRef.current.querySelector('p')) {
+            editorRef.current.innerHTML = '<p></p>'
+            updateContent()
+          }
+        }, 0)
         break
       case 'ul':
         execCommand('insertUnorderedList')
@@ -150,6 +234,18 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
       case 'alignJustify':
         execCommand('justifyFull')
         break
+      case 'article':
+        execCommand('formatBlock', '<article>')
+        break
+      case 'section':
+        execCommand('formatBlock', '<section>')
+        break
+      case 'header':
+        execCommand('formatBlock', '<header>')
+        break
+      case 'footer':
+        execCommand('formatBlock', '<footer>')
+        break
     }
   }
 
@@ -173,11 +269,60 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
     setFontSizeDialogOpen(false)
   }
 
+  const handleImageSubmit = () => {
+    if (imageUrl) {
+      const imageHtml = `<img src="${imageUrl}" alt="${imageAlt}" style="max-width: 100%; height: auto;" />`
+      execCommand('insertHTML', imageHtml)
+      setImageDialogOpen(false)
+      setImageUrl('')
+      setImageAlt('')
+    }
+  }
+
   const handlePaste = (e: React.ClipboardEvent) => {
     e.preventDefault()
     const text = e.clipboardData.getData('text/plain')
     document.execCommand('insertText', false, text)
     updateContent()
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      
+      // Si estamos dentro de un párrafo, crear uno nuevo
+      const selection = window.getSelection()
+      if (selection && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0)
+        const currentNode = range.startContainer
+        
+        // Buscar el elemento padre más cercano
+        let parentElement = currentNode.nodeType === Node.TEXT_NODE 
+          ? currentNode.parentElement 
+          : currentNode as Element
+        
+        // Si estamos en un párrafo, crear uno nuevo después
+        if (parentElement && parentElement.tagName.toLowerCase() === 'p') {
+          const newP = document.createElement('p')
+          newP.innerHTML = ''
+          
+          // Insertar después del párrafo actual
+          parentElement.parentNode?.insertBefore(newP, parentElement.nextSibling)
+          
+          // Mover cursor al nuevo párrafo
+          const newRange = document.createRange()
+          newRange.setStart(newP, 0)
+          newRange.collapse(true)
+          selection.removeAllRanges()
+          selection.addRange(newRange)
+          
+          updateContent()
+        } else {
+          // Comportamiento por defecto
+          execCommand('insertParagraph')
+        }
+      }
+    }
   }
 
   const isFormatActive = (format: string) => {
@@ -333,19 +478,45 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
 
              <Divider orientation="vertical" flexItem />
 
-             {/* Special Formats */}
-             <ToggleButtonGroup size="small" sx={{ mr: 1 }}>
-               <Tooltip title="Cita">
-                 <ToggleButton value="quote" onClick={() => handleFormat('quote')}>
-                   <i className="ri-double-quotes-l" />
-                 </ToggleButton>
-               </Tooltip>
-               <Tooltip title="Código">
-                 <ToggleButton value="code" onClick={() => handleFormat('code')}>
-                   <i className="ri-code-line" />
-                 </ToggleButton>
-               </Tooltip>
-             </ToggleButtonGroup>
+                         {/* Special Formats */}
+            <ToggleButtonGroup size="small" sx={{ mr: 1 }}>
+              <Tooltip title="Cita">
+                <ToggleButton value="quote" onClick={() => handleFormat('quote')}>
+                  <i className="ri-double-quotes-l" />
+                </ToggleButton>
+              </Tooltip>
+              <Tooltip title="Código">
+                <ToggleButton value="code" onClick={() => handleFormat('code')}>
+                  <i className="ri-code-line" />
+                </ToggleButton>
+              </Tooltip>
+            </ToggleButtonGroup>
+
+            <Divider orientation="vertical" flexItem />
+
+            {/* Semantic HTML */}
+            <ToggleButtonGroup size="small" sx={{ mr: 1 }}>
+              <Tooltip title="Artículo (article)">
+                <ToggleButton value="article" onClick={() => handleFormat('article')}>
+                  <i className="ri-article-line" />
+                </ToggleButton>
+              </Tooltip>
+              <Tooltip title="Sección (section)">
+                <ToggleButton value="section" onClick={() => handleFormat('section')}>
+                  <i className="ri-layout-line" />
+                </ToggleButton>
+              </Tooltip>
+              <Tooltip title="Encabezado (header)">
+                <ToggleButton value="header" onClick={() => handleFormat('header')}>
+                  <i className="ri-heading" />
+                </ToggleButton>
+              </Tooltip>
+              <Tooltip title="Pie (footer)">
+                <ToggleButton value="footer" onClick={() => handleFormat('footer')}>
+                  <i className="ri-footer-line" />
+                </ToggleButton>
+              </Tooltip>
+            </ToggleButtonGroup>
 
              <Divider orientation="vertical" flexItem />
 
@@ -365,85 +536,163 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
           </Box>
         </Box>
 
+        {/* Tabs */}
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Tabs 
+            value={activeTab} 
+            onChange={handleTabChange}
+            sx={{ 
+              minHeight: 40,
+              '& .MuiTab-root': {
+                minHeight: 40,
+                fontSize: '14px',
+                fontWeight: 500,
+              }
+            }}
+          >
+            <Tab 
+              label={
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <i className="ri-edit-line" />
+                  Editor
+                </Box>
+              } 
+            />
+            <Tab 
+              label={
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <i className="ri-code-line" />
+                  HTML
+                </Box>
+              } 
+            />
+          </Tabs>
+        </Box>
+
         {/* Editor Area */}
-        <Box
-          ref={editorRef}
-          contentEditable
-          onInput={updateContent}
-          onPaste={handlePaste}
-          onBlur={updateContent}
-          sx={{
-            minHeight: 400,
-            padding: 3,
-            outline: 'none',
-            fontSize: '16px',
-            lineHeight: 1.6,
-            fontFamily: 'inherit',
-            '&:empty:before': {
+        {activeTab === 0 ? (
+          <Box
+            ref={editorRef}
+            contentEditable
+            onInput={updateContent}
+            onPaste={handlePaste}
+            onKeyDown={handleKeyDown}
+            onBlur={updateContent}
+            sx={{
+              minHeight: 400,
+              padding: 3,
+              outline: 'none',
+              fontSize: '16px',
+              lineHeight: 1.6,
+              fontFamily: 'inherit',
+                          '& p:empty:before': {
               content: `"${placeholder}"`,
               color: '#999',
               fontStyle: 'italic',
+              display: 'block',
+              pointerEvents: 'none',
             },
-            '& h1': {
-              fontSize: '2em',
-              fontWeight: 'bold',
-              margin: '0.67em 0',
+            '& p:empty:focus:before': {
+              content: 'none',
             },
-            '& h2': {
-              fontSize: '1.5em',
-              fontWeight: 'bold',
-              margin: '0.83em 0',
-            },
-            '& h3': {
-              fontSize: '1.17em',
-              fontWeight: 'bold',
-              margin: '1em 0',
-            },
-            '& p': {
-              margin: '1em 0',
-            },
-            '& ul, & ol': {
-              margin: '1em 0',
-              paddingLeft: '2em',
-            },
-            '& li': {
-              margin: '0.5em 0',
-            },
-            '& a': {
-              color: 'primary.main',
-              textDecoration: 'underline',
-            },
-            '& img': {
-              maxWidth: '100%',
-              height: 'auto',
-              margin: '1em 0',
-            },
-            '& blockquote': {
-              borderLeft: '4px solid',
-              borderColor: 'primary.main',
-              paddingLeft: '1em',
-              margin: '1em 0',
-              fontStyle: 'italic',
-              color: 'text.secondary',
-            },
-            '& pre': {
-              backgroundColor: 'grey.100',
-              padding: '1em',
-              borderRadius: '4px',
-              fontFamily: 'monospace',
-              fontSize: '14px',
-              overflow: 'auto',
-              margin: '1em 0',
-            },
-            '& code': {
-              backgroundColor: 'grey.100',
-              padding: '0.2em 0.4em',
-              borderRadius: '3px',
-              fontFamily: 'monospace',
-              fontSize: '0.9em',
-            },
-          }}
-        />
+              '& h1': {
+                fontSize: '2em',
+                fontWeight: 'bold',
+                margin: '0.67em 0',
+              },
+              '& h2': {
+                fontSize: '1.5em',
+                fontWeight: 'bold',
+                margin: '0.83em 0',
+              },
+              '& h3': {
+                fontSize: '1.17em',
+                fontWeight: 'bold',
+                margin: '1em 0',
+              },
+              '& p': {
+                margin: '1em 0',
+              },
+              '& ul, & ol': {
+                margin: '1em 0',
+                paddingLeft: '2em',
+              },
+              '& li': {
+                margin: '0.5em 0',
+              },
+              '& a': {
+                color: 'primary.main',
+                textDecoration: 'underline',
+              },
+              '& img': {
+                maxWidth: '100%',
+                height: 'auto',
+                margin: '1em 0',
+              },
+              '& blockquote': {
+                borderLeft: '4px solid',
+                borderColor: 'primary.main',
+                paddingLeft: '1em',
+                margin: '1em 0',
+                fontStyle: 'italic',
+                color: 'text.secondary',
+              },
+              '& pre': {
+                backgroundColor: 'grey.100',
+                padding: '1em',
+                borderRadius: '4px',
+                fontFamily: 'monospace',
+                fontSize: '14px',
+                overflow: 'auto',
+                margin: '1em 0',
+              },
+              '& code': {
+                backgroundColor: 'grey.100',
+                padding: '0.2em 0.4em',
+                borderRadius: '3px',
+                fontFamily: 'monospace',
+                fontSize: '0.9em',
+              },
+              '& article': {
+                margin: '1em 0',
+                padding: '1em',
+                border: '1px solid',
+                borderColor: 'primary.main',
+                borderRadius: '4px',
+              },
+              '& section': {
+                margin: '1em 0',
+                padding: '1em',
+                backgroundColor: 'grey.50',
+                borderRadius: '4px',
+              },
+              '& header': {
+                margin: '1em 0',
+                padding: '1em',
+                backgroundColor: 'primary.50',
+                borderBottom: '2px solid',
+                borderColor: 'primary.main',
+              },
+              '& footer': {
+                margin: '1em 0',
+                padding: '1em',
+                backgroundColor: 'grey.100',
+                borderTop: '2px solid',
+                borderColor: 'grey.300',
+                fontSize: '0.9em',
+                color: 'text.secondary',
+              },
+            }}
+          />
+        ) : (
+          <CodeEditor
+            value={htmlCode}
+            onChange={handleHtmlChange}
+            language="markup"
+            placeholder="Código HTML del contenido..."
+            minHeight={400}
+          />
+        )}
       </Paper>
       
       {helperText && (
@@ -478,6 +727,33 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
          <DialogActions>
            <Button onClick={() => setLinkDialogOpen(false)}>Cancelar</Button>
            <Button onClick={handleLinkSubmit} variant="contained">Insertar</Button>
+         </DialogActions>
+       </Dialog>
+
+       {/* Image Dialog */}
+       <Dialog open={imageDialogOpen} onClose={() => setImageDialogOpen(false)} maxWidth="sm" fullWidth>
+         <DialogTitle>Insertar Imagen</DialogTitle>
+         <DialogContent>
+           <TextField
+             fullWidth
+             label="URL de la imagen"
+             value={imageUrl}
+             onChange={(e) => setImageUrl(e.target.value)}
+             placeholder="https://ejemplo.com/imagen.jpg"
+             sx={{ mb: 2, mt: 1 }}
+           />
+           <TextField
+             fullWidth
+             label="Texto alternativo (alt)"
+             value={imageAlt}
+             onChange={(e) => setImageAlt(e.target.value)}
+             placeholder="Descripción de la imagen"
+             helperText="Importante para SEO y accesibilidad"
+           />
+         </DialogContent>
+         <DialogActions>
+           <Button onClick={() => setImageDialogOpen(false)}>Cancelar</Button>
+           <Button onClick={handleImageSubmit} variant="contained">Insertar</Button>
          </DialogActions>
        </Dialog>
 
