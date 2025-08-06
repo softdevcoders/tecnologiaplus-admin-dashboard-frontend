@@ -135,13 +135,13 @@ const ArticlesFilters: React.FC<ArticlesFiltersProps> = ({
               <InputLabel>Categoría</InputLabel>
               <Select
                 key={`categories-select-${categories.length}`}
-                value={filters.categoryId}
+                value="all"
                 label="Categoría"
                 onChange={(e) => handleFilterChange('categoryId', e.target.value)}
                 displayEmpty
               >
-                <MenuItem value="">
-                  <em>Todas las categorías</em>
+                <MenuItem value="all">
+                  Todas las categorías
                 </MenuItem>
                 {categories && categories.length > 0 ? (
                   categories.map((category) => (

@@ -4,7 +4,7 @@ import { API_CONFIG } from '@/configs/api.config'
 // Tipos para las categorías
 export interface Category {
   id: string
-  name: string
+  label: string
   slug: string
   description?: string
   color?: string

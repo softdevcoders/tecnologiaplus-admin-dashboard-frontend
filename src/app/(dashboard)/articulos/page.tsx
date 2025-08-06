@@ -40,9 +40,7 @@ const ArticulosPage = () => {
 
   const { categories: categoriesData, loading: categoriesLoading } = useCategories()
 
-  // Debug: Log de categorías
-  console.log('ArticulosPage - categoriesData:', categoriesData)
-  console.log('ArticulosPage - categoriesLoading:', categoriesLoading)
+
 
   const [viewMode, setViewMode] = useState<ViewMode>('list')
 

@@ -22,10 +22,7 @@ export const useCategories = (): UseCategoriesReturn => {
       setLoading(true)
       setError(null)
       
-      console.log('useCategories - fetchCategories called')
       const response = await categoriesService.getCategories(filters)
-      console.log('useCategories - response:', response)
-      console.log('useCategories - response.data:', response.data)
       setCategories(response.data)
     } catch (err) {
       console.error('Error al obtener categorías:', err)
