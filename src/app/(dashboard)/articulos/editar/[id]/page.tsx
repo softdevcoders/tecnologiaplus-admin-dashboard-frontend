@@ -25,6 +25,7 @@ import { useArticles } from '@/hooks/useArticles'
 
 // Components
 import WYSIWYGEditor from '@/components/WYSIWYGEditor'
+import ImageUpload from '@/components/ImageUpload'
 
 // Utils
 import { generateSlug, isValidSlug } from '@/utils/slug'
@@ -38,6 +39,7 @@ interface ArticleFormData {
   metaTitle: string
   metaDescription: string
   keywords: string
+  coverImage: string
   categoryId: string
   isPublished: boolean
   tags: string[]
@@ -59,6 +61,7 @@ const EditarArticuloPage = () => {
     metaTitle: '',
     metaDescription: '',
     keywords: '',
+    coverImage: '',
     categoryId: '',
     isPublished: false,
     tags: [],
@@ -82,6 +85,7 @@ const EditarArticuloPage = () => {
               metaTitle: article.metaTitle || '',
               metaDescription: article.metaDescription || '',
               keywords: article.metaKeywords || '',
+              coverImage: article.coverImage || '',
               categoryId: article.categoryId,
               isPublished: article.isPublished,
               tags: article.tags || [],
@@ -140,6 +144,7 @@ const EditarArticuloPage = () => {
         metaTitle: formData.metaTitle,
         metaDescription: formData.metaDescription,
         metaKeywords: formData.keywords,
+        coverImage: formData.coverImage,
         categoryId: formData.categoryId,
         tags: formData.tags,
       })
@@ -214,6 +219,18 @@ const EditarArticuloPage = () => {
                   multiline
                   rows={3}
                   placeholder="Escribe un resumen del artículo..."
+                  helperText="Breve descripción que aparecerá en las vistas previas"
+                />
+              </Grid>
+
+              {/* Imagen Principal */}
+              <Grid item xs={12}>
+                <ImageUpload
+                  value={formData.coverImage}
+                  onChange={(imageUrl) => handleInputChange('coverImage', imageUrl)}
+                  label="Imagen Principal"
+                  helperText="Imagen destacada del artículo. Recomendado: 1200x630px"
+                  maxSize={5}
                 />
               </Grid>
 

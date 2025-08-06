@@ -160,6 +160,23 @@ const VerArticuloPage = () => {
                 </Typography>
               )}
 
+              {/* Cover Image */}
+              {article.coverImage && (
+                <Box sx={{ mb: 3 }}>
+                  <Box
+                    component="img"
+                    src={article.coverImage}
+                    alt={article.title}
+                    sx={{
+                      width: '100%',
+                      height: 300,
+                      objectFit: 'cover',
+                      borderRadius: 1,
+                    }}
+                  />
+                </Box>
+              )}
+
               <Divider sx={{ my: 3 }} />
 
               {/* Content */}
