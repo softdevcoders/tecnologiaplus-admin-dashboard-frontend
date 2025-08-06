@@ -38,11 +38,11 @@ type ErrorType = {
 type FormData = InferInput<typeof schema>
 
 const schema = object({
-  email: pipe(string(), minLength(1, 'This field is required'), email('Please enter a valid email address')),
+  email: pipe(string(), minLength(1, 'Este campo es requerido'), email('Por favor, ingrese una dirección de correo electrónico válida')),
   password: pipe(
     string(),
-    nonEmpty('This field is required'),
-    minLength(5, 'Password must be at least 5 characters long')
+    nonEmpty('Este campo es requerido'),
+    minLength(5, 'La contraseña debe tener al menos 5 caracteres')
   )
 })
 
@@ -63,8 +63,8 @@ const Login = () => {
   } = useForm<FormData>({
     resolver: valibotResolver(schema),
     defaultValues: {
-      email: 'admin@materio.com',
-      password: 'admin'
+      email: 'admin2@tecnologiaplus.com',
+      password: 'admin123'
     }
   })
 
@@ -84,9 +84,7 @@ const Login = () => {
       router.replace(redirectURL)
     } else {
       if (res?.error) {
-        const error = JSON.parse(res.error)
-
-        setErrorState(error)
+        setErrorState({ message: [res?.error] })
       }
     }
   }

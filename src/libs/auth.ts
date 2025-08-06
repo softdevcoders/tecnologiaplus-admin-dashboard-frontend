@@ -1,4 +1,5 @@
-import type { NextAuthOptions } from 'next-auth';
+import type { NextAuthOptions, Session } from 'next-auth';
+import type { JWT } from 'next-auth/jwt'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import axios from 'axios'
 
@@ -34,43 +35,24 @@ export const authOptions: NextAuthOptions = {
         password: { label: 'Password', type: 'password' }
       },
       async authorize(credentials) {
-        console.log('=== AUTH ATTEMPT START ===')
-        console.log('Credentials received:', {
-          email: credentials?.email,
-          password: credentials?.password ? '***' : 'undefined'
-        })
-
         if (!credentials?.email || !credentials?.password) {
-          console.log('Missing credentials')
           throw new Error('Missing credentials')
         }
 
         const apiUrl = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL
         const loginUrl = `${apiUrl}/auth/login`
 
-        console.log('Auth attempt with URL:', loginUrl)
-        console.log('API URL being used:', apiUrl)
-
         try {
-          console.log('Making request to backend...')
-
           const response = await axios.post(loginUrl, {
             email: credentials.email,
             password: credentials.password
           })
 
-          console.log('Backend response status:', response.status)
-          console.log('Backend response data:', response.data)
-
           const { access_token } = response.data
 
           if (access_token) {
-            console.log('Authentication successful!')
-
             // Decode JWT to get user data
             const decodedToken = decodeJWT(access_token)
-
-            console.log('Decoded token:', decodedToken)
 
             if (decodedToken) {
               const user = {
@@ -81,37 +63,31 @@ export const authOptions: NextAuthOptions = {
                 accessToken: access_token
               }
 
-              console.log('User data:', { id: user.id, email: user.email, role: user.role })
-              
               return user
             }
           }
 
-          console.log('No access token received')
-          
-          return null
-
+          // Si no hay access_token en la respuesta
+          throw new Error('Respuesta de autenticación inválida')
         } catch (error: unknown) {
-          console.log('=== AUTH ERROR ===')
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-          
-          console.log('Error message:', errorMessage)
-
-          if (error && typeof error === 'object' && 'response' in error) {
-            const axiosError = error as {
-              response?: { status?: number; statusText?: string; data?: unknown }
-              config?: { url?: string }
+          // Manejar específicamente el error 401 de la API
+          if (axios.isAxiosError(error)) {
+            if (error.response?.status === 401) {
+              // Extraer el mensaje de error de la respuesta de la API
+              const errorMessage = 'Credenciales incorrectas'
+              
+              throw new Error(errorMessage)
+            } else if (error.response?.status) {
+              // Otros errores HTTP
+              throw new Error(`Error del servidor: ${error.response.status}`)
+            } else if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND') {
+              // Errores de conexión
+              throw new Error('No se pudo conectar con el servidor')
             }
-
-            console.log('Error status:', axiosError.response?.status)
-            console.log('Error status text:', axiosError.response?.statusText)
-            console.log('Error data:', axiosError.response?.data)
-            console.log('Error URL:', axiosError.config?.url)
           }
-
-          console.log('Full error:', error)
           
-return null
+          // Error genérico para otros tipos de errores
+          throw new Error('Error durante la autenticación')
         }
       }
     })
@@ -122,19 +98,17 @@ return null
         token.role = user.role
         token.accessToken = user.accessToken
       }
-
       
-return token
+      return token
     },
-    async session({ session, token }) {
+    async session({ session, token }: { session: Session, token: JWT }) { 
       if (token) {
         session.user.id = token.sub as string
         session.user.role = token.role as string
         session.accessToken = token.accessToken as string
       }
-
       
-return session
+      return session
     }
   },
   pages: {
