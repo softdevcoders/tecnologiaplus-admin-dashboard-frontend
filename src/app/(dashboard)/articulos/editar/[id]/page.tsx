@@ -24,7 +24,7 @@ import { useCategories } from '@/hooks/useCategories'
 import { useArticles } from '@/hooks/useArticles'
 
 // Components
-import SimpleRichTextEditor from '@/components/SimpleRichTextEditor'
+import WYSIWYGEditor from '@/components/WYSIWYGEditor'
 
 // Utils
 import { generateSlug, isValidSlug } from '@/utils/slug'
@@ -290,11 +290,11 @@ const EditarArticuloPage = () => {
 
               {/* Contenido */}
               <Grid item xs={12}>
-                <SimpleRichTextEditor
+                <WYSIWYGEditor
                   value={formData.content}
                   onChange={(value) => handleInputChange('content', value)}
                   label="Contenido del artículo"
-                  placeholder="Escribe el contenido del artículo usando el editor de texto enriquecido..."
+                  placeholder="Escribe el contenido del artículo. Usa los botones de la barra de herramientas para dar formato..."
                 />
               </Grid>
 

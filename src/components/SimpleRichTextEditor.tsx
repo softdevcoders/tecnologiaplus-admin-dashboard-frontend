@@ -146,7 +146,7 @@ const SimpleRichTextEditor: React.FC<SimpleRichTextEditorProps> = ({
         <TextField
           id="rich-text-field"
           multiline
-          rows={12}
+          rows={5}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onSelect={handleSelectionChange}
@@ -162,7 +162,7 @@ const SimpleRichTextEditor: React.FC<SimpleRichTextEditorProps> = ({
             },
             '& .MuiInputBase-input': {
               padding: 2,
-              minHeight: 300,
+              minHeight: 100,
               fontFamily: 'monospace',
               fontSize: '14px',
               lineHeight: 1.6,

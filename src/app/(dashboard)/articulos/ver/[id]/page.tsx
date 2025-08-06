@@ -163,9 +163,62 @@ const VerArticuloPage = () => {
               <Divider sx={{ my: 3 }} />
 
               {/* Content */}
-              <Typography variant='body1' sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
-                {article.content}
-              </Typography>
+              <Box
+                dangerouslySetInnerHTML={{ __html: article.content }}
+                sx={{
+                  lineHeight: 1.6,
+                  '& h1': {
+                    fontSize: '2em',
+                    fontWeight: 'bold',
+                    margin: '0.67em 0',
+                    color: 'text.primary',
+                  },
+                  '& h2': {
+                    fontSize: '1.5em',
+                    fontWeight: 'bold',
+                    margin: '0.83em 0',
+                    color: 'text.primary',
+                  },
+                  '& h3': {
+                    fontSize: '1.17em',
+                    fontWeight: 'bold',
+                    margin: '1em 0',
+                    color: 'text.primary',
+                  },
+                  '& p': {
+                    margin: '1em 0',
+                    fontSize: '16px',
+                  },
+                  '& ul, & ol': {
+                    margin: '1em 0',
+                    paddingLeft: '2em',
+                  },
+                  '& li': {
+                    margin: '0.5em 0',
+                  },
+                  '& a': {
+                    color: 'primary.main',
+                    textDecoration: 'underline',
+                    '&:hover': {
+                      textDecoration: 'none',
+                    },
+                  },
+                  '& img': {
+                    maxWidth: '100%',
+                    height: 'auto',
+                    margin: '1em 0',
+                    borderRadius: '4px',
+                  },
+                  '& blockquote': {
+                    borderLeft: '4px solid',
+                    borderColor: 'primary.main',
+                    paddingLeft: '1em',
+                    margin: '1em 0',
+                    fontStyle: 'italic',
+                    color: 'text.secondary',
+                  },
+                }}
+              />
             </CardContent>
           </Card>
         </Grid>
