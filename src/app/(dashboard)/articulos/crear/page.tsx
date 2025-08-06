@@ -173,7 +173,6 @@ const CrearArticuloPage = () => {
                   onChange={(e) => handleInputChange('title', e.target.value)}
                   required
                   placeholder="Ingresa el título del artículo..."
-                  helperText="El título aparecerá en la página y será usado para generar el slug automáticamente"
                 />
               </Grid>
 
@@ -186,7 +185,6 @@ const CrearArticuloPage = () => {
                   onChange={(e) => handleInputChange('slug', e.target.value)}
                   required
                   placeholder="url-del-articulo"
-                  helperText="URL amigable para SEO. Se genera automáticamente desde el título"
                   error={formData.slug && !isValidSlug(formData.slug)}
                 />
               </Grid>
@@ -220,7 +218,6 @@ const CrearArticuloPage = () => {
                   multiline
                   rows={3}
                   placeholder="Escribe un resumen del artículo..."
-                  helperText="Breve descripción que aparecerá en las vistas previas"
                 />
               </Grid>
 
@@ -242,7 +239,7 @@ const CrearArticuloPage = () => {
               {/* Tags */}
               <Grid item xs={12} md={6}>
                 <Box>
-                  <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+                  {/* <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
                     <TextField
                       placeholder="Agregar etiqueta..."
                       value={tagInput}
@@ -257,7 +254,7 @@ const CrearArticuloPage = () => {
                     >
                       Agregar
                     </Button>
-                  </Box>
+                  </Box> */}
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                     {formData.tags.map((tag) => (
                       <Chip
@@ -297,7 +294,6 @@ const CrearArticuloPage = () => {
                   value={formData.metaTitle}
                   onChange={(e) => handleInputChange('metaTitle', e.target.value)}
                   placeholder="Título para motores de búsqueda"
-                  helperText="Título que aparecerá en los resultados de búsqueda (máx. 60 caracteres)"
                   inputProps={{ maxLength: 60 }}
                 />
               </Grid>

@@ -39,10 +39,27 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
   const [linkDialogOpen, setLinkDialogOpen] = useState(false)
   const [linkUrl, setLinkUrl] = useState('')
   const [linkText, setLinkText] = useState('')
+  const [colorDialogOpen, setColorDialogOpen] = useState(false)
+  const [selectedColor, setSelectedColor] = useState('#000000')
+  const [fontSizeDialogOpen, setFontSizeDialogOpen] = useState(false)
+  const [selectedFontSize, setSelectedFontSize] = useState('16px')
 
   useEffect(() => {
-    if (editorRef.current) {
+    if (editorRef.current && editorRef.current.innerHTML !== value) {
+      const selection = window.getSelection()
+      const range = selection?.getRangeAt(0)
+      const wasAtEnd = range && range.endOffset === range.endContainer.textContent?.length
+      
       editorRef.current.innerHTML = value
+      
+      // Restaurar cursor al final si estaba al final
+      if (wasAtEnd && editorRef.current.textContent) {
+        const newRange = document.createRange()
+        newRange.selectNodeContents(editorRef.current)
+        newRange.collapse(false)
+        selection?.removeAllRanges()
+        selection?.addRange(newRange)
+      }
     }
   }, [value])
 
@@ -100,6 +117,27 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
           execCommand('insertImage', imageUrl)
         }
         break
+      case 'color':
+        setColorDialogOpen(true)
+        break
+      case 'fontSize':
+        setFontSizeDialogOpen(true)
+        break
+      case 'quote':
+        execCommand('formatBlock', '<blockquote>')
+        break
+      case 'code':
+        execCommand('formatBlock', '<pre>')
+        break
+      case 'strikethrough':
+        execCommand('strikeThrough')
+        break
+      case 'subscript':
+        execCommand('subscript')
+        break
+      case 'superscript':
+        execCommand('superscript')
+        break
       case 'alignLeft':
         execCommand('justifyLeft')
         break
@@ -123,6 +161,16 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
       setLinkUrl('')
       setLinkText('')
     }
+  }
+
+  const handleColorSubmit = () => {
+    execCommand('foreColor', selectedColor)
+    setColorDialogOpen(false)
+  }
+
+  const handleFontSizeSubmit = () => {
+    execCommand('fontSize', selectedFontSize.replace('px', ''))
+    setFontSizeDialogOpen(false)
   }
 
   const handlePaste = (e: React.ClipboardEvent) => {
@@ -160,35 +208,44 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
         }}>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, alignItems: 'center' }}>
             {/* Text Format */}
-            <ToggleButtonGroup size="small" sx={{ mr: 1 }}>
-              <Tooltip title="Negrita">
-                <ToggleButton 
-                  value="bold" 
-                  onClick={() => handleFormat('bold')}
-                  selected={isFormatActive('bold')}
-                >
-                  <strong>B</strong>
-                </ToggleButton>
-              </Tooltip>
-              <Tooltip title="Cursiva">
-                <ToggleButton 
-                  value="italic" 
-                  onClick={() => handleFormat('italic')}
-                  selected={isFormatActive('italic')}
-                >
-                  <em>I</em>
-                </ToggleButton>
-              </Tooltip>
-              <Tooltip title="Subrayado">
-                <ToggleButton 
-                  value="underline" 
-                  onClick={() => handleFormat('underline')}
-                  selected={isFormatActive('underline')}
-                >
-                  <u>U</u>
-                </ToggleButton>
-              </Tooltip>
-            </ToggleButtonGroup>
+                         <ToggleButtonGroup size="small" sx={{ mr: 1 }}>
+               <Tooltip title="Negrita">
+                 <ToggleButton 
+                   value="bold" 
+                   onClick={() => handleFormat('bold')}
+                   selected={isFormatActive('bold')}
+                 >
+                   <strong>B</strong>
+                 </ToggleButton>
+               </Tooltip>
+               <Tooltip title="Cursiva">
+                 <ToggleButton 
+                   value="italic" 
+                   onClick={() => handleFormat('italic')}
+                   selected={isFormatActive('italic')}
+                 >
+                   <em>I</em>
+                 </ToggleButton>
+               </Tooltip>
+               <Tooltip title="Subrayado">
+                 <ToggleButton 
+                   value="underline" 
+                   onClick={() => handleFormat('underline')}
+                   selected={isFormatActive('underline')}
+                 >
+                   <u>U</u>
+                 </ToggleButton>
+               </Tooltip>
+               <Tooltip title="Tachado">
+                 <ToggleButton 
+                   value="strikethrough" 
+                   onClick={() => handleFormat('strikethrough')}
+                   selected={isFormatActive('strikeThrough')}
+                 >
+                   <s>S</s>
+                 </ToggleButton>
+               </Tooltip>
+             </ToggleButtonGroup>
 
             <Divider orientation="vertical" flexItem />
 
@@ -260,19 +317,51 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
 
             <Divider orientation="vertical" flexItem />
 
-            {/* Links and Images */}
-            <ToggleButtonGroup size="small">
-              <Tooltip title="Insertar enlace">
-                <ToggleButton value="link" onClick={() => handleFormat('link')}>
-                  <i className="ri-link" />
-                </ToggleButton>
-              </Tooltip>
-              <Tooltip title="Insertar imagen">
-                <ToggleButton value="image" onClick={() => handleFormat('image')}>
-                  <i className="ri-image-line" />
-                </ToggleButton>
-              </Tooltip>
-            </ToggleButtonGroup>
+                         {/* Color and Font Size */}
+             <ToggleButtonGroup size="small" sx={{ mr: 1 }}>
+               <Tooltip title="Color de texto">
+                 <ToggleButton value="color" onClick={() => handleFormat('color')}>
+                   <i className="ri-palette-line" />
+                 </ToggleButton>
+               </Tooltip>
+               <Tooltip title="Tamaño de fuente">
+                 <ToggleButton value="fontSize" onClick={() => handleFormat('fontSize')}>
+                   <i className="ri-font-size" />
+                 </ToggleButton>
+               </Tooltip>
+             </ToggleButtonGroup>
+
+             <Divider orientation="vertical" flexItem />
+
+             {/* Special Formats */}
+             <ToggleButtonGroup size="small" sx={{ mr: 1 }}>
+               <Tooltip title="Cita">
+                 <ToggleButton value="quote" onClick={() => handleFormat('quote')}>
+                   <i className="ri-double-quotes-l" />
+                 </ToggleButton>
+               </Tooltip>
+               <Tooltip title="Código">
+                 <ToggleButton value="code" onClick={() => handleFormat('code')}>
+                   <i className="ri-code-line" />
+                 </ToggleButton>
+               </Tooltip>
+             </ToggleButtonGroup>
+
+             <Divider orientation="vertical" flexItem />
+
+             {/* Links and Images */}
+             <ToggleButtonGroup size="small">
+               <Tooltip title="Insertar enlace">
+                 <ToggleButton value="link" onClick={() => handleFormat('link')}>
+                   <i className="ri-link" />
+                 </ToggleButton>
+               </Tooltip>
+               <Tooltip title="Insertar imagen">
+                 <ToggleButton value="image" onClick={() => handleFormat('image')}>
+                   <i className="ri-image-line" />
+                 </ToggleButton>
+               </Tooltip>
+             </ToggleButtonGroup>
           </Box>
         </Box>
 
@@ -329,6 +418,30 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
               height: 'auto',
               margin: '1em 0',
             },
+            '& blockquote': {
+              borderLeft: '4px solid',
+              borderColor: 'primary.main',
+              paddingLeft: '1em',
+              margin: '1em 0',
+              fontStyle: 'italic',
+              color: 'text.secondary',
+            },
+            '& pre': {
+              backgroundColor: 'grey.100',
+              padding: '1em',
+              borderRadius: '4px',
+              fontFamily: 'monospace',
+              fontSize: '14px',
+              overflow: 'auto',
+              margin: '1em 0',
+            },
+            '& code': {
+              backgroundColor: 'grey.100',
+              padding: '0.2em 0.4em',
+              borderRadius: '3px',
+              fontFamily: 'monospace',
+              fontSize: '0.9em',
+            },
           }}
         />
       </Paper>
@@ -343,30 +456,102 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
         </Typography>
       )}
 
-      {/* Link Dialog */}
-      <Dialog open={linkDialogOpen} onClose={() => setLinkDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Insertar Enlace</DialogTitle>
-        <DialogContent>
-          <TextField
-            fullWidth
-            label="Texto del enlace"
-            value={linkText}
-            onChange={(e) => setLinkText(e.target.value)}
-            sx={{ mb: 2, mt: 1 }}
-          />
-          <TextField
-            fullWidth
-            label="URL del enlace"
-            value={linkUrl}
-            onChange={(e) => setLinkUrl(e.target.value)}
-            placeholder="https://ejemplo.com"
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setLinkDialogOpen(false)}>Cancelar</Button>
-          <Button onClick={handleLinkSubmit} variant="contained">Insertar</Button>
-        </DialogActions>
-      </Dialog>
+             {/* Link Dialog */}
+       <Dialog open={linkDialogOpen} onClose={() => setLinkDialogOpen(false)} maxWidth="sm" fullWidth>
+         <DialogTitle>Insertar Enlace</DialogTitle>
+         <DialogContent>
+           <TextField
+             fullWidth
+             label="Texto del enlace"
+             value={linkText}
+             onChange={(e) => setLinkText(e.target.value)}
+             sx={{ mb: 2, mt: 1 }}
+           />
+           <TextField
+             fullWidth
+             label="URL del enlace"
+             value={linkUrl}
+             onChange={(e) => setLinkUrl(e.target.value)}
+             placeholder="https://ejemplo.com"
+           />
+         </DialogContent>
+         <DialogActions>
+           <Button onClick={() => setLinkDialogOpen(false)}>Cancelar</Button>
+           <Button onClick={handleLinkSubmit} variant="contained">Insertar</Button>
+         </DialogActions>
+       </Dialog>
+
+       {/* Color Dialog */}
+       <Dialog open={colorDialogOpen} onClose={() => setColorDialogOpen(false)} maxWidth="xs" fullWidth>
+         <DialogTitle>Seleccionar Color</DialogTitle>
+         <DialogContent>
+           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+             <TextField
+               fullWidth
+               label="Color (hex)"
+               value={selectedColor}
+               onChange={(e) => setSelectedColor(e.target.value)}
+               placeholder="#000000"
+             />
+             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+               {['#000000', '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#800080', '#008000'].map((color) => (
+                 <Box
+                   key={color}
+                   sx={{
+                     width: 40,
+                     height: 40,
+                     backgroundColor: color,
+                     border: '2px solid',
+                     borderColor: selectedColor === color ? 'primary.main' : 'grey.300',
+                     borderRadius: 1,
+                     cursor: 'pointer',
+                     '&:hover': {
+                       borderColor: 'primary.main',
+                     },
+                   }}
+                   onClick={() => setSelectedColor(color)}
+                 />
+               ))}
+             </Box>
+           </Box>
+         </DialogContent>
+         <DialogActions>
+           <Button onClick={() => setColorDialogOpen(false)}>Cancelar</Button>
+           <Button onClick={handleColorSubmit} variant="contained">Aplicar</Button>
+         </DialogActions>
+       </Dialog>
+
+       {/* Font Size Dialog */}
+       <Dialog open={fontSizeDialogOpen} onClose={() => setFontSizeDialogOpen(false)} maxWidth="xs" fullWidth>
+         <DialogTitle>Tamaño de Fuente</DialogTitle>
+         <DialogContent>
+           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+             <TextField
+               fullWidth
+               label="Tamaño (px)"
+               value={selectedFontSize}
+               onChange={(e) => setSelectedFontSize(e.target.value)}
+               placeholder="16px"
+             />
+             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+               {['12px', '14px', '16px', '18px', '20px', '24px', '28px', '32px'].map((size) => (
+                 <Button
+                   key={size}
+                   variant={selectedFontSize === size ? 'contained' : 'outlined'}
+                   onClick={() => setSelectedFontSize(size)}
+                   sx={{ justifyContent: 'flex-start' }}
+                 >
+                   {size}
+                 </Button>
+               ))}
+             </Box>
+           </Box>
+         </DialogContent>
+         <DialogActions>
+           <Button onClick={() => setFontSizeDialogOpen(false)}>Cancelar</Button>
+           <Button onClick={handleFontSizeSubmit} variant="contained">Aplicar</Button>
+         </DialogActions>
+       </Dialog>
     </Box>
   )
 }

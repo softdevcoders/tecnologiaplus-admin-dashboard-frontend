@@ -217,6 +217,22 @@ const VerArticuloPage = () => {
                     fontStyle: 'italic',
                     color: 'text.secondary',
                   },
+                  '& pre': {
+                    backgroundColor: 'grey.100',
+                    padding: '1em',
+                    borderRadius: '4px',
+                    fontFamily: 'monospace',
+                    fontSize: '14px',
+                    overflow: 'auto',
+                    margin: '1em 0',
+                  },
+                  '& code': {
+                    backgroundColor: 'grey.100',
+                    padding: '0.2em 0.4em',
+                    borderRadius: '3px',
+                    fontFamily: 'monospace',
+                    fontSize: '0.9em',
+                  },
                 }}
               />
             </CardContent>
