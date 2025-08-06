@@ -79,7 +79,7 @@ const ArticlesListView: React.FC<ArticlesListViewProps> = ({
               <TableCell align="center" sx={{ minWidth: 100 }}>Estado</TableCell>
               <TableCell align="center" sx={{ minWidth: 120 }}>Categoría</TableCell>
               <TableCell align="center" sx={{ minWidth: 120 }}>Autor</TableCell>
-              <TableCell align="center" sx={{ minWidth: 120 }}>Fecha de creación</TableCell>
+              <TableCell align="center" sx={{ minWidth: 120, textWrap: 'nowrap' }}>Fecha</TableCell>
               <TableCell align="center">Acciones</TableCell>
             </TableRow>
           </TableHead>

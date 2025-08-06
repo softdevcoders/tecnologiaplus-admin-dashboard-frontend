@@ -1,34 +1,26 @@
 'use client'
 
+import { useState } from 'react'
+
 // MUI Imports
 import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import Grid from '@mui/material/Grid'
 import Button from '@mui/material/Button'
 import CircularProgress from '@mui/material/CircularProgress'
 import Alert from '@mui/material/Alert'
 import TablePagination from '@mui/material/TablePagination'
-import TextField from '@mui/material/TextField'
-import InputAdornment from '@mui/material/InputAdornment'
-import FormControl from '@mui/material/FormControl'
-import InputLabel from '@mui/material/InputLabel'
-import Select from '@mui/material/Select'
-import MenuItem from '@mui/material/MenuItem'
+
 // Custom hooks and services
 import { useArticles } from '@/hooks/useArticles'
-import { Article } from '@/services/articles.service'
+import { useCategories } from '@/hooks/useCategories'
 
 // Components
-import ArticlesViewToggle, { ViewMode } from '@/components/ArticlesViewToggle'
+import type { ViewMode } from '@/components/ArticlesViewToggle'
+import ArticlesViewToggle from '@/components/ArticlesViewToggle'
 import ArticlesListView from '@/components/ArticlesListView'
 import ArticlesGridView from '@/components/ArticlesGridView'
-
-// Utils
-import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
-import { useState } from 'react'
+import type { ArticlesFiltersState } from '@/components/ArticlesFilters'
+import ArticlesFilters from '@/components/ArticlesFilters'
 
 const ArticulosPage = () => {
   const {
@@ -46,9 +38,27 @@ const ArticulosPage = () => {
     clearError,
   } = useArticles()
 
-  const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState<string>('')
+  const { categories: categoriesData, loading: categoriesLoading } = useCategories()
+
+  // Debug: Log de categorías
+  console.log('ArticulosPage - categoriesData:', categoriesData)
+  console.log('ArticulosPage - categoriesLoading:', categoriesLoading)
+
   const [viewMode, setViewMode] = useState<ViewMode>('list')
+
+  const [filters, setFilters] = useState<ArticlesFiltersState>({
+    keywordSearch: '',
+    titleSearch: '',
+    summarySearch: '',
+    contentSearch: '',
+    isPublished: '',
+    categoryId: '',
+    authorId: '',
+    dateFrom: null,
+    dateTo: null,
+    sortBy: 'createdAt',
+    sortOrder: 'desc',
+  })
 
   // Manejar cambio de página
   const handleChangePage = (event: unknown, newPage: number) => {
@@ -62,17 +72,41 @@ const ArticulosPage = () => {
 
   // Aplicar filtros
   const handleApplyFilters = () => {
-    fetchArticles({
+    const apiFilters: any = {
       page: 1,
-      search: searchTerm || undefined,
-      isPublished: statusFilter === 'true' ? true : statusFilter === 'false' ? false : undefined,
-    })
+      sortBy: filters.sortBy,
+      sortOrder: filters.sortOrder,
+    }
+
+    // Agregar filtros solo si tienen valor
+    if (filters.keywordSearch) apiFilters.search = filters.keywordSearch
+    if (filters.titleSearch) apiFilters.titleSearch = filters.titleSearch
+    if (filters.summarySearch) apiFilters.summarySearch = filters.summarySearch
+    if (filters.contentSearch) apiFilters.contentSearch = filters.contentSearch
+    if (filters.isPublished) apiFilters.isPublished = filters.isPublished === 'true'
+    if (filters.categoryId) apiFilters.categoryId = filters.categoryId
+    if (filters.authorId) apiFilters.authorId = filters.authorId
+    if (filters.dateFrom) apiFilters.dateFrom = filters.dateFrom.toISOString()
+    if (filters.dateTo) apiFilters.dateTo = filters.dateTo.toISOString()
+
+    fetchArticles(apiFilters)
   }
 
   // Limpiar filtros
   const handleClearFilters = () => {
-    setSearchTerm('')
-    setStatusFilter('')
+    setFilters({
+      keywordSearch: '',
+      titleSearch: '',
+      summarySearch: '',
+      contentSearch: '',
+      isPublished: '',
+      categoryId: '',
+      authorId: '',
+      dateFrom: null,
+      dateTo: null,
+      sortBy: 'createdAt',
+      sortOrder: 'desc',
+    })
     fetchArticles({ page: 1 })
   }
 
@@ -119,53 +153,16 @@ const ArticulosPage = () => {
         </Box>
       </Box>
 
-      {/* Filtros */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Grid container spacing={2} alignItems='center'>
-            <Grid item xs={12} md={4}>
-              <TextField
-                fullWidth
-                label='Buscar artículos'
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position='start'>
-                      <i className='ri-search-line' />
-                    </InputAdornment>
-                  ),
-                }}
-                onKeyPress={(e) => e.key === 'Enter' && handleApplyFilters()}
-              />
-            </Grid>
-            <Grid item xs={12} md={3}>
-              <FormControl fullWidth>
-                <InputLabel>Estado</InputLabel>
-                <Select
-                  value={statusFilter}
-                  label='Estado'
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                >
-                  <MenuItem value=''>Todos</MenuItem>
-                  <MenuItem value='true'>Publicados</MenuItem>
-                  <MenuItem value='false'>Borradores</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} md={5}>
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <Button variant='contained' onClick={handleApplyFilters}>
-                  Aplicar Filtros
-                </Button>
-                <Button variant='outlined' onClick={handleClearFilters}>
-                  Limpiar
-                </Button>
-              </Box>
-            </Grid>
-          </Grid>
-        </CardContent>
-      </Card>
+      {/* Filtros Avanzados */}
+      <ArticlesFilters
+        filters={filters}
+        onFiltersChange={setFilters}
+        onApplyFilters={handleApplyFilters}
+        onClearFilters={handleClearFilters}
+        loading={loading || categoriesLoading}
+        categories={categoriesData}
+        authors={[]} // TODO: Obtener autores desde la API
+      />
 
       {/* Error Alert */}
       {error && (
@@ -187,8 +184,8 @@ const ArticulosPage = () => {
           {viewMode === 'list' ? (
             <ArticlesListView
               articles={articles}
-              onEdit={(id) => {/* TODO: Navegar a editar */}} 
-              onView={(id) => {/* TODO: Navegar a ver */}}
+              onEdit={() => {/* TODO: Navegar a editar */}} 
+              onView={() => {/* TODO: Navegar a ver */}}
               onDelete={handleDeleteArticle}
               onPublish={handlePublishArticle}
               onUnpublish={handleUnpublishArticle}
@@ -197,8 +194,8 @@ const ArticulosPage = () => {
           ) : (
             <ArticlesGridView
               articles={articles}
-              onEdit={(id) => {/* TODO: Navegar a editar */}}
-              onView={(id) => {/* TODO: Navegar a ver */}}
+              onEdit={() => {/* TODO: Navegar a editar */}}
+              onView={() => {/* TODO: Navegar a ver */}}
               onDelete={handleDeleteArticle}
               onPublish={handlePublishArticle}
               onUnpublish={handleUnpublishArticle}
