@@ -6,18 +6,9 @@ import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import Grid from '@mui/material/Grid'
-import Chip from '@mui/material/Chip'
 import Button from '@mui/material/Button'
-import IconButton from '@mui/material/IconButton'
 import CircularProgress from '@mui/material/CircularProgress'
 import Alert from '@mui/material/Alert'
-import Paper from '@mui/material/Paper'
-import Table from '@mui/material/Table'
-import TableBody from '@mui/material/TableBody'
-import TableCell from '@mui/material/TableCell'
-import TableContainer from '@mui/material/TableContainer'
-import TableHead from '@mui/material/TableHead'
-import TableRow from '@mui/material/TableRow'
 import TablePagination from '@mui/material/TablePagination'
 import TextField from '@mui/material/TextField'
 import InputAdornment from '@mui/material/InputAdornment'
@@ -29,9 +20,14 @@ import MenuItem from '@mui/material/MenuItem'
 import { useArticles } from '@/hooks/useArticles'
 import { Article } from '@/services/articles.service'
 
+// Components
+import ArticlesViewToggle, { ViewMode } from '@/components/ArticlesViewToggle'
+import ArticlesListView from '@/components/ArticlesListView'
+import ArticlesGridView from '@/components/ArticlesGridView'
+
 // Utils
 import { format } from 'date-fns'
-import { es } from 'date-fns/locale'  
+import { es } from 'date-fns/locale'
 import { useState } from 'react'
 
 const ArticulosPage = () => {
@@ -52,6 +48,7 @@ const ArticulosPage = () => {
 
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('')
+  const [viewMode, setViewMode] = useState<ViewMode>('list')
 
   // Manejar cambio de página
   const handleChangePage = (event: unknown, newPage: number) => {
@@ -98,15 +95,7 @@ const ArticulosPage = () => {
     await archiveArticle(id)
   }
 
-  // Obtener el color del chip según el status
-  const getStatusColor = (isPublished: boolean) => {
-    return isPublished ? 'success' : 'warning'
-  }
 
-  // Obtener el texto del status
-  const getStatusText = (isPublished: boolean) => {
-    return isPublished ? 'Publicado' : 'Borrador'
-  }
 
   return (
     <Box sx={{ p: 3 }}>
@@ -115,13 +104,19 @@ const ArticulosPage = () => {
         <Typography variant='h4' component='h1'>
           Artículos
         </Typography>
-        <Button
-          variant='contained'
-          startIcon={<i className='ri-folder-line' />}
-          onClick={() => {/* TODO: Navegar a crear artículo */}}
-        >
-          Nuevo Artículo
-        </Button>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <ArticlesViewToggle 
+            viewMode={viewMode} 
+            onViewModeChange={setViewMode} 
+          />
+          <Button
+            variant='contained'
+            startIcon={<i className='ri-folder-line' />}
+            onClick={() => {/* TODO: Navegar a crear artículo */}}
+          >
+            Nuevo Artículo
+          </Button>
+        </Box>
       </Box>
 
       {/* Filtros */}
@@ -186,135 +181,48 @@ const ArticulosPage = () => {
         </Box>
       )}
 
-      {/* Tabla de artículos */}
+      {/* Vista de artículos */}
       {!loading && (
-        <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-          <TableContainer>
-            <Table stickyHeader>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Título</TableCell>
-                  <TableCell>Estado</TableCell>
-                  <TableCell>Autor</TableCell>
-                  <TableCell>Fecha de creación</TableCell>
-                  <TableCell>Fecha de publicación</TableCell>
-                  <TableCell align='center'>Acciones</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {articles.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} align='center'>
-                      <Typography variant='body2' color='text.secondary'>
-                        No se encontraron artículos
-                      </Typography>
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  articles.map((article) => (
-                    <TableRow key={article.id} hover>
-                      <TableCell>
-                        <Typography variant='subtitle2' sx={{ fontWeight: 600 }}>
-                          {article.title}
-                        </Typography>
-                        {article.summary && (
-                          <Typography variant='body2' color='text.secondary' sx={{ mt: 0.5 }}>
-                            {article.summary.length > 100
-                              ? `${article.summary.substring(0, 100)}...`
-                              : article.summary}
-                          </Typography>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <Chip
-                          label={getStatusText(article.isPublished)}
-                          color={getStatusColor(article.isPublished) as any}
-                          size='small'
-                        />
-                      </TableCell>
-                      <TableCell>{article.author.name}</TableCell>
-                      <TableCell>
-                        {format(new Date(article.createdAt), 'dd/MM/yyyy HH:mm', { locale: es })}
-                      </TableCell>
-                      <TableCell>
-                        {article.isPublished ? 'Publicado' : '-'}
-                      </TableCell>
-                      <TableCell align='center'>
-                        <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }}>
-                          <IconButton
-                            size='small'
-                            onClick={() => {/* TODO: Navegar a editar */}}
-                            title='Editar'
-                          >
-                            <i className='ri-pencil-line' />
-                          </IconButton>
-                          <IconButton
-                            size='small'
-                            onClick={() => {/* TODO: Navegar a ver */}}
-                            title='Ver'
-                          >
-                            <i className='ri-eye-line' />
-                          </IconButton>
-                          {!article.isPublished && (
-                            <IconButton
-                              size='small'
-                              onClick={() => handlePublishArticle(article.id)}
-                              title='Publicar'
-                              color='success'
-                            >
-                              <i className='ri-eye-line' />
-                            </IconButton>
-                          )}
-                          {article.isPublished && (
-                            <IconButton
-                              size='small'
-                              onClick={() => handleUnpublishArticle(article.id)}
-                              title='Despublicar'
-                              color='warning'
-                            >
-                              <i className='ri-eye-off-line' />
-                            </IconButton>
-                          )}
-                          <IconButton
-                            size='small'
-                            onClick={() => handleArchiveArticle(article.id)}
-                            title='Archivar'
-                            color='default'
-                          >
-                            <i className='ri-archive-line' />
-                          </IconButton>
-                          <IconButton
-                            size='small'
-                            onClick={() => handleDeleteArticle(article.id)}
-                            title='Eliminar'
-                            color='error'
-                          >
-                            <i className='ri-delete-bin-line' />
-                          </IconButton>
-                        </Box>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
+        <>
+          {viewMode === 'list' ? (
+            <ArticlesListView
+              articles={articles}
+              onEdit={(id) => {/* TODO: Navegar a editar */}}
+              onView={(id) => {/* TODO: Navegar a ver */}}
+              onDelete={handleDeleteArticle}
+              onPublish={handlePublishArticle}
+              onUnpublish={handleUnpublishArticle}
+              onArchive={handleArchiveArticle}
+            />
+          ) : (
+            <ArticlesGridView
+              articles={articles}
+              onEdit={(id) => {/* TODO: Navegar a editar */}}
+              onView={(id) => {/* TODO: Navegar a ver */}}
+              onDelete={handleDeleteArticle}
+              onPublish={handlePublishArticle}
+              onUnpublish={handleUnpublishArticle}
+              onArchive={handleArchiveArticle}
+            />
+          )}
           
           {/* Paginación */}
-          <TablePagination
-            rowsPerPageOptions={[5, 10, 25, 50]}
-            component='div'
-            count={total}
-            rowsPerPage={limit}
-            page={page - 1}
-            onPageChange={handleChangePage}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-            labelRowsPerPage='Filas por página:'
-            labelDisplayedRows={({ from, to, count }) =>
-              `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`
-            }
-          />
-        </Paper>
+          <Box sx={{ mt: 3 }}>
+            <TablePagination
+              rowsPerPageOptions={[5, 10, 25, 50]}
+              component='div'
+              count={total}
+              rowsPerPage={limit}
+              page={page - 1}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+              labelRowsPerPage='Filas por página:'
+              labelDisplayedRows={({ from, to, count }) =>
+                `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`
+              }
+            />
+          </Box>
+        </>
       )}
     </Box>
   )
