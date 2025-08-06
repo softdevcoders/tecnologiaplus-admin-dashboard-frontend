@@ -3,7 +3,6 @@ import classnames from 'classnames'
 
 // Type Imports
 
-
 // Component Imports
 import NavToggle from './NavToggle'
 import ModeDropdown from '@components/layout/shared/ModeDropdown'

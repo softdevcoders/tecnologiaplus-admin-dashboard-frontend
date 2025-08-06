@@ -7,6 +7,8 @@ import { useState } from 'react'
 import Link from 'next/link'
 
 // MUI Imports
+import Image from 'next/image'
+
 import Typography from '@mui/material/Typography'
 import TextField from '@mui/material/TextField'
 import IconButton from '@mui/material/IconButton'
@@ -16,26 +18,20 @@ import Button from '@mui/material/Button'
 // Third-party Imports
 import classnames from 'classnames'
 
-// Type Imports
-import type { Mode } from '@core/types'
-
 // Component Imports
 import DirectionalIcon from '@components/DirectionalIcon'
-import Logo from '@components/layout/shared/Logo'
 
 // Hook Imports
 import { useSettings } from '@core/hooks/useSettings'
-import Image from 'next/image'
 
 // Util Imports
 
-const ResetPassword = ({ mode }: { mode: Mode }) => {
+const ResetPassword = () => {
   // States
   const [isPasswordShown, setIsPasswordShown] = useState(false)
   const [isConfirmPasswordShown, setIsConfirmPasswordShown] = useState(false)
 
   // Vars
-
 
   // Hooks
   const { settings } = useSettings()
@@ -120,10 +116,7 @@ const ResetPassword = ({ mode }: { mode: Mode }) => {
               Establecer nueva contraseña
             </Button>
             <Typography className='flex justify-center items-center' color='primary.main'>
-              <Link
-                href={'/login'}
-                className='flex items-center gap-1.5'
-              >
+              <Link href={'/login'} className='flex items-center gap-1.5'>
                 <DirectionalIcon
                   ltrIconClass='ri-arrow-left-s-line'
                   rtlIconClass='ri-arrow-right-s-line'
@@ -139,4 +132,4 @@ const ResetPassword = ({ mode }: { mode: Mode }) => {
   )
 }
 
-  export default ResetPassword
+export default ResetPassword

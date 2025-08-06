@@ -1,18 +1,14 @@
-// Next Imports
-import { useParams } from 'next/navigation'
-
 // MUI Imports
-import Chip from '@mui/material/Chip'
 import { useTheme } from '@mui/material/styles'
 
-// Third-party Imports
+  // Third-party Imports
 import PerfectScrollbar from 'react-perfect-scrollbar'
 
 // Type Imports
 import type { VerticalMenuContextProps } from '@menu/components/vertical-menu/Menu'
 
 // Component Imports
-import { Menu, SubMenu, MenuItem, MenuSection } from '@menu/vertical-menu'
+import { Menu, MenuItem, MenuSection } from '@menu/vertical-menu'
 
 // import { GenerateVerticalMenu } from '@components/GenerateMenu'
 
@@ -77,15 +73,14 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
         renderExpandedMenuItemIcon={{ icon: <i className='ri-circle-line' /> }}
         menuSectionStyles={menuSectionStyles(verticalNavOptions, theme)}
       >
-        <MenuItem
-          href={`/`}
-          exactMatch={true}
-          icon={<i className='ri-home-smile-line' />}
-        >
+        <MenuItem href={`/`} exactMatch={true} icon={<i className='ri-home-smile-line' />}>
           {'Inicio'}
         </MenuItem>
-        <MenuItem href={`/categorias`} exactMatch={true} icon={<i className='ri-dashboard-horizontal-line' />}>
-          {'Categorias'}
+        <MenuItem href={`/articulos`} exactMatch={true} icon={<i className='ri-article-line' />}>
+          {'Artículos'}
+        </MenuItem>
+        <MenuItem href={`/categorias`} exactMatch={true} icon={<i className='ri-folder-line' />}>
+          {'Categorías'}
         </MenuItem>
         <MenuItem href={`/etiquetas`} exactMatch={true} icon={<i className='ri-price-tag-3-line' />}>
           {'Etiquetas'}

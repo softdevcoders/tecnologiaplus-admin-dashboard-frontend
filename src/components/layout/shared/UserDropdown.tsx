@@ -91,7 +91,7 @@ const UserDropdown = () => {
         <Avatar
           ref={anchorRef}
           alt={session?.user?.name || ''}
-          src={session?.user?.image || ''}
+          src='https://res.cloudinary.com/ddqh0mkx9/image/upload/v1747675231/website-v2/logos/so7xgqia3ntpj1hqlpsk.png'
           onClick={handleDropdownOpen}
           className='cursor-pointer bs-[38px] is-[38px]'
         />
@@ -115,7 +115,10 @@ const UserDropdown = () => {
               <ClickAwayListener onClickAway={e => handleDropdownClose(e as MouseEvent | TouchEvent)}>
                 <MenuList>
                   <div className='flex items-center plb-2 pli-4 gap-2' tabIndex={-1}>
-                    <Avatar alt={session?.user?.name || ''} src={session?.user?.image || ''} />
+                    <Avatar
+                      alt={session?.user?.name || ''}
+                      src='https://res.cloudinary.com/ddqh0mkx9/image/upload/v1747675231/website-v2/logos/so7xgqia3ntpj1hqlpsk.png'
+                    />
                     <div className='flex items-start flex-col'>
                       <Typography className='font-medium' color='text.primary'>
                         {session?.user?.name || ''}
@@ -132,7 +135,7 @@ const UserDropdown = () => {
                     <Button
                       fullWidth
                       variant='contained'
-                      color='error'
+                      color='primary'
                       size='small'
                       endIcon={<i className='ri-logout-box-r-line' />}
                       onClick={handleUserLogout}

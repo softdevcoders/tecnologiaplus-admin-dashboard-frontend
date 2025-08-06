@@ -13,9 +13,8 @@ import { styled, useColorScheme, useTheme } from '@mui/material/styles'
 import type { Mode } from '@core/types'
 
 // Component Imports
-import VerticalNav, { NavHeader, NavCollapseIcons } from '@menu/vertical-menu'
+import VerticalNav, { NavHeader } from '@menu/vertical-menu'
 import VerticalMenu from './VerticalMenu'
-import Logo from '@components/layout/shared/Logo'
 
 // Hook Imports
 import useVerticalNav from '@menu/hooks/useVerticalNav'
@@ -23,6 +22,7 @@ import { useSettings } from '@core/hooks/useSettings'
 
 // Style Imports
 import navigationCustomStyles from '@core/styles/vertical/navigationCustomStyles'
+import Logo from '@components/layout/shared/Logo'
 
 type Props = {
   mode: Mode
@@ -52,7 +52,7 @@ const Navigation = (props: Props) => {
 
   // Hooks
   const verticalNavOptions = useVerticalNav()
-  const { updateSettings, settings } = useSettings()
+  const { settings } = useSettings()
   const { mode: muiMode, systemMode: muiSystemMode } = useColorScheme()
   const theme = useTheme()
 
@@ -60,7 +60,7 @@ const Navigation = (props: Props) => {
   const shadowRef = useRef(null)
 
   // Vars
-  const { isCollapsed, isHovered, collapseVerticalNav, isBreakpointReached } = verticalNavOptions
+  const { collapseVerticalNav, isBreakpointReached } = verticalNavOptions
   const isSemiDark = settings.semiDark
 
   const currentMode = muiMode === 'system' ? muiSystemMode : muiMode || mode

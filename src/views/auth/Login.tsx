@@ -7,6 +7,9 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 
+// Util Imports
+import Image from 'next/image' 
+
 // MUI Imports
 import Typography from '@mui/material/Typography'
 import TextField from '@mui/material/TextField'
@@ -25,20 +28,8 @@ import classnames from 'classnames'
 import type { SubmitHandler } from 'react-hook-form'
 import type { InferInput } from 'valibot'
 
-// Type Imports
-import type { Mode } from '@core/types'
-
-// Component Imports
-import Logo from '@components/layout/shared/Logo'
-
-// Config Imports
-import themeConfig from '@configs/themeConfig'
-
 // Hook Imports
-import { useSettings } from '@core/hooks/useSettings'
-import Image from 'next/image'
-
-// Util Imports
+import { useSettings } from '@/@core/hooks/useSettings'
 
 type ErrorType = {
   message: string[]
@@ -55,7 +46,7 @@ const schema = object({
   )
 })
 
-const Login = ({ mode }: { mode: Mode }) => {
+const Login = () => {
   // States
   const [isPasswordShown, setIsPasswordShown] = useState(false)
   const [errorState, setErrorState] = useState<ErrorType | null>(null)

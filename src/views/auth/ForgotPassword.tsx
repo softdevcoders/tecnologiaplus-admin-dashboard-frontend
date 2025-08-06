@@ -2,6 +2,7 @@
 
 // Next Imports
 import Link from 'next/link'
+import Image from 'next/image'
 
 // MUI Imports
 import Typography from '@mui/material/Typography'
@@ -11,17 +12,10 @@ import Button from '@mui/material/Button'
 // Third-party Imports
 import classnames from 'classnames'
 
-// Type Imports
-import type { Mode } from '@core/types'
-
-// Component Imports
-import Logo from '@components/layout/shared/Logo'
-
 // Hook Imports
 import { useSettings } from '@core/hooks/useSettings'
-import Image from 'next/image'
 
-const ForgotPassword = ({ mode }: { mode: Mode }) => {
+const ForgotPassword = () => {
   // Vars
   // Hooks
   const { settings } = useSettings()

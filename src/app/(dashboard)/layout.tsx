@@ -33,11 +33,7 @@ const Layout = async (props: ChildrenType) => {
         <LayoutWrapper
           systemMode={systemMode}
           verticalLayout={
-            <VerticalLayout
-              navigation={<Navigation mode={mode} />}
-              navbar={<Navbar />}
-              footer={<VerticalFooter />}
-            >
+            <VerticalLayout navigation={<Navigation mode={mode} />} navbar={<Navbar />} footer={<VerticalFooter />}>
               {children}
             </VerticalLayout>
           }

@@ -10,7 +10,7 @@ import BlankLayout from '@layouts/BlankLayout'
 
 // Util Imports
 import { getSystemMode } from '@core/utils/serverHelpers'
-  
+
 const Layout = async (props: ChildrenType) => {
   const { children } = props
 
@@ -28,6 +28,3 @@ const Layout = async (props: ChildrenType) => {
 }
 
 export default Layout
-
-
-

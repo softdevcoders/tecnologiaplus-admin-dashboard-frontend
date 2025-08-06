@@ -2,7 +2,7 @@
 import type { Metadata } from 'next'
 
 // Component Imports
-  import ForgotPassword from '@views/auth/ForgotPassword'
+import ForgotPassword from '@views/auth/ForgotPassword'
 
 // Server Action Imports
 import { getServerMode } from '@core/utils/serverHelpers'

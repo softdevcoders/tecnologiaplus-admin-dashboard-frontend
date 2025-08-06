@@ -81,9 +81,7 @@ export const GenerateVerticalMenu = ({ menuData }: { menuData: VerticalMenuDataT
       const { label, excludeLang, icon, prefix, suffix, ...rest } = menuItem
 
       // Localize the href
-      const href = rest.href?.startsWith('http')
-        ? rest.href
-        : rest.href && (excludeLang ? rest.href : rest.href)
+      const href = rest.href?.startsWith('http') ? rest.href : rest.href && (excludeLang ? rest.href : rest.href)
 
       const Icon = icon ? <i className={icon} /> : null
 
@@ -158,9 +156,7 @@ export const GenerateHorizontalMenu = ({ menuData }: { menuData: HorizontalMenuD
       const { label, excludeLang, icon, prefix, suffix, ...rest } = menuItem
 
       // Localize the href
-      const href = rest.href?.startsWith('http')
-        ? rest.href
-        : rest.href && (excludeLang ? rest.href : rest.href)
+      const href = rest.href?.startsWith('http') ? rest.href : rest.href && (excludeLang ? rest.href : rest.href)
 
       const Icon = icon ? <i className={icon} /> : null
 

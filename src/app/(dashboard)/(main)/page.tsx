@@ -2,9 +2,7 @@
 import Typography from '@mui/material/Typography'
 
 const InicioPage = () => {
-  return (
-    <Typography variant='h1'>Inicio</Typography>
-  )
+  return <Typography variant='h1'>Inicio</Typography>
 }
 
 export default InicioPage
