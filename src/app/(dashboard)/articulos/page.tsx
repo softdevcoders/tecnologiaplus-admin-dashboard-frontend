@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 // MUI Imports
 import Typography from '@mui/material/Typography'
@@ -23,6 +24,8 @@ import type { ArticlesFiltersState } from '@/components/ArticlesFilters'
 import ArticlesFilters from '@/components/ArticlesFilters'
 
 const ArticulosPage = () => {
+  const router = useRouter()
+  
   const {
     articles,
     total,
@@ -144,7 +147,7 @@ const ArticulosPage = () => {
           <Button
             variant='contained'
             startIcon={<i className='ri-folder-line' />}
-            onClick={() => {/* TODO: Navegar a crear artículo */}}
+            onClick={() => router.push('/articulos/crear')}
           >
             Nuevo Artículo
           </Button>
@@ -182,8 +185,8 @@ const ArticulosPage = () => {
           {viewMode === 'list' ? (
             <ArticlesListView
               articles={articles}
-              onEdit={() => {/* TODO: Navegar a editar */}} 
-              onView={() => {/* TODO: Navegar a ver */}}
+              onEdit={(id) => router.push(`/articulos/editar/${id}`)} 
+              onView={(id) => router.push(`/articulos/ver/${id}`)}
               onDelete={handleDeleteArticle}
               onPublish={handlePublishArticle}
               onUnpublish={handleUnpublishArticle}
@@ -192,8 +195,8 @@ const ArticulosPage = () => {
           ) : (
             <ArticlesGridView
               articles={articles}
-              onEdit={() => {/* TODO: Navegar a editar */}}
-              onView={() => {/* TODO: Navegar a ver */}}
+              onEdit={(id) => router.push(`/articulos/editar/${id}`)}
+              onView={(id) => router.push(`/articulos/ver/${id}`)}
               onDelete={handleDeleteArticle}
               onPublish={handlePublishArticle}
               onUnpublish={handleUnpublishArticle}

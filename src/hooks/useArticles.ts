@@ -21,6 +21,7 @@ interface UseArticlesState {
 
 interface UseArticlesReturn extends UseArticlesState {
   fetchArticles: (filters?: ArticlesFilters) => Promise<void>
+  getArticleById: (id: string) => Promise<Article | null>
   createArticle: (articleData: CreateArticleRequest) => Promise<Article | null>
   updateArticle: (articleData: UpdateArticleRequest) => Promise<Article | null>
   deleteArticle: (id: string) => Promise<boolean>
@@ -79,6 +80,29 @@ export const useArticles = (initialFilters: ArticlesFilters = {}): UseArticlesRe
         loading: false,
         error: apiError,
       }))
+    }
+  }
+
+  const getArticleById = async (id: string): Promise<Article | null> => {
+    setState(prev => ({ ...prev, loading: true, error: null }))
+
+    try {
+      const response = await articlesService.getArticleById(id)
+
+      if (response.success) {
+        setState(prev => ({ ...prev, loading: false }))
+        return response.data
+      } else {
+        throw new Error(response.message || 'Error al obtener artículo')
+      }
+    } catch (error) {
+      const apiError = error as ApiError
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        error: apiError,
+      }))
+      return null
     }
   }
 
@@ -265,6 +289,7 @@ export const useArticles = (initialFilters: ArticlesFilters = {}): UseArticlesRe
   return {
     ...state,
     fetchArticles,
+    getArticleById,
     createArticle,
     updateArticle,
     deleteArticle,

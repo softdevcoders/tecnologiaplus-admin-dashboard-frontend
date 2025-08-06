@@ -39,6 +39,7 @@ export interface CreateArticleRequest {
   content: string
   slug?: string
   summary?: string
+  metaTitle?: string
   metaKeywords?: string
   metaDescription?: string
   coverImage?: string
