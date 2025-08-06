@@ -172,7 +172,7 @@ const ArticulosPage = () => {
         <Alert severity='error' sx={{ mb: 3 }} onClose={clearError}>
           {error.message}
         </Alert>
-      )}
+      )}  
 
       {/* Loading */}
       {loading && (
@@ -187,7 +187,7 @@ const ArticulosPage = () => {
           {viewMode === 'list' ? (
             <ArticlesListView
               articles={articles}
-              onEdit={(id) => {/* TODO: Navegar a editar */}}
+              onEdit={(id) => {/* TODO: Navegar a editar */}} 
               onView={(id) => {/* TODO: Navegar a ver */}}
               onDelete={handleDeleteArticle}
               onPublish={handlePublishArticle}

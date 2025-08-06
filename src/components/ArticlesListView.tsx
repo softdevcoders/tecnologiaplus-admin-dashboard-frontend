@@ -13,8 +13,10 @@ import {
   Box,
   Chip,
   IconButton,
-  Avatar,
-  Tooltip
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText
 } from '@mui/material'
 
 import { format } from 'date-fns'
@@ -40,6 +42,23 @@ const ArticlesListView: React.FC<ArticlesListViewProps> = ({
   onUnpublish,
   onArchive
 }) => {
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
+  const [selectedArticleId, setSelectedArticleId] = React.useState<string | null>(null)
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, articleId: string) => {
+    setAnchorEl(event.currentTarget)
+    setSelectedArticleId(articleId)
+  }
+
+  const handleMenuClose = () => {
+    setAnchorEl(null)
+    setSelectedArticleId(null)
+  }
+
+  const handleAction = (action: () => void) => {
+    action()
+    handleMenuClose()
+  }
   const getStatusColor = (isPublished: boolean) => {
     return isPublished ? 'success' : 'warning'
   }
@@ -56,12 +75,12 @@ const ArticlesListView: React.FC<ArticlesListViewProps> = ({
         <Table stickyHeader>
           <TableHead>
             <TableRow>
-              <TableCell sx={{ minWidth: 300 }}>Artículo</TableCell>
-              <TableCell sx={{ minWidth: 100 }}>Estado</TableCell>
-              <TableCell sx={{ minWidth: 120 }}>Categoría</TableCell>
-              <TableCell sx={{ minWidth: 120 }}>Autor</TableCell>
-              <TableCell sx={{ minWidth: 120 }}>Fecha de creación</TableCell>
-              <TableCell align="center" sx={{ minWidth: 150 }}>Acciones</TableCell>
+              <TableCell align="center" sx={{ minWidth: 300 }}>Artículo</TableCell>
+              <TableCell align="center" sx={{ minWidth: 100 }}>Estado</TableCell>
+              <TableCell align="center" sx={{ minWidth: 120 }}>Categoría</TableCell>
+              <TableCell align="center" sx={{ minWidth: 120 }}>Autor</TableCell>
+              <TableCell align="center" sx={{ minWidth: 120 }}>Fecha de creación</TableCell>
+              <TableCell align="center">Acciones</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -92,7 +111,7 @@ const ArticlesListView: React.FC<ArticlesListViewProps> = ({
                       />
                       
                       {/* Información del artículo */}
-                      <Box sx={{ flexGrow: 1, minWidth: 0, maxWidth: '20rem' }}>
+                      <Box sx={{ flexGrow: 1, minWidth: 0, maxWidth: '30rem' }}>
                         <Typography 
                           variant="subtitle1" 
                           color="text.primary"
@@ -156,79 +175,13 @@ const ArticlesListView: React.FC<ArticlesListViewProps> = ({
                   </TableCell>
                   
                   <TableCell align="center">
-                    <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }}>
-                      {onView && (
-                        <Tooltip title="Ver artículo">
-                          <IconButton
-                            size="small"
-                            onClick={() => onView(article.id)}
-                            color="primary"
-                          >
-                            <i className="ri-eye-line" />
-                          </IconButton>
-                        </Tooltip>
-                      )}
-                      
-                      {onEdit && (
-                        <Tooltip title="Editar artículo">
-                          <IconButton
-                            size="small"
-                            onClick={() => onEdit(article.id)}
-                            color="primary"
-                          >
-                            <i className="ri-pencil-line" />
-                          </IconButton>
-                        </Tooltip>
-                      )}
-
-                      {!article.isPublished && onPublish && (
-                        <Tooltip title="Publicar">
-                          <IconButton
-                            size="small"
-                            onClick={() => onPublish(article.id)}
-                            color="success"
-                          >
-                            <i className="ri-eye-line" />
-                          </IconButton>
-                        </Tooltip>
-                      )}
-
-                      {article.isPublished && onUnpublish && (
-                        <Tooltip title="Despublicar">
-                          <IconButton
-                            size="small"
-                            onClick={() => onUnpublish(article.id)}
-                            color="warning"
-                          >
-                            <i className="ri-eye-off-line" />
-                          </IconButton>
-                        </Tooltip>
-                      )}
-
-                      {onArchive && (
-                        <Tooltip title="Archivar">
-                          <IconButton
-                            size="small"
-                            onClick={() => onArchive(article.id)}
-                            color="default"
-                          >
-                            <i className="ri-archive-line" />
-                          </IconButton>
-                        </Tooltip>
-                      )}
-
-                      {onDelete && (
-                        <Tooltip title="Eliminar">
-                          <IconButton
-                            size="small"
-                            onClick={() => onDelete(article.id)}
-                            color="error"
-                          >
-                            <i className="ri-delete-bin-line" />
-                          </IconButton>
-                        </Tooltip>
-                      )}
-                    </Box>
+                    <IconButton
+                      size="small"
+                      onClick={(e) => handleMenuOpen(e, article.id)}
+                      color="default"
+                    >
+                      <i className="ri-more-2-fill" />
+                    </IconButton>
                   </TableCell>
                 </TableRow>
               ))
@@ -236,6 +189,75 @@ const ArticlesListView: React.FC<ArticlesListViewProps> = ({
           </TableBody>
         </Table>
       </TableContainer>
+
+      {/* Menú de acciones */}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+      >
+        {onView && (
+          <MenuItem sx={{ display: 'flex', alignItems: 'center', gap: 2 }} onClick={() => handleAction(() => onView(selectedArticleId!))}>
+            <ListItemIcon sx={{ color: 'primary.main' }}>
+              <i className="ri-eye-line" />
+            </ListItemIcon>
+            <ListItemText sx={{ color: 'primary.main' }}>Ver artículo</ListItemText>
+          </MenuItem>
+        )}
+        
+        {onEdit && (
+          <MenuItem sx={{ display: 'flex', alignItems: 'center', gap: 2 }} onClick={() => handleAction(() => onEdit(selectedArticleId!))}>
+            <ListItemIcon sx={{ color: 'primary.main' }}>
+              <i className="ri-pencil-line" />
+            </ListItemIcon>
+            <ListItemText sx={{ color: 'primary.main' }}>Editar artículo</ListItemText>
+          </MenuItem>
+        )}
+
+        {selectedArticleId && articles.find(a => a.id === selectedArticleId)?.isPublished === false && onPublish && (
+          <MenuItem sx={{ display: 'flex', alignItems: 'center', gap: 2 }} onClick={() => handleAction(() => onPublish(selectedArticleId))}>
+            <ListItemIcon sx={{ color: 'success.main' }}>
+              <i className="ri-eye-line" />
+            </ListItemIcon>
+            <ListItemText sx={{ color: 'success.main' }}>Publicar</ListItemText>
+          </MenuItem>
+        )}
+
+        {selectedArticleId && articles.find(a => a.id === selectedArticleId)?.isPublished === true && onUnpublish && (
+          <MenuItem sx={{ display: 'flex', alignItems: 'center', gap: 2 }} onClick={() => handleAction(() => onUnpublish(selectedArticleId))}>
+            <ListItemIcon sx={{ color: 'warning.main' }}>
+              <i className="ri-eye-off-line" />
+            </ListItemIcon>
+            <ListItemText sx={{ color: 'warning.main' }}>Despublicar</ListItemText>
+          </MenuItem>
+        )}
+
+        {onArchive && (
+          <MenuItem sx={{ display: 'flex', alignItems: 'center', gap: 2 }} onClick={() => handleAction(() => onArchive(selectedArticleId!))}>
+            <ListItemIcon sx={{ color: 'text.secondary' }}>
+              <i className="ri-archive-line" />
+            </ListItemIcon>
+            <ListItemText sx={{ color: 'text.secondary' }}>Archivar</ListItemText>
+          </MenuItem>
+        )}
+
+        {onDelete && (
+          <MenuItem sx={{ display: 'flex', alignItems: 'center', gap: 2 }} onClick={() => handleAction(() => onDelete(selectedArticleId!))}>
+            <ListItemIcon sx={{ color: 'error.main' }}>
+              <i className="ri-delete-bin-line" />
+            </ListItemIcon>
+            <ListItemText sx={{ color: 'error.main' }}>Eliminar</ListItemText>
+          </MenuItem>
+        )}
+      </Menu>
     </Paper>
   )
 }
