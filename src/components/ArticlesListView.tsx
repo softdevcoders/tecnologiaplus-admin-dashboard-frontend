@@ -48,13 +48,7 @@ const ArticlesListView: React.FC<ArticlesListViewProps> = ({
     return isPublished ? 'Publicado' : 'Borrador'
   }
 
-  const truncateText = (text: string, maxLength: number) => {
-    if (!text) return ''
-    const cleanText = text.replace(/<[^>]*>/g, '')
-    return cleanText.length > maxLength 
-      ? cleanText.substring(0, maxLength) + '...' 
-      : cleanText
-  }
+
 
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
@@ -87,8 +81,8 @@ const ArticlesListView: React.FC<ArticlesListViewProps> = ({
                       {/* Imagen de portada */}
                       <Box
                         sx={{
-                          width: 60,
-                          height: 40,
+                          width: 80,
+                          height: 60,
                           borderRadius: 1,
                           background: article.coverImage 
                             ? `url(https://res.cloudinary.com/ddqh0mkx9/image/upload/f_webp,w_100/${article.coverImage}) center/cover`
@@ -98,9 +92,10 @@ const ArticlesListView: React.FC<ArticlesListViewProps> = ({
                       />
                       
                       {/* Información del artículo */}
-                      <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                      <Box sx={{ flexGrow: 1, minWidth: 0, maxWidth: '20rem' }}>
                         <Typography 
-                          variant="subtitle2" 
+                          variant="subtitle1" 
+                          color="text.primary"
                           sx={{ 
                             fontWeight: 600,
                             mb: 0.5,
@@ -123,9 +118,8 @@ const ArticlesListView: React.FC<ArticlesListViewProps> = ({
                               WebkitBoxOrient: 'vertical',
                               lineHeight: 1.4
                             }}
-                          >
-                            {truncateText(article.summary, 100)}
-                          </Typography>
+                            dangerouslySetInnerHTML={{ __html: article.summary }}
+                          />
                         )}
                       </Box>
                     </Box>
@@ -149,21 +143,15 @@ const ArticlesListView: React.FC<ArticlesListViewProps> = ({
                   
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Avatar sx={{ width: 24, height: 24 }}>
-                        <i className="ri-user-line" />
-                      </Avatar>
-                      <Typography variant="body2">
+                      <Typography variant="body2" noWrap>
                         {article.author.name}
                       </Typography>
                     </Box>
                   </TableCell>
                   
                   <TableCell>
-                    <Typography variant="body2">
-                      {format(new Date(article.createdAt), 'dd/MM/yyyy', { locale: es })}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {format(new Date(article.createdAt), 'HH:mm', { locale: es })}
+                    <Typography variant="body2" align="center">
+                      {format(new Date(article.createdAt), 'dd/MM/yyyy', { locale: es })} 
                     </Typography>
                   </TableCell>
                   

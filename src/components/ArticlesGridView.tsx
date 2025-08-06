@@ -10,7 +10,6 @@ import {
   Box, 
   Chip,
   IconButton,
-  Avatar,
   Divider
 } from '@mui/material'
 
@@ -45,16 +44,10 @@ const ArticlesGridView: React.FC<ArticlesGridViewProps> = ({
     return isPublished ? 'Publicado' : 'Borrador'
   }
 
-  const truncateText = (text: string, maxLength: number) => {
-    if (!text) return ''
-    const cleanText = text.replace(/<[^>]*>/g, '')
-    return cleanText.length > maxLength 
-      ? cleanText.substring(0, maxLength) + '...' 
-      : cleanText
-  }
+
 
   return (
-    <Grid container spacing={3}>
+    <Grid container spacing={5}>
       {articles.map((article) => (
         <Grid item xs={12} sm={6} md={4} lg={3} key={article.id}>
           <Card 
@@ -63,16 +56,12 @@ const ArticlesGridView: React.FC<ArticlesGridViewProps> = ({
               display: 'flex', 
               flexDirection: 'column',
               transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
-              '&:hover': {
-                transform: 'translateY(-4px)',
-                boxShadow: 4
-              }
             }}
           >
             {/* Header con imagen de portada */}
             <Box
               sx={{
-                height: 140,
+                height: 200,
                 background: article.coverImage 
                   ? `url(https://res.cloudinary.com/ddqh0mkx9/image/upload/f_webp,w_500/${article.coverImage}) center/cover`
                   : 'linear-gradient(45deg, #f5f5f5 30%, #e0e0e0 90%)',
@@ -115,53 +104,58 @@ const ArticlesGridView: React.FC<ArticlesGridViewProps> = ({
               </Box>
             </Box>
 
-            <CardContent sx={{ flexGrow: 1, p: 2 }}>
+            <CardContent sx={{ flexGrow: 1, p: 5 }}>
               {/* Título */}
-              <Typography 
-                variant="h6" 
-                component="h3" 
-                gutterBottom
-                sx={{ 
-                  fontWeight: 600,
-                  lineHeight: 1.3,
-                  mb: 1
-                }}
-              >
-                {article.title}
-              </Typography>
+                              <Typography 
+                  variant="h6" 
+                  component="h3" 
+                  gutterBottom
+                  sx={{ 
+                    fontWeight: 600,
+                    lineHeight: 1.3,
+                    mb: 1,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical'
+                  }}
+                >
+                  {article.title}
+                </Typography>
 
-              {/* Resumen */}
-              <Typography 
-                variant="body2" 
-                color="text.secondary" 
-                sx={{ 
-                  mb: 2,
-                  lineHeight: 1.5
-                }}
-              >
-                {truncateText(article.summary, 120)}
-              </Typography>
+                {/* Resumen */}
+                <Typography 
+                  variant="body2" 
+                  color="text.secondary" 
+                  sx={{ 
+                    mb: 2,
+                    lineHeight: 1.5,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 3,
+                    WebkitBoxOrient: 'vertical'
+                  }}
+                  dangerouslySetInnerHTML={{ __html: article.summary }}
+                />
 
-              <Divider sx={{ my: 1 }} />
+              <Divider sx={{ my: 5 }} />
 
               {/* Información del autor y fecha */}
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <Avatar sx={{ width: 24, height: 24, mr: 1 }}>
-                  <i className="ri-user-line" />
-                </Avatar>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
                 <Typography variant="caption" color="text.secondary">
                   {article.author.name}
                 </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {format(new Date(article.createdAt), 'dd/MM/yyyy', { locale: es })}
+                </Typography>
               </Box>
-
-              <Typography variant="caption" color="text.secondary">
-                {format(new Date(article.createdAt), 'dd/MM/yyyy', { locale: es })}
-              </Typography>
             </CardContent>
 
             {/* Acciones */}
-            <CardActions sx={{ p: 2, pt: 0 }}>
-              <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+            <CardActions sx={{ p: 5 }}>
+              <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', width: '100%', justifyContent: 'space-around' }}>
                 {onView && (
                   <IconButton
                     size="small"
