@@ -1,6 +1,44 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
-import { getSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import API_CONFIG from '@/configs/api.config'
+
+// Función para decodificar JWT sin verificación
+function decodeJWT(token: string) {
+  try {
+    const base64Url = token.split('.')[1]
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
+
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map(function (c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+        })
+        .join('')
+    )
+
+    return JSON.parse(jsonPayload)
+  } catch (error) {
+    console.error('Error decoding JWT:', error)
+    return null
+  }
+}
+
+// Función para verificar si un token ha expirado
+function isTokenExpired(token: string): boolean {
+  try {
+    const decoded = decodeJWT(token)
+    if (!decoded || !decoded.exp) {
+      return true
+    }
+
+    const currentTime = Math.floor(Date.now() / 1000)
+    return decoded.exp < currentTime
+  } catch (error) {
+    console.error('Error checking token expiration:', error)
+    return true
+  }
+}
 
 // Tipos para la respuesta de la API
 export interface ApiResponse<T = any> {
@@ -39,10 +77,24 @@ class HttpClient {
           try {
             const session = await getSession()
             if (session?.accessToken) {
+              // Verificar si el token ha expirado antes de usarlo
+              if (isTokenExpired(session.accessToken)) {
+                console.warn('Token expired, logging out...')
+                await signOut({ 
+                  redirect: true,
+                  callbackUrl: '/auth/login'
+                })
+                throw new Error('Token expired')
+              }
+              
               config.headers.Authorization = `Bearer ${session.accessToken}`
             }
           } catch (error) {
-            console.warn('Error getting session:', error)
+            console.warn('Error getting session or token expired:', error)
+            // Si hay un error con la sesión, redirigir al login
+            if (error instanceof Error && error.message === 'Token expired') {
+              throw error
+            }
           }
         }
         return config
@@ -57,13 +109,13 @@ class HttpClient {
       (response: AxiosResponse) => {
         return response
       },
-      (error) => {
+      async (error) => {
         return this.handleError(error)
       }
     )
   }
 
-  private handleError(error: any): never {
+  private async handleError(error: any): Promise<never> {
     if (axios.isAxiosError(error)) {
       const apiError: ApiError = {
         message: error.response?.data?.message || error.message || 'Error de conexión',
@@ -75,7 +127,16 @@ class HttpClient {
       if (error.response?.status === 401) {
         // Token expirado o inválido
         apiError.message = 'Sesión expirada. Por favor, inicia sesión nuevamente.'
-        // Aquí podrías redirigir al login o refrescar el token
+        
+        // Cerrar sesión automáticamente
+        try {
+          await signOut({ 
+            redirect: true,
+            callbackUrl: '/auth/login'
+          })
+        } catch (signOutError) {
+          console.error('Error during automatic logout:', signOutError)
+        }
       } else if (error.response?.status === 403) {
         apiError.message = 'No tienes permisos para realizar esta acción.'
       } else if (error.response?.status === 404) {

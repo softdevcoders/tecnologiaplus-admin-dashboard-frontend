@@ -15,6 +15,7 @@ import Navbar from '@components/layout/vertical/Navbar'
 import VerticalFooter from '@components/layout/vertical/Footer'
 import ScrollToTop from '@core/components/scroll-to-top'
 import AuthGuard from '@/hocs/AuthGuard'
+import { SessionExpirationAlert } from '@/components/SessionExpirationAlert'
 
 // Util Imports
 import { getMode, getSystemMode } from '@core/utils/serverHelpers'
@@ -46,6 +47,7 @@ const Layout = async (props: ChildrenType) => {
             <i className='ri-arrow-up-line' />
           </Button>
         </ScrollToTop>
+        <SessionExpirationAlert warningMinutes={5} />
       </AuthGuard>
     </Providers>
   )
