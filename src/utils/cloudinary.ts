@@ -21,10 +21,12 @@ return match ? match[1] : ''
 }
 
 /**
- * Extraer la URL base de Cloudinary (sin public ID)
+ * Extraer la URL base de Cloudinary (hasta /image/upload inclusive)
  */
 export function getBaseUrl(url: string): string {
-  return url.replace(/\/v\d+\/[^/]+$/, '')
+  const match = url.match(/(.*\/image\/upload)/)
+
+  return match ? match[1] : url
 }
 
 /**
@@ -75,6 +77,7 @@ export function getTransformedUrl(baseUrl: string, options: CloudinaryTransformO
  */
 export function generatePictureElement(
   baseUrl: string,
+  publicId: string,
   alt: string,
   options: {
     desktopWidth?: number
@@ -85,28 +88,27 @@ export function generatePictureElement(
 ): string {
   const { desktopWidth = 1000, tabletWidth = 600, mobileWidth = 400, fallbackWidth = 800 } = options
 
-  const publicId = getPublicId(baseUrl)
   const baseUrlWithoutPublicId = getBaseUrl(baseUrl)
 
   return `
     <picture>
       <source 
         media="(min-width: 900px)"
-        srcset="${baseUrlWithoutPublicId}/c_scale,q_80,f_webp,w_${desktopWidth}/v1754414736/${publicId}"
+        srcset="${baseUrlWithoutPublicId}/c_scale,q_80,f_webp,w_${desktopWidth}/${publicId}"
         type="image/webp"
       />
       <source 
         media="(min-width: 600px)"
-        srcset="${baseUrlWithoutPublicId}/c_scale,q_80,f_webp,w_${tabletWidth}/v1754414736/${publicId}"
+        srcset="${baseUrlWithoutPublicId}/c_scale,q_80,f_webp,w_${tabletWidth}/${publicId}"
         type="image/webp"
       />
       <source 
         media="(min-width: 0px)"
-        srcset="${baseUrlWithoutPublicId}/c_scale,q_80,f_webp,w_${mobileWidth}/v1754414736/${publicId}"
+        srcset="${baseUrlWithoutPublicId}/c_scale,q_80,f_webp,w_${mobileWidth}/${publicId}"
         type="image/webp"
       />
       <img
-        src="${baseUrlWithoutPublicId}/c_scale,q_80,f_webp,w_${fallbackWidth}/v1754414736/${publicId}"
+        src="${baseUrlWithoutPublicId}/c_scale,q_80,f_webp,w_${fallbackWidth}/${publicId}"
         alt="${alt}"
         loading="lazy"
       />

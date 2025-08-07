@@ -38,7 +38,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const { session } = useAuth()
-  const sessionId = session?.user?.email || 'anonymous'
+  const sessionId = session?.user?.id || session?.user?.email || 'anonymous'
 
   const {
     uploading,

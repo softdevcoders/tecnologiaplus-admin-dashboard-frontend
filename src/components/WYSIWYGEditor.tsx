@@ -26,6 +26,7 @@ import CodeEditor from './CodeEditor'
 import { useImages } from '@/hooks/useImages'
 import { useAuth } from '@/hooks/useAuth'
 import { generatePictureElement } from '@/utils/cloudinary'
+import { useNotification } from '@/contexts/NotificationContext'
 
 interface WYSIWYGEditorProps {
   value: string
@@ -59,11 +60,13 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
   const [htmlCode, setHtmlCode] = useState(value)
   const [imageUploadError, setImageUploadError] = useState<string | null>(null)
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null)
+  const [uploadedImagePublicId, setUploadedImagePublicId] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const { showError } = useNotification()
 
   // Cloudinary integration
   const { session } = useAuth()
-  const sessionId = session?.user?.email || 'anonymous'
+  const sessionId = session?.user?.id || session?.user?.email || 'anonymous'
 
   const {
     uploading: imageUploading,
@@ -72,8 +75,9 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
   } = useImages({
     sessionId,
     onSuccess: response => {
-      // Guardar la URL de la imagen subida y mantener el modal abierto
+      // Guardar la URL y publicId de la imagen subida y mantener el modal abierto
       setUploadedImageUrl(response.url)
+      setUploadedImagePublicId(response.publicId)
       setImageUrl(response.url)
       setImageUploadError(null)
     },
@@ -120,9 +124,56 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
   }, []) // Solo se ejecuta al montar
 
   const execCommand = (command: string, value?: string) => {
-    document.execCommand(command, false, value)
+    // Asegurar que el editor tenga el foco
     editorRef.current?.focus()
+    
+    if (command === 'insertHTML' && value) {
+      // Usar una función más robusta para insertar HTML
+      insertHTML(value)
+    } else {
+      document.execCommand(command, false, value)
+    }
+    
     updateContent()
+  }
+
+  const insertHTML = (html: string) => {
+    if (!editorRef.current) {
+      showError('❌ Editor ref no disponible')
+      
+      return
+    }
+
+    // Asegurar que el editor tenga el foco
+    editorRef.current.focus()
+
+    const selection = window.getSelection()
+
+    if (!selection || selection.rangeCount === 0) {
+      // Si no hay selección, insertar al final
+      editorRef.current.innerHTML += html
+      
+      return
+    }
+
+    const range = selection.getRangeAt(0)
+
+    range.deleteContents()
+    
+    const tempDiv = document.createElement('div')
+    
+    tempDiv.innerHTML = html
+    
+    const fragment = document.createDocumentFragment()
+
+    while (tempDiv.firstChild) {
+      fragment.appendChild(tempDiv.firstChild)
+    }
+    
+    range.insertNode(fragment)
+    range.collapse(false)
+    selection.removeAllRanges()
+    selection.addRange(range)
   }
 
   const updateContent = () => {
@@ -288,17 +339,17 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
 
   const handleImageSubmit = () => {
     if (!imageAlt.trim()) {
-      alert('El texto alternativo (alt) es obligatorio para la accesibilidad y SEO.')
+      showError('El texto alternativo (alt) es obligatorio para la accesibilidad y SEO.')
       
-return
+      return
     }
 
     if (imageUrl || uploadedImageUrl) {
       const finalImageUrl = imageUrl || uploadedImageUrl
       
-      // Si es una URL de Cloudinary, generar picture element
-      if (finalImageUrl && finalImageUrl.includes('res.cloudinary.com')) {
-        const pictureElement = generatePictureElement(finalImageUrl, imageAlt, {
+      // Si es una URL de Cloudinary y tenemos publicId, generar picture element
+      if (finalImageUrl && finalImageUrl.includes('res.cloudinary.com') && uploadedImagePublicId) {
+        const pictureElement = generatePictureElement(finalImageUrl, uploadedImagePublicId, imageAlt, {
           desktopWidth: 1000,
           tabletWidth: 600,
           mobileWidth: 400
@@ -316,6 +367,7 @@ return
       setImageUrl('')
       setImageAlt('')
       setUploadedImageUrl(null)
+      setUploadedImagePublicId(null)
       setImageUploadError(null)
     }
   }
@@ -329,6 +381,8 @@ return
 
       if (!result) {
         // El error ya se maneja en el hook
+        showError('Error al subir la imagen. Por favor, intenta de nuevo.')
+        
         return
       }
     },
@@ -915,6 +969,7 @@ return
             setImageUrl('')
             setImageAlt('')
             setUploadedImageUrl(null)
+            setUploadedImagePublicId(null)
             setImageUploadError(null)
           }}>
             Cancelar
