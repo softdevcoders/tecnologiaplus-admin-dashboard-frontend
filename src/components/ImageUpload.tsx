@@ -1,11 +1,15 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { Box, Typography, Paper, Button, IconButton, Alert, CircularProgress } from '@mui/material'
+import { useImages } from '@/hooks/useImages'
+import { useAuth } from '@/hooks/useAuth'
+import { generatePictureElement } from '@/utils/cloudinary'
 
 interface ImageUploadProps {
   value?: string
   onChange: (imageUrl: string) => void
+  onTempImageIdChange?: (tempImageId: string) => void
   label?: string
   error?: boolean
   helperText?: string
@@ -16,16 +20,33 @@ interface ImageUploadProps {
 const ImageUpload: React.FC<ImageUploadProps> = ({
   value,
   onChange,
+  onTempImageIdChange,
   label = 'Imagen principal',
   error = false,
   helperText,
   accept = 'image/*',
-  maxSize = 5 // 5MB por defecto
+  maxSize = 8 // 8MB por defecto para Cloudinary
 }) => {
   const [isDragOver, setIsDragOver] = useState(false)
-  const [isUploading, setIsUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
+  const [tempImageId, setTempImageId] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  
+  const { session } = useAuth()
+  const sessionId = session?.user?.id || 'anonymous'
+  
+  const { uploading, error: uploadErrorState, uploadCoverImage, deleteTempImage, clearError } = useImages({
+    sessionId,
+          onSuccess: (response) => {
+        setTempImageId(response.tempImageId)
+        onTempImageIdChange?.(response.tempImageId)
+        // Usar URL original sin transformaciones para la vista previa
+        onChange(response.url)
+      },
+    onError: (error) => {
+      setUploadError(error)
+    }
+  })
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -56,47 +77,32 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 
   const handleFile = useCallback(
     async (file: File) => {
-      // Validar tipo de archivo
-      if (!file.type.startsWith('image/')) {
-        setUploadError('Solo se permiten archivos de imagen')
-        return
-      }
-
-      // Validar tamaño
-      if (file.size > maxSize * 1024 * 1024) {
-        setUploadError(`El archivo es demasiado grande. Máximo ${maxSize}MB`)
-        return
-      }
-
-      setIsUploading(true)
       setUploadError(null)
+      clearError()
 
-      try {
-        // Por ahora, convertimos a base64 para simular una subida
-        // En producción, aquí subirías a un servidor de archivos
-        const reader = new FileReader()
-        reader.onload = e => {
-          const result = e.target?.result as string
-          onChange(result)
-          setIsUploading(false)
-        }
-        reader.onerror = () => {
-          setUploadError('Error al leer el archivo')
-          setIsUploading(false)
-        }
-        reader.readAsDataURL(file)
-      } catch (error) {
-        setUploadError('Error al procesar la imagen')
-        setIsUploading(false)
+      // Subir a Cloudinary
+      const result = await uploadCoverImage(file)
+      
+      if (!result) {
+        // El error ya se maneja en el hook
+        return
       }
     },
-    [maxSize, onChange]
+    [uploadCoverImage, clearError]
   )
 
-  const handleRemoveImage = useCallback(() => {
+  const handleRemoveImage = useCallback(async () => {
+    // Si hay una imagen temporal, eliminarla de Cloudinary
+    if (tempImageId) {
+      await deleteTempImage(tempImageId)
+      setTempImageId(null)
+      onTempImageIdChange?.('')
+    }
+    
     onChange('')
     setUploadError(null)
-  }, [onChange])
+    clearError()
+  }, [onChange, tempImageId, deleteTempImage, onTempImageIdChange, clearError])
 
   const handleClick = useCallback(() => {
     fileInputRef.current?.click()
@@ -191,7 +197,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
               textAlign: 'center'
             }}
           >
-            {isUploading ? (
+            {uploading ? (
               <CircularProgress size={40} />
             ) : (
               <>
@@ -200,7 +206,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
                   Arrastra una imagen aquí o haz clic para seleccionar
                 </Typography>
                 <Typography variant='caption' color='text.secondary'>
-                  PNG, JPG, GIF hasta {maxSize}MB
+                  PNG, JPG, WebP, GIF, SVG, TIFF hasta {maxSize}MB
                 </Typography>
                 <Button
                   variant='outlined'
@@ -223,9 +229,9 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
       <input ref={fileInputRef} type='file' accept={accept} onChange={handleFileSelect} style={{ display: 'none' }} />
 
       {/* Mensajes de error */}
-      {uploadError && (
+      {(uploadError || uploadErrorState) && (
         <Alert severity='error' sx={{ mt: 1 }}>
-          {uploadError}
+          {uploadError || uploadErrorState}
         </Alert>
       )}
 

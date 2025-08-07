@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import {
   Box,
   Typography,
@@ -17,9 +17,14 @@ import {
   IconButton,
   Tooltip,
   Tabs,
-  Tab
+  Tab,
+  Alert,
+  CircularProgress
 } from '@mui/material'
 import CodeEditor from './CodeEditor'
+import { useImages } from '@/hooks/useImages'
+import { useAuth } from '@/hooks/useAuth'
+import { generatePictureElement } from '@/utils/cloudinary'
 
 interface WYSIWYGEditorProps {
   value: string
@@ -51,6 +56,29 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
   const [selectedFontSize, setSelectedFontSize] = useState('16px')
   const [activeTab, setActiveTab] = useState(0) // 0 = Editor, 1 = HTML
   const [htmlCode, setHtmlCode] = useState(value)
+  const [imageUploadError, setImageUploadError] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  
+  // Cloudinary integration
+  const { session } = useAuth()
+  const sessionId = session?.user?.id || 'anonymous'
+  
+  const { uploading: imageUploading, uploadContentImage, deleteTempImage, clearError } = useImages({
+    sessionId,
+    onSuccess: (response) => {
+      // Insertar imagen con URL original sin transformaciones
+      const imageHtml = `<img src="${response.url}" alt="${imageAlt || 'Imagen del artículo'}" style="max-width: 100%; height: auto;" />`
+      
+      execCommand('insertHTML', imageHtml)
+      setImageDialogOpen(false)
+      setImageUrl('')
+      setImageAlt('')
+      setImageUploadError(null)
+    },
+    onError: (error) => {
+      setImageUploadError(error)
+    }
+  })
 
   useEffect(() => {
     // Solo actualizar si estamos en la pestaña del editor y hay un cambio real
@@ -272,13 +300,56 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
 
   const handleImageSubmit = () => {
     if (imageUrl) {
-      const imageHtml = `<img src="${imageUrl}" alt="${imageAlt}" style="max-width: 100%; height: auto;" />`
-      execCommand('insertHTML', imageHtml)
+      // Si es una URL de Cloudinary, generar picture element
+      if (imageUrl.includes('res.cloudinary.com')) {
+        const pictureElement = generatePictureElement(imageUrl, imageAlt || 'Imagen del artículo', {
+          desktopWidth: 1000,
+          tabletWidth: 600,
+          mobileWidth: 400
+        })
+        execCommand('insertHTML', pictureElement)
+      } else {
+        // URL externa, usar img simple
+        const imageHtml = `<img src="${imageUrl}" alt="${imageAlt}" style="max-width: 100%; height: auto;" />`
+        execCommand('insertHTML', imageHtml)
+      }
       setImageDialogOpen(false)
       setImageUrl('')
       setImageAlt('')
     }
   }
+
+  const handleImageUpload = useCallback(async (file: File) => {
+    setImageUploadError(null)
+    clearError()
+    
+    const result = await uploadContentImage(file)
+    
+    if (!result) {
+      // El error ya se maneja en el hook
+      return
+    }
+  }, [uploadContentImage, clearError])
+
+  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (files && files.length > 0) {
+      handleImageUpload(files[0])
+    }
+  }, [handleImageUpload])
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+  }, [])
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    
+    const files = Array.from(e.dataTransfer.files)
+    if (files.length > 0) {
+      handleImageUpload(files[0])
+    }
+  }, [handleImageUpload])
 
   const handlePaste = (e: React.ClipboardEvent) => {
     e.preventDefault()
@@ -730,13 +801,65 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
       <Dialog open={imageDialogOpen} onClose={() => setImageDialogOpen(false)} maxWidth='sm' fullWidth>
         <DialogTitle>Insertar Imagen</DialogTitle>
         <DialogContent>
+          <Box sx={{ mb: 3 }}>
+            <Typography variant='subtitle2' sx={{ mb: 1 }}>
+              Subir imagen desde tu computadora
+            </Typography>
+            <Paper
+              variant='outlined'
+              sx={{
+                border: '2px dashed',
+                borderColor: 'primary.main',
+                backgroundColor: 'primary.50',
+                p: 3,
+                textAlign: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  backgroundColor: 'primary.100',
+                  borderColor: 'primary.dark'
+                }
+              }}
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              {imageUploading ? (
+                <CircularProgress size={40} />
+              ) : (
+                <>
+                  <i className='ri-image-line' style={{ fontSize: '48px', color: '#1976d2', marginBottom: '16px' }} />
+                  <Typography variant='body2' color='text.secondary' sx={{ mb: 1 }}>
+                    Arrastra una imagen aquí o haz clic para seleccionar
+                  </Typography>
+                  <Typography variant='caption' color='text.secondary'>
+                    PNG, JPG, WebP, GIF, SVG, TIFF hasta 8MB
+                  </Typography>
+                </>
+              )}
+            </Paper>
+            <input 
+              ref={fileInputRef} 
+              type='file' 
+              accept='image/*' 
+              onChange={handleFileSelect} 
+              style={{ display: 'none' }} 
+            />
+          </Box>
+
+          <Divider sx={{ my: 2 }}>
+            <Typography variant='body2' color='text.secondary'>
+              O insertar desde URL
+            </Typography>
+          </Divider>
+
           <TextField
             fullWidth
             label='URL de la imagen'
             value={imageUrl}
             onChange={e => setImageUrl(e.target.value)}
             placeholder='https://ejemplo.com/imagen.jpg'
-            sx={{ mb: 2, mt: 1 }}
+            sx={{ mb: 2 }}
           />
           <TextField
             fullWidth
@@ -746,11 +869,21 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
             placeholder='Descripción de la imagen'
             helperText='Importante para SEO y accesibilidad'
           />
+
+          {imageUploadError && (
+            <Alert severity='error' sx={{ mt: 2 }}>
+              {imageUploadError}
+            </Alert>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setImageDialogOpen(false)}>Cancelar</Button>
-          <Button onClick={handleImageSubmit} variant='contained'>
-            Insertar
+          <Button 
+            onClick={handleImageSubmit} 
+            variant='contained'
+            disabled={!imageUrl}
+          >
+            Insertar desde URL
           </Button>
         </DialogActions>
       </Dialog>

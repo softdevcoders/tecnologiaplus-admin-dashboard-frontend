@@ -28,6 +28,7 @@ import Tooltip from '@mui/material/Tooltip'
 // Custom hooks and services
 import { useCategories } from '@/hooks/useCategories'
 import { useArticles } from '@/hooks/useArticles'
+import { useTags } from '@/hooks/useTags'
 
 // Components
 import WYSIWYGEditor from '@/components/WYSIWYGEditor'
@@ -47,6 +48,7 @@ interface ArticleFormData {
   metaKeywords?: string
   metaDescription?: string
   coverImage?: string
+  coverImageTempId?: string // Para manejar imágenes temporales
   categoryId: string
   isPublished: boolean
   tagIds: string[]
@@ -55,6 +57,7 @@ interface ArticleFormData {
 const CrearArticuloPage = () => {
   const router = useRouter()
   const { categories, loading: categoriesLoading } = useCategories()
+  const { tags, loading: tagsLoading, createTag } = useTags()
   const { createArticle, loading: createLoading, error, clearError } = useArticles()
 
   const [formData, setFormData] = useState<ArticleFormData>({
@@ -66,6 +69,7 @@ const CrearArticuloPage = () => {
     metaKeywords: '',
     metaDescription: '',
     coverImage: '',
+    coverImageTempId: '',
     categoryId: '',
     isPublished: false,
     tagIds: []
@@ -106,13 +110,34 @@ const CrearArticuloPage = () => {
     }
   }
 
-  const handleAddTag = () => {
-    if (tagInput.trim() && !formData.tagIds.includes(tagInput.trim())) {
-      setFormData(prev => ({
-        ...prev,
-        tagIds: [...prev.tagIds, tagInput.trim()]
-      }))
-      setTagInput('')
+  const handleAddTag = async () => {
+    if (tagInput.trim()) {
+      try {
+        // Buscar si el tag ya existe
+        const existingTag = tags.find(tag => tag.name.toLowerCase() === tagInput.trim().toLowerCase())
+        
+        if (existingTag) {
+          // Si existe, agregar su ID
+          if (!formData.tagIds.includes(existingTag.id)) {
+            setFormData(prev => ({
+              ...prev,
+              tagIds: [...prev.tagIds, existingTag.id]
+            }))
+          }
+        } else {
+          // Si no existe, crear el tag
+          const newTag = await createTag(tagInput.trim())
+          if (newTag) {
+            setFormData(prev => ({
+              ...prev,
+              tagIds: [...prev.tagIds, newTag.id]
+            }))
+          }
+        }
+        setTagInput('')
+      } catch (error) {
+        console.error('Error al agregar etiqueta:', error)
+      }
     }
   }
 
@@ -420,8 +445,9 @@ const CrearArticuloPage = () => {
                 <ImageUpload
                   value={formData.coverImage}
                   onChange={imageUrl => handleInputChange('coverImage', imageUrl)}
+                  onTempImageIdChange={tempImageId => handleInputChange('coverImageTempId', tempImageId)}
                   label='Imagen Principal'
-                  maxSize={1}
+                  maxSize={8}
                 />
               </Grid>
 
@@ -460,15 +486,18 @@ const CrearArticuloPage = () => {
                     </Button>
                   </Box>
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                    {formData.tagIds.map(tagId => (
-                      <Chip
-                        key={tagId}
-                        label={tagId}
-                        onDelete={() => handleRemoveTag(tagId)}
-                        color='primary'
-                        variant='outlined'
-                      />
-                    ))}
+                    {formData.tagIds.map(tagId => {
+                      const tag = tags.find(t => t.id === tagId)
+                      return (
+                        <Chip
+                          key={tagId}
+                          label={tag ? tag.name : tagId}
+                          onDelete={() => handleRemoveTag(tagId)}
+                          color='primary'
+                          variant='outlined'
+                        />
+                      )
+                    })}
                   </Box>
                 </Box>
               </Grid>
@@ -491,7 +520,7 @@ const CrearArticuloPage = () => {
               </Grid>
 
               {/* Meta Título */}
-              <Grid item xs={12} md={4}>
+              <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
                   label='Meta Título'
@@ -505,7 +534,7 @@ const CrearArticuloPage = () => {
               </Grid>
 
               {/* Meta Keywords */}
-              <Grid item xs={12} md={4}>
+              <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
                   label='Meta Keywords'
@@ -517,7 +546,7 @@ const CrearArticuloPage = () => {
               </Grid>
 
               {/* Meta Description */}
-              <Grid item xs={12} md={4}>
+              <Grid item xs={12}>
                 <TextField
                   fullWidth
                   label='Meta Description'
