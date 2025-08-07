@@ -273,14 +273,16 @@ const CrearArticuloPage = () => {
             </Button>
           </Tooltip>
           <Tooltip title='Guardar como borrador'>
-            <Button
-              variant='outlined'
-              onClick={autoSave}
-              disabled={!hasUnsavedChanges || createLoading}
-              startIcon={<i className='ri-save-line' />}
-            >
-              Guardar
-            </Button>
+            <span>
+              <Button
+                variant='outlined'
+                onClick={autoSave}
+                disabled={!hasUnsavedChanges || createLoading}
+                startIcon={<i className='ri-save-line' />}
+              >
+                Guardar
+              </Button>
+            </span>
           </Tooltip>
           <Button variant='outlined' onClick={handleCancel} startIcon={<i className='ri-arrow-left-line' />}>
             Volver
