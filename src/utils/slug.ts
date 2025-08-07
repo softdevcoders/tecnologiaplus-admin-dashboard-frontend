@@ -8,6 +8,7 @@ export const generateSlug = (title: string): string => {
     title
       .toLowerCase()
       .trim()
+
       // Reemplazar caracteres especiales y acentos
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '') // Remover acentos
@@ -25,7 +26,9 @@ export const generateSlug = (title: string): string => {
  */
 export const isValidSlug = (slug: string): boolean => {
   const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
-  return slugRegex.test(slug)
+
+  
+return slugRegex.test(slug)
 }
 
 /**

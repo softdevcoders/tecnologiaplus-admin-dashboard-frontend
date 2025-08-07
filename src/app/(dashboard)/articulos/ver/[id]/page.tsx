@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+
 import { useRouter, useParams } from 'next/navigation'
 
 // MUI Imports
@@ -14,21 +15,26 @@ import Alert from '@mui/material/Alert'
 import Grid from '@mui/material/Grid'
 import Chip from '@mui/material/Chip'
 import Divider from '@mui/material/Divider'
-import Paper from '@mui/material/Paper'
 
 // Custom hooks and services
-import { useCategories } from '@/hooks/useCategories'
 import { useArticles } from '@/hooks/useArticles'
 
 // Types
 interface ArticleData {
   id: string
   title: string
-  summary: string
+  summary?: string
   content: string
-  categoryId: string
+  category?: {
+    id: string
+    label: string
+  }
+  coverImage?: string
   isPublished: boolean
-  tags: string[]
+  tags: Array<{
+    id: string
+    name: string
+  }>
   createdAt: string
   updatedAt: string
   author?: {
@@ -43,7 +49,6 @@ const VerArticuloPage = () => {
   const params = useParams()
   const articleId = params.id as string
 
-  const { categories } = useCategories()
   const { getArticleById, loading, error, clearError } = useArticles()
 
   const [article, setArticle] = useState<ArticleData | null>(null)
@@ -54,6 +59,7 @@ const VerArticuloPage = () => {
       if (articleId) {
         try {
           const articleData = await getArticleById(articleId)
+
           if (articleData) {
             setArticle(articleData)
           }
@@ -74,8 +80,7 @@ const VerArticuloPage = () => {
     router.push('/articulos')
   }
 
-  const getCategoryName = (categoryId: string) => {
-    const category = categories.find(cat => cat.id === categoryId)
+  const getCategoryName = (category?: { id: string; label: string }) => {
     return category ? category.label : 'Categoría no encontrada'
   }
 
@@ -276,7 +281,7 @@ const VerArticuloPage = () => {
                     <Typography variant='subtitle2' color='text.secondary'>
                       Categoría
                     </Typography>
-                    <Typography variant='body2'>{getCategoryName(article.categoryId)}</Typography>
+                    <Typography variant='body2'>{getCategoryName(article.category)}</Typography>
                   </Box>
 
                   {/* Tags */}
@@ -287,7 +292,7 @@ const VerArticuloPage = () => {
                       </Typography>
                       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                         {article.tags.map(tag => (
-                          <Chip key={tag} label={tag} size='small' variant='outlined' />
+                          <Chip key={tag.id} label={tag.name} size='small' variant='outlined' />
                         ))}
                       </Box>
                     </Box>

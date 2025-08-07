@@ -85,6 +85,7 @@ module.exports = {
         'newlines-between': 'always-and-inside-groups'
       }
     ],
+    'import/no-unresolved': 'off',
     '@typescript-eslint/ban-types': [
       'error',
       {

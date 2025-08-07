@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { useArticles } from '@/hooks/useArticles'
+
 import {
   List,
   ListItem,
@@ -14,9 +14,10 @@ import {
   CircularProgress,
   Alert
 } from '@mui/material'
-import { Edit as EditIcon, Delete as DeleteIcon, Visibility as VisibilityIcon } from '@mui/icons-material'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
+
+import { useArticles } from '@/hooks/useArticles'
 
 interface ArticlesListProps {
   onEdit?: (articleId: string) => void
@@ -30,6 +31,7 @@ const ArticlesList: React.FC<ArticlesListProps> = ({ onEdit, onView, onDelete })
   const handleDelete = async (articleId: string) => {
     if (window.confirm('¿Estás seguro de que quieres eliminar este artículo?')) {
       const success = await deleteArticle(articleId)
+
       if (success && onDelete) {
         onDelete(articleId)
       }
@@ -101,12 +103,12 @@ const ArticlesList: React.FC<ArticlesListProps> = ({ onEdit, onView, onDelete })
             <Box display='flex' gap={0.5}>
               {onView && (
                 <IconButton edge='end' size='small' onClick={() => onView(article.id)} title='Ver artículo'>
-                  <VisibilityIcon />
+                  <i className='ri-eye-line' />
                 </IconButton>
               )}
               {onEdit && (
                 <IconButton edge='end' size='small' onClick={() => onEdit(article.id)} title='Editar artículo'>
-                  <EditIcon />
+                  <i className='ri-pencil-line' />
                 </IconButton>
               )}
               <IconButton
@@ -116,7 +118,7 @@ const ArticlesList: React.FC<ArticlesListProps> = ({ onEdit, onView, onDelete })
                 title='Eliminar artículo'
                 color='error'
               >
-                <DeleteIcon />
+                <i className='ri-delete-bin-line' />
               </IconButton>
             </Box>
           </ListItemSecondaryAction>

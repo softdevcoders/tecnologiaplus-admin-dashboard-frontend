@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+
 import { Box, Typography, Card, CardContent, CardMedia, Chip, Divider, Avatar, Grid, Paper } from '@mui/material'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'

@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Box, Typography, TextField, ToggleButton, ToggleButtonGroup, Button, Paper, Divider } from '@mui/material'
+
+import { Box, Typography, TextField, ToggleButton, ToggleButtonGroup, Paper, Divider } from '@mui/material'
 
 interface SimpleRichTextEditorProps {
   value: string
@@ -20,10 +21,11 @@ const SimpleRichTextEditor: React.FC<SimpleRichTextEditorProps> = ({
   error = false,
   helperText
 }) => {
-  const [selection, setSelection] = useState({ start: 0, end: 0 })
+  const [_, setSelection] = useState({ start: 0, end: 0 }) // eslint-disable-line @typescript-eslint/no-unused-vars
 
   const handleFormat = (format: string) => {
     const textField = document.getElementById('rich-text-field') as HTMLTextAreaElement
+
     if (!textField) return
 
     const start = textField.selectionStart
@@ -61,15 +63,18 @@ const SimpleRichTextEditor: React.FC<SimpleRichTextEditorProps> = ({
       case 'list':
         const lines = selectedText.split('\n')
         const listText = lines.map(line => `- ${line}`).join('\n')
+
         newText = value.substring(0, start) + listText + value.substring(end)
         newSelection = { start, end: start + listText.length }
         break
       case 'link':
         const url = prompt('Ingresa la URL:')
+
         if (url) {
           newText = value.substring(0, start) + `[${selectedText}](${url})` + value.substring(end)
           newSelection = { start: start + 1, end: start + selectedText.length + 1 }
         }
+
         break
     }
 
@@ -78,6 +83,7 @@ const SimpleRichTextEditor: React.FC<SimpleRichTextEditorProps> = ({
     // Restaurar selección después del cambio
     setTimeout(() => {
       const textField = document.getElementById('rich-text-field') as HTMLTextAreaElement
+
       if (textField) {
         textField.setSelectionRange(newSelection.start, newSelection.end)
         textField.focus()
@@ -87,6 +93,7 @@ const SimpleRichTextEditor: React.FC<SimpleRichTextEditorProps> = ({
 
   const handleSelectionChange = () => {
     const textField = document.getElementById('rich-text-field') as HTMLTextAreaElement
+
     if (textField) {
       setSelection({ start: textField.selectionStart, end: textField.selectionEnd })
     }

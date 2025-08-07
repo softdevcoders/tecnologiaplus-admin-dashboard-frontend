@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback } from 'react'
+
 import {
   Box,
   Typography,
@@ -14,13 +15,13 @@ import {
   DialogContent,
   DialogActions,
   TextField,
-  IconButton,
   Tooltip,
   Tabs,
   Tab,
   Alert,
   CircularProgress
 } from '@mui/material'
+
 import CodeEditor from './CodeEditor'
 import { useImages } from '@/hooks/useImages'
 import { useAuth } from '@/hooks/useAuth'
@@ -58,24 +59,28 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
   const [htmlCode, setHtmlCode] = useState(value)
   const [imageUploadError, setImageUploadError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  
+
   // Cloudinary integration
   const { session } = useAuth()
-  const sessionId = session?.user?.id || 'anonymous'
-  
-  const { uploading: imageUploading, uploadContentImage, deleteTempImage, clearError } = useImages({
+  const sessionId = session?.user?.email || 'anonymous'
+
+  const {
+    uploading: imageUploading,
+    uploadContentImage,
+    clearError
+  } = useImages({
     sessionId,
-    onSuccess: (response) => {
+    onSuccess: response => {
       // Insertar imagen con URL original sin transformaciones
       const imageHtml = `<img src="${response.url}" alt="${imageAlt || 'Imagen del artículo'}" style="max-width: 100%; height: auto;" />`
-      
+
       execCommand('insertHTML', imageHtml)
       setImageDialogOpen(false)
       setImageUrl('')
       setImageAlt('')
       setImageUploadError(null)
     },
-    onError: (error) => {
+    onError: error => {
       setImageUploadError(error)
     }
   })
@@ -99,6 +104,7 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
       // Restaurar cursor al final si estaba al final
       if (wasAtEnd && editorRef.current.textContent) {
         const newRange = document.createRange()
+
         newRange.selectNodeContents(editorRef.current)
         newRange.collapse(false)
         selection?.removeAllRanges()
@@ -140,9 +146,11 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue)
+
     if (newValue === 1) {
       // Al cambiar a la vista HTML, actualizar el código
       const currentHtml = editorRef.current?.innerHTML || value
+
       setHtmlCode(currentHtml)
     } else if (newValue === 0) {
       // Al cambiar al editor, sincronizar el contenido
@@ -155,32 +163,14 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
   const handleHtmlChange = (newHtml: string) => {
     setHtmlCode(newHtml)
     onChange(newHtml)
+
+
     // Solo actualizar el editor si estamos en la pestaña HTML
     if (editorRef.current && activeTab === 1) {
       editorRef.current.innerHTML = newHtml
     }
   }
-
-  const formatHtml = () => {
-    try {
-      // Crear un parser temporal para formatear el HTML
-      const parser = new DOMParser()
-      const doc = parser.parseFromString(htmlCode, 'text/html')
-      const formatted = doc.body.innerHTML
-        .replace(/></g, '>\n<')
-        .replace(/\n\s*\n/g, '\n')
-        .trim()
-
-      setHtmlCode(formatted)
-      onChange(formatted)
-      if (editorRef.current) {
-        editorRef.current.innerHTML = formatted
-      }
-    } catch (error) {
-      console.error('Error al formatear HTML:', error)
-    }
-  }
-
+  
   const handleFormat = (format: string) => {
     switch (format) {
       case 'bold':
@@ -203,6 +193,7 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
         break
       case 'p':
         execCommand('formatBlock', '<p>')
+
         // Asegurar que siempre haya al menos un párrafo
         setTimeout(() => {
           if (editorRef.current && !editorRef.current.querySelector('p')) {
@@ -219,16 +210,15 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
         break
       case 'link':
         const selection = window.getSelection()
+
         if (selection && selection.toString()) {
           setLinkText(selection.toString())
           setLinkDialogOpen(true)
         }
+
         break
       case 'image':
-        const imageUrl = prompt('Ingresa la URL de la imagen:')
-        if (imageUrl) {
-          execCommand('insertImage', imageUrl)
-        }
+        setImageDialogOpen(true)
         break
       case 'color':
         setColorDialogOpen(true)
@@ -281,6 +271,7 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
   const handleLinkSubmit = () => {
     if (linkUrl && linkText) {
       const linkHtml = `<a href="${linkUrl}" target="_blank" rel="noopener noreferrer">${linkText}</a>`
+
       execCommand('insertHTML', linkHtml)
       setLinkDialogOpen(false)
       setLinkUrl('')
@@ -299,61 +290,82 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
   }
 
   const handleImageSubmit = () => {
+    if (!imageAlt.trim()) {
+      alert('El texto alternativo (alt) es obligatorio para la accesibilidad y SEO.')
+      
+return
+    }
+
     if (imageUrl) {
       // Si es una URL de Cloudinary, generar picture element
       if (imageUrl.includes('res.cloudinary.com')) {
-        const pictureElement = generatePictureElement(imageUrl, imageAlt || 'Imagen del artículo', {
+        const pictureElement = generatePictureElement(imageUrl, imageAlt, {
           desktopWidth: 1000,
           tabletWidth: 600,
           mobileWidth: 400
         })
+
         execCommand('insertHTML', pictureElement)
       } else {
         // URL externa, usar img simple
         const imageHtml = `<img src="${imageUrl}" alt="${imageAlt}" style="max-width: 100%; height: auto;" />`
+
         execCommand('insertHTML', imageHtml)
       }
+
       setImageDialogOpen(false)
       setImageUrl('')
       setImageAlt('')
     }
   }
 
-  const handleImageUpload = useCallback(async (file: File) => {
-    setImageUploadError(null)
-    clearError()
-    
-    const result = await uploadContentImage(file)
-    
-    if (!result) {
-      // El error ya se maneja en el hook
-      return
-    }
-  }, [uploadContentImage, clearError])
+  const handleImageUpload = useCallback(
+    async (file: File) => {
+      setImageUploadError(null)
+      clearError()
 
-  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files
-    if (files && files.length > 0) {
-      handleImageUpload(files[0])
-    }
-  }, [handleImageUpload])
+      const result = await uploadContentImage(file)
+
+      if (!result) {
+        // El error ya se maneja en el hook
+        return
+      }
+    },
+    [uploadContentImage, clearError]
+  )
+
+  const handleFileSelect = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = e.target.files
+
+      if (files && files.length > 0) {
+        handleImageUpload(files[0])
+      }
+    },
+    [handleImageUpload]
+  )
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault()
   }, [])
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    
-    const files = Array.from(e.dataTransfer.files)
-    if (files.length > 0) {
-      handleImageUpload(files[0])
-    }
-  }, [handleImageUpload])
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault()
+
+      const files = Array.from(e.dataTransfer.files)
+
+      if (files.length > 0) {
+        handleImageUpload(files[0])
+      }
+    },
+    [handleImageUpload]
+  )
 
   const handlePaste = (e: React.ClipboardEvent) => {
     e.preventDefault()
     const text = e.clipboardData.getData('text/plain')
+
     document.execCommand('insertText', false, text)
     updateContent()
   }
@@ -364,17 +376,19 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
 
       // Si estamos dentro de un párrafo, crear uno nuevo
       const selection = window.getSelection()
+
       if (selection && selection.rangeCount > 0) {
         const range = selection.getRangeAt(0)
         const currentNode = range.startContainer
 
         // Buscar el elemento padre más cercano
-        let parentElement =
+        const parentElement =
           currentNode.nodeType === Node.TEXT_NODE ? currentNode.parentElement : (currentNode as Element)
 
         // Si estamos en un párrafo, crear uno nuevo después
         if (parentElement && parentElement.tagName.toLowerCase() === 'p') {
           const newP = document.createElement('p')
+
           newP.innerHTML = ''
 
           // Insertar después del párrafo actual
@@ -382,6 +396,7 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
 
           // Mover cursor al nuevo párrafo
           const newRange = document.createRange()
+
           newRange.setStart(newP, 0)
           newRange.collapse(true)
           selection.removeAllRanges()
@@ -838,12 +853,12 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
                 </>
               )}
             </Paper>
-            <input 
-              ref={fileInputRef} 
-              type='file' 
-              accept='image/*' 
-              onChange={handleFileSelect} 
-              style={{ display: 'none' }} 
+            <input
+              ref={fileInputRef}
+              type='file'
+              accept='image/*'
+              onChange={handleFileSelect}
+              style={{ display: 'none' }}
             />
           </Box>
 
@@ -863,11 +878,13 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
           />
           <TextField
             fullWidth
-            label='Texto alternativo (alt)'
+            label='Texto alternativo (alt) *'
             value={imageAlt}
             onChange={e => setImageAlt(e.target.value)}
             placeholder='Descripción de la imagen'
             helperText='Importante para SEO y accesibilidad'
+            required
+            error={!imageAlt.trim()}
           />
 
           {imageUploadError && (
@@ -878,11 +895,7 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setImageDialogOpen(false)}>Cancelar</Button>
-          <Button 
-            onClick={handleImageSubmit} 
-            variant='contained'
-            disabled={!imageUrl}
-          >
+          <Button onClick={handleImageSubmit} variant='contained' disabled={!imageUrl || !imageAlt.trim()}>
             Insertar desde URL
           </Button>
         </DialogActions>

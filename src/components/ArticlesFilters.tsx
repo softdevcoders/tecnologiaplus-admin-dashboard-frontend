@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+
 import {
   Card,
   CardContent,
@@ -23,6 +24,7 @@ import { es } from 'date-fns/locale'
 
 // Tipos para los filtros
 export interface ArticlesFiltersState {
+
   // Búsqueda por palabras clave
   keywordSearch: string
 

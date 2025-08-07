@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+
 import { Box, ToggleButton, ToggleButtonGroup, Tooltip } from '@mui/material'
 
 export type ViewMode = 'list' | 'grid'

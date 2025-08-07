@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
-import { categoriesService, Category, CategoriesFilters } from '@/services/categories.service'
+
+import type { Category, CategoriesFilters } from '@/services/categories.service';
+import { categoriesService } from '@/services/categories.service'
 
 interface UseCategoriesReturn {
   categories: Category[]
@@ -26,6 +28,7 @@ export const useCategories = (): UseCategoriesReturn => {
       setError(null)
 
       const response = await categoriesService.getCategories(filters)
+
       setCategories(response.data)
     } catch (err) {
       console.error('Error al obtener categorías:', err)
@@ -39,11 +42,14 @@ export const useCategories = (): UseCategoriesReturn => {
     try {
       setError(null)
       const category = await categoriesService.getCategoryById(id)
-      return category
+
+      
+return category
     } catch (err) {
       console.error('Error al obtener categoría:', err)
       setError('Error al obtener categoría')
-      return null
+      
+return null
     }
   }, [])
 
@@ -60,7 +66,8 @@ export const useCategories = (): UseCategoriesReturn => {
       } catch (err) {
         console.error('Error al crear categoría:', err)
         setError('Error al crear categoría')
-        return null
+        
+return null
       }
     },
     []
@@ -82,7 +89,8 @@ export const useCategories = (): UseCategoriesReturn => {
       } catch (err) {
         console.error('Error al actualizar categoría:', err)
         setError('Error al actualizar categoría')
-        return null
+        
+return null
       }
     },
     []
@@ -100,7 +108,8 @@ export const useCategories = (): UseCategoriesReturn => {
     } catch (err) {
       console.error('Error al eliminar categoría:', err)
       setError('Error al eliminar categoría')
-      return false
+      
+return false
     }
   }, [])
 

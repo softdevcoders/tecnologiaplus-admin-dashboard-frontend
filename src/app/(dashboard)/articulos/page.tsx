@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+
 import { useRouter } from 'next/navigation'
 
 // MUI Imports
@@ -14,7 +15,6 @@ import TablePagination from '@mui/material/TablePagination'
 // Custom hooks and services
 import { useArticles } from '@/hooks/useArticles'
 import { useCategories } from '@/hooks/useCategories'
-import { useAuth } from '@/hooks/useAuth'
 
 // Components
 import type { ViewMode } from '@/components/ArticlesViewToggle'
@@ -44,7 +44,7 @@ const ArticulosPage = () => {
 
   const { categories: categoriesData, loading: categoriesLoading } = useCategories()
 
-  const { getSessionInfo, logout } = useAuth()
+  // const { getSessionInfo, logout } = useAuth()
 
   const [viewMode, setViewMode] = useState<ViewMode>('list')
 

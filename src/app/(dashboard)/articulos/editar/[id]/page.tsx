@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+
 import { useRouter, useParams } from 'next/navigation'
 
 // MUI Imports
@@ -28,7 +29,7 @@ import WYSIWYGEditor from '@/components/WYSIWYGEditor'
 import ImageUpload from '@/components/ImageUpload'
 
 // Utils
-import { generateSlug, isValidSlug } from '@/utils/slug'
+import { isValidSlug } from '@/utils/slug'
 
 // Types
 interface ArticleFormData {
@@ -76,6 +77,7 @@ const EditarArticuloPage = () => {
       if (articleId) {
         try {
           const article = await getArticleById(articleId)
+
           if (article) {
             setFormData({
               title: article.title,
@@ -86,9 +88,9 @@ const EditarArticuloPage = () => {
               metaDescription: article.metaDescription || '',
               keywords: article.metaKeywords || '',
               coverImage: article.coverImage || '',
-              categoryId: article.categoryId,
+              categoryId: article.category?.id || '',
               isPublished: article.isPublished,
-              tags: article.tags || []
+              tags: article.tags.map(tag => tag.id) || []
             })
           }
         } catch (error) {
@@ -132,11 +134,13 @@ const EditarArticuloPage = () => {
     // Validar slug
     if (!isValidSlug(formData.slug)) {
       alert('El slug no es válido. Debe contener solo letras minúsculas, números y guiones.')
-      return
+      
+return
     }
 
     try {
-      const updatedArticle = await updateArticle(articleId, {
+      const updatedArticle = await updateArticle({
+        id: articleId,
         title: formData.title,
         summary: formData.summary,
         content: formData.content,
@@ -146,7 +150,7 @@ const EditarArticuloPage = () => {
         metaKeywords: formData.keywords,
         coverImage: formData.coverImage,
         categoryId: formData.categoryId,
-        tags: formData.tags
+        tagIds: formData.tags,
       })
 
       if (updatedArticle) {
@@ -258,8 +262,8 @@ const EditarArticuloPage = () => {
                     label='Estado'
                     onChange={e => handleInputChange('isPublished', e.target.value)}
                   >
-                    <MenuItem value={false}>Borrador</MenuItem>
-                    <MenuItem value={true}>Publicado</MenuItem>
+                    <MenuItem value='false'>Borrador</MenuItem>
+                    <MenuItem value='true'>Publicado</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>

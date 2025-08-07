@@ -3,78 +3,71 @@
  */
 
 export interface CloudinaryTransformOptions {
-  width?: number;
-  height?: number;
-  quality?: number;
-  format?: 'webp' | 'jpg' | 'png';
-  crop?: 'scale' | 'fill' | 'fit';
+  width?: number
+  height?: number
+  quality?: number
+  format?: 'webp' | 'jpg' | 'png'
+  crop?: 'scale' | 'fill' | 'fit'
 }
 
 /**
  * Extraer public ID de una URL de Cloudinary
  */
 export function getPublicId(url: string): string {
-  const match = url.match(/\/v\d+\/([^/]+)$/);
-  return match ? match[1] : '';
+  const match = url.match(/\/v\d+\/([^/]+)$/)
+
+  
+return match ? match[1] : ''
 }
 
 /**
  * Extraer la URL base de Cloudinary (sin public ID)
  */
 export function getBaseUrl(url: string): string {
-  return url.replace(/\/v\d+\/[^/]+$/, '');
+  return url.replace(/\/v\d+\/[^/]+$/, '')
 }
 
 /**
  * Generar URL con transformaciones de Cloudinary
  */
-export function getTransformedUrl(
-  baseUrl: string,
-  options: CloudinaryTransformOptions = {}
-): string {
-  const {
-    width,
-    height,
-    quality = 80,
-    format = 'webp',
-    crop = 'scale'
-  } = options;
+export function getTransformedUrl(baseUrl: string, options: CloudinaryTransformOptions = {}): string {
+  const { width, height, quality = 80, format = 'webp', crop = 'scale' } = options
 
-  const publicId = getPublicId(baseUrl);
-  const baseUrlWithoutPublicId = getBaseUrl(baseUrl);
+  const publicId = getPublicId(baseUrl)
+  const baseUrlWithoutPublicId = getBaseUrl(baseUrl)
 
   // Si no hay transformaciones, devolver la URL original
   if (!width && !height && !crop && quality === 80 && format === 'webp') {
-    return baseUrl;
+    return baseUrl
   }
 
   // Construir transformaciones
-  const transformations: string[] = [];
+  const transformations: string[] = []
 
   if (crop) {
-    transformations.push(`c_${crop}`);
+    transformations.push(`c_${crop}`)
   }
 
   if (width) {
-    transformations.push(`w_${width}`);
+    transformations.push(`w_${width}`)
   }
 
   if (height) {
-    transformations.push(`h_${height}`);
+    transformations.push(`h_${height}`)
   }
 
   if (quality) {
-    transformations.push(`q_${quality}`);
+    transformations.push(`q_${quality}`)
   }
 
   if (format) {
-    transformations.push(`f_${format}`);
+    transformations.push(`f_${format}`)
   }
 
-  const transformationString = transformations.join(',');
+  const transformationString = transformations.join(',')
 
   // Construir URL final
-  return `${baseUrlWithoutPublicId}/${transformationString}/v1754414736/${publicId}`;
+  return `${baseUrlWithoutPublicId}/${transformationString}/v1754414736/${publicId}`
 }
 
 /**
@@ -84,21 +77,16 @@ export function generatePictureElement(
   baseUrl: string,
   alt: string,
   options: {
-    desktopWidth?: number;
-    tabletWidth?: number;
-    mobileWidth?: number;
-    fallbackWidth?: number;
+    desktopWidth?: number
+    tabletWidth?: number
+    mobileWidth?: number
+    fallbackWidth?: number
   } = {}
 ): string {
-  const {
-    desktopWidth = 1000,
-    tabletWidth = 600,
-    mobileWidth = 400,
-    fallbackWidth = 800
-  } = options;
+  const { desktopWidth = 1000, tabletWidth = 600, mobileWidth = 400, fallbackWidth = 800 } = options
 
-  const publicId = getPublicId(baseUrl);
-  const baseUrlWithoutPublicId = getBaseUrl(baseUrl);
+  const publicId = getPublicId(baseUrl)
+  const baseUrlWithoutPublicId = getBaseUrl(baseUrl)
 
   return `
     <picture>
@@ -123,14 +111,14 @@ export function generatePictureElement(
         loading="lazy"
       />
     </picture>
-  `;
+  `
 }
 
 /**
  * Validar si una URL es de Cloudinary
  */
 export function isCloudinaryUrl(url: string): boolean {
-  return url.includes('res.cloudinary.com');
+  return url.includes('res.cloudinary.com')
 }
 
 /**
@@ -145,7 +133,7 @@ export function getOptimizedUrl(
     content: { width: 800, crop: 'scale' },
     thumbnail: { width: 300, height: 200, crop: 'fill' },
     original: {} // Sin transformaciones - calidad original
-  };
+  }
 
-  return getTransformedUrl(baseUrl, options[context]);
-} 
+  return getTransformedUrl(baseUrl, options[context])
+}

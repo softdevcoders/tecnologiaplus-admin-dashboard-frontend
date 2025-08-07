@@ -1,4 +1,5 @@
-import httpClient, { ApiResponse } from '@/libs/http'
+import type { ApiResponse } from '@/libs/http';
+import httpClient from '@/libs/http'
 
 // Tipos para los artículos
 export interface Article {
@@ -48,6 +49,7 @@ export interface CreateArticleRequest {
   metaKeywords?: string
   metaDescription?: string
   coverImage?: string
+  coverImageAlt?: string
   images?: string
   isPublished?: boolean
   categoryId?: string
@@ -94,12 +96,15 @@ class ArticlesService {
       if (value !== undefined && value !== null && value !== '') {
         // Convertir camelCase a snake_case para la API
         const apiKey = key.replace(/([A-Z])/g, '_$1').toLowerCase()
+
         params.append(apiKey, value.toString())
       }
     })
 
     const url = `${this.baseUrl}?${params.toString()}`
-    return httpClient.get<ArticlesListResponse>(url)
+
+    
+return httpClient.get<ArticlesListResponse>(url)
   }
 
   /**
@@ -128,7 +133,9 @@ class ArticlesService {
    */
   async updateArticle(articleData: UpdateArticleRequest): Promise<ApiResponse<Article>> {
     const { id, ...data } = articleData
-    return httpClient.put<Article>(`${this.baseUrl}/${id}`, data)
+
+    
+return httpClient.put<Article>(`${this.baseUrl}/${id}`, data)
   }
 
   /**
@@ -182,7 +189,9 @@ class ArticlesService {
     })
 
     const url = `${this.baseUrl}/category/${categoryId}?${params.toString()}`
-    return httpClient.get<ArticlesListResponse>(url)
+
+    
+return httpClient.get<ArticlesListResponse>(url)
   }
 }
 

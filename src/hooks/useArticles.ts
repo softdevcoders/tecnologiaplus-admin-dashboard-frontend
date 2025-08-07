@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react'
+
 import { useSession } from 'next-auth/react'
-import articlesService, {
+
+import type {
   Article,
-  ArticlesListResponse,
   ArticlesFilters,
   CreateArticleRequest,
   UpdateArticleRequest
-} from '@/services/articles.service'
-import { ApiError } from '@/libs/http'
+} from '@/services/articles.service';
+import articlesService from '@/services/articles.service'
+import type { ApiError } from '@/libs/http'
 
 interface UseArticlesState {
   articles: Article[]
@@ -32,7 +34,8 @@ interface UseArticlesReturn extends UseArticlesState {
 }
 
 export const useArticles = (initialFilters: ArticlesFilters = {}): UseArticlesReturn => {
-  const { data: session, status } = useSession()
+  const { status } = useSession()
+
   const [state, setState] = useState<UseArticlesState>({
     articles: [],
     total: 0,
@@ -75,6 +78,7 @@ export const useArticles = (initialFilters: ArticlesFilters = {}): UseArticlesRe
       }
     } catch (error) {
       const apiError = error as ApiError
+
       setState(prev => ({
         ...prev,
         loading: false,
@@ -91,18 +95,21 @@ export const useArticles = (initialFilters: ArticlesFilters = {}): UseArticlesRe
 
       if (response.success) {
         setState(prev => ({ ...prev, loading: false }))
-        return response.data
+        
+return response.data
       } else {
         throw new Error(response.message || 'Error al obtener artículo')
       }
     } catch (error) {
       const apiError = error as ApiError
+
       setState(prev => ({
         ...prev,
         loading: false,
         error: apiError
       }))
-      return null
+      
+return null
     }
   }
 
@@ -115,18 +122,21 @@ export const useArticles = (initialFilters: ArticlesFilters = {}): UseArticlesRe
       if (response.success) {
         // Recargar la lista de artículos
         await fetchArticles()
-        return response.data
+        
+return response.data
       } else {
         throw new Error(response.message || 'Error al crear artículo')
       }
     } catch (error) {
       const apiError = error as ApiError
+
       setState(prev => ({
         ...prev,
         loading: false,
         error: apiError
       }))
-      return null
+      
+return null
     }
   }
 
@@ -143,18 +153,21 @@ export const useArticles = (initialFilters: ArticlesFilters = {}): UseArticlesRe
           articles: prev.articles.map(article => (article.id === articleData.id ? response.data : article)),
           loading: false
         }))
-        return response.data
+        
+return response.data
       } else {
         throw new Error(response.message || 'Error al actualizar artículo')
       }
     } catch (error) {
       const apiError = error as ApiError
+
       setState(prev => ({
         ...prev,
         loading: false,
         error: apiError
       }))
-      return null
+      
+return null
     }
   }
 
@@ -172,18 +185,21 @@ export const useArticles = (initialFilters: ArticlesFilters = {}): UseArticlesRe
           total: prev.total - 1,
           loading: false
         }))
-        return true
+        
+return true
       } else {
         throw new Error(response.message || 'Error al eliminar artículo')
       }
     } catch (error) {
       const apiError = error as ApiError
+
       setState(prev => ({
         ...prev,
         loading: false,
         error: apiError
       }))
-      return false
+      
+return false
     }
   }
 
@@ -200,18 +216,21 @@ export const useArticles = (initialFilters: ArticlesFilters = {}): UseArticlesRe
           articles: prev.articles.map(article => (article.id === id ? response.data : article)),
           loading: false
         }))
-        return response.data
+        
+return response.data
       } else {
         throw new Error(response.message || 'Error al publicar artículo')
       }
     } catch (error) {
       const apiError = error as ApiError
+
       setState(prev => ({
         ...prev,
         loading: false,
         error: apiError
       }))
-      return null
+      
+return null
     }
   }
 
@@ -228,18 +247,21 @@ export const useArticles = (initialFilters: ArticlesFilters = {}): UseArticlesRe
           articles: prev.articles.map(article => (article.id === id ? response.data : article)),
           loading: false
         }))
-        return response.data
+        
+return response.data
       } else {
         throw new Error(response.message || 'Error al despublicar artículo')
       }
     } catch (error) {
       const apiError = error as ApiError
+
       setState(prev => ({
         ...prev,
         loading: false,
         error: apiError
       }))
-      return null
+      
+return null
     }
   }
 
@@ -256,18 +278,21 @@ export const useArticles = (initialFilters: ArticlesFilters = {}): UseArticlesRe
           articles: prev.articles.map(article => (article.id === id ? response.data : article)),
           loading: false
         }))
-        return response.data
+        
+return response.data
       } else {
         throw new Error(response.message || 'Error al archivar artículo')
       }
     } catch (error) {
       const apiError = error as ApiError
+
       setState(prev => ({
         ...prev,
         loading: false,
         error: apiError
       }))
-      return null
+      
+return null
     }
   }
 

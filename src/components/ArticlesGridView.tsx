@@ -1,11 +1,13 @@
 'use client'
 
 import React from 'react'
+
 import { Grid, Card, CardContent, CardActions, Typography, Box, Chip, IconButton, Divider } from '@mui/material'
 
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { Article } from '@/services/articles.service'
+
+import type { Article } from '@/services/articles.service'
 
 interface ArticlesGridViewProps {
   articles: Article[]
@@ -113,20 +115,22 @@ const ArticlesGridView: React.FC<ArticlesGridViewProps> = ({
               </Typography>
 
               {/* Resumen */}
-              <Typography
-                variant='body2'
-                color='text.secondary'
-                sx={{
-                  mb: 2,
-                  lineHeight: 1.5,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  display: '-webkit-box',
-                  WebkitLineClamp: 3,
-                  WebkitBoxOrient: 'vertical'
-                }}
-                dangerouslySetInnerHTML={{ __html: article.summary }}
-              />
+              {article.summary && (
+                <Typography
+                  variant='body2'
+                  color='text.secondary'
+                  sx={{
+                    mb: 2,
+                    lineHeight: 1.5,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 3,
+                    WebkitBoxOrient: 'vertical'
+                  }}
+                  dangerouslySetInnerHTML={{ __html: article.summary }}
+                />
+              )}
 
               <Divider sx={{ my: 5 }} />
 

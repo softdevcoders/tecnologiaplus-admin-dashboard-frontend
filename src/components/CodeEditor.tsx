@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+
 import { Box, TextField, Typography, Button, Paper } from '@mui/material'
 import Prism from 'prismjs'
 import '@/styles/prism-theme.css'
@@ -39,6 +40,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
 
   useEffect(() => {
     setEditValue(value)
+
     if (language === 'markup') {
       setFormattedValue(formatHtmlCode(value))
     } else {
@@ -55,6 +57,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
   const handleEditClick = () => {
     setIsEditing(true)
     setEditValue(value)
+
     // Enfocar el textarea después de un pequeño delay
     setTimeout(() => {
       textareaRef.current?.focus()
@@ -80,6 +83,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
 
       // Insertar tabulación
       const newValue = editValue.substring(0, start) + '  ' + editValue.substring(end)
+
       setEditValue(newValue)
 
       // Mover cursor después de la tabulación
@@ -114,6 +118,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
 
         if (element.nodeType === Node.TEXT_NODE) {
           const text = element.textContent?.trim()
+
           if (text) {
             result += spaces + text + '\n'
           }
@@ -128,6 +133,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
             // Agregar atributos
             for (let i = 0; i < element.attributes.length; i++) {
               const attr = element.attributes[i]
+
               result += ` ${attr.name}="${attr.value}"`
             }
 
@@ -150,6 +156,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
             // Agregar atributos
             for (let i = 0; i < element.attributes.length; i++) {
               const attr = element.attributes[i]
+
               result += ` ${attr.name}="${attr.value}"`
             }
 
@@ -162,6 +169,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
 
       // Formatear todo el contenido
       let formatted = ''
+
       for (let i = 0; i < doc.body.children.length; i++) {
         formatted += formatElement(doc.body.children[i])
       }
@@ -176,13 +184,15 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
       return formatted
     } catch (error) {
       console.error('Error al formatear HTML:', error)
-      return html // Retornar HTML original si hay error
+      
+return html // Retornar HTML original si hay error
     }
   }
 
   const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(value)
+
       // Aquí podrías mostrar una notificación de éxito
     } catch (error) {
       console.error('Error al copiar al portapapeles:', error)
@@ -193,6 +203,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
     try {
       if (language === 'markup') {
         const formatted = formatHtmlCode(editValue)
+
         setEditValue(formatted)
       }
     } catch (error) {
@@ -288,7 +299,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
         <Box sx={{ position: 'relative' }}>
           {isEditing ? (
             <TextField
-              ref={textareaRef}
+              inputRef={textareaRef}
               multiline
               fullWidth
               value={editValue}

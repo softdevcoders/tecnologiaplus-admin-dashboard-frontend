@@ -1,4 +1,5 @@
-import httpClient, { ApiResponse } from '@/libs/http'
+import type { ApiResponse } from '@/libs/http';
+import httpClient from '@/libs/http'
 
 export interface Tag {
   id: string
@@ -66,4 +67,4 @@ class TagsService {
   }
 }
 
-export const tagsService = new TagsService() 
+export const tagsService = new TagsService()

@@ -1,15 +1,18 @@
 'use client'
 
-import { useState, useRef, useCallback, useEffect } from 'react'
-import { Box, Typography, Paper, Button, IconButton, Alert, CircularProgress } from '@mui/material'
+import { useState, useRef, useCallback } from 'react'
+
+import { Box, Typography, Paper, Button, IconButton, Alert, CircularProgress, TextField } from '@mui/material'
+
 import { useImages } from '@/hooks/useImages'
 import { useAuth } from '@/hooks/useAuth'
-import { generatePictureElement } from '@/utils/cloudinary'
 
 interface ImageUploadProps {
   value?: string
   onChange: (imageUrl: string) => void
   onTempImageIdChange?: (tempImageId: string) => void
+  altText?: string
+  onAltTextChange?: (altText: string) => void
   label?: string
   error?: boolean
   helperText?: string
@@ -21,6 +24,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   value,
   onChange,
   onTempImageIdChange,
+  altText = '',
+  onAltTextChange,
   label = 'Imagen principal',
   error = false,
   helperText,
@@ -31,19 +36,25 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [tempImageId, setTempImageId] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  
+
   const { session } = useAuth()
-  const sessionId = session?.user?.id || 'anonymous'
-  
-  const { uploading, error: uploadErrorState, uploadCoverImage, deleteTempImage, clearError } = useImages({
+  const sessionId = session?.user?.email || 'anonymous'
+
+  const {
+    uploading,
+    error: uploadErrorState,
+    uploadCoverImage,
+    deleteTempImage,
+    clearError
+  } = useImages({
     sessionId,
-          onSuccess: (response) => {
-        setTempImageId(response.tempImageId)
-        onTempImageIdChange?.(response.tempImageId)
-        // Usar URL original sin transformaciones para la vista previa
-        onChange(response.url)
-      },
-    onError: (error) => {
+    onSuccess: response => {
+      setTempImageId(response.tempImageId)
+      onTempImageIdChange?.(response.tempImageId)
+
+      onChange(response.url)
+    },
+    onError: error => {
       setUploadError(error)
     }
   })
@@ -63,6 +74,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     setIsDragOver(false)
 
     const files = Array.from(e.dataTransfer.files)
+
     if (files.length > 0) {
       handleFile(files[0])
     }
@@ -70,6 +82,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 
   const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
+
     if (files && files.length > 0) {
       handleFile(files[0])
     }
@@ -82,7 +95,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 
       // Subir a Cloudinary
       const result = await uploadCoverImage(file)
-      
+
       if (!result) {
         // El error ya se maneja en el hook
         return
@@ -98,7 +111,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
       setTempImageId(null)
       onTempImageIdChange?.('')
     }
-    
+
     onChange('')
     setUploadError(null)
     clearError()
@@ -133,16 +146,15 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
         onClick={handleClick}
       >
         {value ? (
-          // Vista previa de la imagen
-          <Box sx={{ position: 'relative' }}>
+          <Box sx={{ position: 'relative', p: '2rem' }}>
             <Box
               component='img'
               src={value}
               alt='Vista previa'
               sx={{
                 width: '100%',
-                height: 200,
-                objectFit: 'cover',
+                height: 600,
+                objectFit: 'contain',
                 display: 'block'
               }}
             />
@@ -185,7 +197,6 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
             </Box>
           </Box>
         ) : (
-          // Área de carga
           <Box
             sx={{
               height: 200,
@@ -224,6 +235,21 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
           </Box>
         )}
       </Paper>
+
+      {/* Campo de texto alternativo */}
+      {value && (
+        <TextField
+          fullWidth
+          label='Texto alternativo (alt) *'
+          value={altText}
+          onChange={e => onAltTextChange?.(e.target.value)}
+          placeholder='Descripción de la imagen principal'
+          helperText='Importante para SEO y accesibilidad'
+          required
+          error={!altText.trim()}
+          sx={{ mt: 2 }}
+        />
+      )}
 
       {/* Input de archivo oculto */}
       <input ref={fileInputRef} type='file' accept={accept} onChange={handleFileSelect} style={{ display: 'none' }} />

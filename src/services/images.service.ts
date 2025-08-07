@@ -1,4 +1,5 @@
-import httpClient, { ApiResponse } from '@/libs/http'
+import type { ApiResponse } from '@/libs/http';
+import httpClient from '@/libs/http'
 
 export interface UploadImageResponse {
   url: string
@@ -20,13 +21,14 @@ class ImagesService {
    */
   async uploadCoverImage(file: File, sessionId: string): Promise<ApiResponse<UploadImageResponse>> {
     const formData = new FormData()
+
     formData.append('file', file)
     formData.append('sessionId', sessionId)
 
     return httpClient.post<UploadImageResponse>(`${this.baseUrl}/upload/cover`, formData, {
       headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+        'Content-Type': 'multipart/form-data'
+      }
     })
   }
 
@@ -35,13 +37,14 @@ class ImagesService {
    */
   async uploadContentImage(file: File, sessionId: string): Promise<ApiResponse<UploadImageResponse>> {
     const formData = new FormData()
+
     formData.append('file', file)
     formData.append('sessionId', sessionId)
 
     return httpClient.post<UploadImageResponse>(`${this.baseUrl}/upload/content`, formData, {
       headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+        'Content-Type': 'multipart/form-data'
+      }
     })
   }
 
@@ -65,26 +68,21 @@ class ImagesService {
   validateFile(file: File): { isValid: boolean; error?: string } {
     // Validar tamaño (8MB)
     const maxSize = 8 * 1024 * 1024 // 8MB
+
     if (file.size > maxSize) {
       return {
         isValid: false,
-        error: 'El archivo es demasiado grande. Máximo 8MB',
+        error: 'El archivo es demasiado grande. Máximo 8MB'
       }
     }
 
     // Validar tipo de archivo
-    const allowedTypes = [
-      'image/jpeg',
-      'image/png',
-      'image/webp',
-      'image/gif',
-      'image/svg+xml',
-      'image/tiff',
-    ]
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml', 'image/tiff']
+
     if (!allowedTypes.includes(file.type)) {
       return {
         isValid: false,
-        error: 'Tipo de archivo no permitido. Solo se permiten imágenes (JPG, PNG, WebP, GIF, SVG, TIFF)',
+        error: 'Tipo de archivo no permitido. Solo se permiten imágenes (JPG, PNG, WebP, GIF, SVG, TIFF)'
       }
     }
 
@@ -92,4 +90,4 @@ class ImagesService {
   }
 }
 
-export const imagesService = new ImagesService() 
+export const imagesService = new ImagesService()

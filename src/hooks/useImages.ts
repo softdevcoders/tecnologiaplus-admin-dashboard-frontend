@@ -1,5 +1,7 @@
 import { useState, useCallback } from 'react'
-import { imagesService, UploadImageResponse } from '@/services/images.service'
+
+import type { UploadImageResponse } from '@/services/images.service';
+import { imagesService } from '@/services/images.service'
 
 interface UseImagesOptions {
   sessionId: string
@@ -19,24 +21,28 @@ export const useImages = ({ sessionId, onSuccess, onError }: UseImagesOptions) =
       try {
         // Validar archivo
         const validation = imagesService.validateFile(file)
+
         if (!validation.isValid) {
           throw new Error(validation.error)
         }
 
         // Subir imagen
         const response = await imagesService.uploadCoverImage(file, sessionId)
-        
+
         if (response.data) {
           onSuccess?.(response.data)
-          return response.data
+          
+return response.data
         } else {
           throw new Error('Error al subir la imagen')
         }
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Error desconocido'
+
         setError(errorMessage)
         onError?.(errorMessage)
-        return null
+        
+return null
       } finally {
         setUploading(false)
       }
@@ -52,24 +58,28 @@ export const useImages = ({ sessionId, onSuccess, onError }: UseImagesOptions) =
       try {
         // Validar archivo
         const validation = imagesService.validateFile(file)
+
         if (!validation.isValid) {
           throw new Error(validation.error)
         }
 
         // Subir imagen
         const response = await imagesService.uploadContentImage(file, sessionId)
-        
+
         if (response.data) {
           onSuccess?.(response.data)
-          return response.data
+          
+return response.data
         } else {
           throw new Error('Error al subir la imagen')
         }
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Error desconocido'
+
         setError(errorMessage)
         onError?.(errorMessage)
-        return null
+        
+return null
       } finally {
         setUploading(false)
       }
@@ -81,32 +91,36 @@ export const useImages = ({ sessionId, onSuccess, onError }: UseImagesOptions) =
     async (tempImageId: string): Promise<boolean> => {
       try {
         await imagesService.deleteTempImage(tempImageId)
-        return true
+        
+return true
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Error al eliminar la imagen'
+
         setError(errorMessage)
         onError?.(errorMessage)
-        return false
+        
+return false
       }
     },
     [onError]
   )
 
-  const cleanupSessionImages = useCallback(
-    async (): Promise<boolean> => {
-      try {
-        const response = await imagesService.cleanupSessionImages(sessionId)
-        console.log(`Limpieza completada: ${response.data?.deletedCount} imágenes eliminadas`)
-        return true
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Error al limpiar imágenes'
-        setError(errorMessage)
-        onError?.(errorMessage)
-        return false
-      }
-    },
-    [sessionId, onError]
-  )
+  const cleanupSessionImages = useCallback(async (): Promise<boolean> => {
+    try {
+      const response = await imagesService.cleanupSessionImages(sessionId)
+
+      console.log(`Limpieza completada: ${response.data?.deletedCount} imágenes eliminadas`)
+      
+return true
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Error al limpiar imágenes'
+
+      setError(errorMessage)
+      onError?.(errorMessage)
+      
+return false
+    }
+  }, [sessionId, onError])
 
   const clearError = useCallback(() => {
     setError(null)
@@ -119,6 +133,6 @@ export const useImages = ({ sessionId, onSuccess, onError }: UseImagesOptions) =
     uploadContentImage,
     deleteTempImage,
     cleanupSessionImages,
-    clearError,
+    clearError
   }
-} 
+}

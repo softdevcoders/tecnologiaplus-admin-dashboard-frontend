@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+
 import { useRouter } from 'next/navigation'
 
 // MUI Imports
@@ -49,6 +50,7 @@ interface ArticleFormData {
   metaDescription?: string
   coverImage?: string
   coverImageTempId?: string // Para manejar imágenes temporales
+  coverImageAlt?: string // Texto alternativo de la imagen principal
   categoryId: string
   isPublished: boolean
   tagIds: string[]
@@ -57,7 +59,7 @@ interface ArticleFormData {
 const CrearArticuloPage = () => {
   const router = useRouter()
   const { categories, loading: categoriesLoading } = useCategories()
-  const { tags, loading: tagsLoading, createTag } = useTags()
+  const { tags, createTag } = useTags()
   const { createArticle, loading: createLoading, error, clearError } = useArticles()
 
   const [formData, setFormData] = useState<ArticleFormData>({
@@ -70,6 +72,7 @@ const CrearArticuloPage = () => {
     metaDescription: '',
     coverImage: '',
     coverImageTempId: '',
+    coverImageAlt: '',
     categoryId: '',
     isPublished: false,
     tagIds: []
@@ -102,6 +105,7 @@ const CrearArticuloPage = () => {
     // Generar slug y metaTitle automáticamente cuando cambia el título
     if (field === 'title' && value) {
       const generatedSlug = generateSlug(value)
+
       setFormData(prev => ({
         ...prev,
         slug: generatedSlug,
@@ -115,7 +119,7 @@ const CrearArticuloPage = () => {
       try {
         // Buscar si el tag ya existe
         const existingTag = tags.find(tag => tag.name.toLowerCase() === tagInput.trim().toLowerCase())
-        
+
         if (existingTag) {
           // Si existe, agregar su ID
           if (!formData.tagIds.includes(existingTag.id)) {
@@ -127,6 +131,7 @@ const CrearArticuloPage = () => {
         } else {
           // Si no existe, crear el tag
           const newTag = await createTag(tagInput.trim())
+
           if (newTag) {
             setFormData(prev => ({
               ...prev,
@@ -134,6 +139,7 @@ const CrearArticuloPage = () => {
             }))
           }
         }
+
         setTagInput('')
       } catch (error) {
         console.error('Error al agregar etiqueta:', error)
@@ -154,28 +160,33 @@ const CrearArticuloPage = () => {
     // Validar slug
     if (!isValidSlug(formData.slug)) {
       alert('El slug no es válido. Debe contener solo letras minúsculas, números y guiones.')
-      return
+      
+return
     }
 
     // Validar campos requeridos
     if (!formData.title.trim()) {
       alert('El título es obligatorio.')
-      return
+      
+return
     }
 
     if (!formData.content.trim()) {
       alert('El contenido es obligatorio.')
-      return
+      
+return
     }
 
     if (!formData.slug.trim()) {
       alert('El slug es obligatorio.')
-      return
+      
+return
     }
 
     if (!formData.categoryId) {
       alert('Debes seleccionar una categoría.')
-      return
+      
+return
     }
 
     try {
@@ -188,6 +199,7 @@ const CrearArticuloPage = () => {
         metaKeywords: formData.metaKeywords,
         metaDescription: formData.metaDescription,
         coverImage: formData.coverImage,
+        coverImageAlt: formData.coverImageAlt,
         categoryId: formData.categoryId,
         tagIds: formData.tagIds
       })
@@ -218,6 +230,7 @@ const CrearArticuloPage = () => {
         metaKeywords: formData.metaKeywords,
         metaDescription: formData.metaDescription,
         coverImage: formData.coverImage,
+        coverImageAlt: formData.coverImageAlt,
         categoryId: formData.categoryId,
         tagIds: formData.tagIds,
         isPublished: false // Siempre guardar como borrador
@@ -234,7 +247,9 @@ const CrearArticuloPage = () => {
     if (!autoSaveEnabled) return
 
     const interval = setInterval(autoSave, 30000)
-    return () => clearInterval(interval)
+
+    
+return () => clearInterval(interval)
   }, [autoSave, autoSaveEnabled])
 
   // Confirmar antes de salir si hay cambios no guardados
@@ -250,7 +265,8 @@ const CrearArticuloPage = () => {
 
   useEffect(() => {
     window.addEventListener('beforeunload', handleBeforeUnload)
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+    
+return () => window.removeEventListener('beforeunload', handleBeforeUnload)
   }, [handleBeforeUnload])
 
   const handleCancel = () => {
@@ -399,7 +415,7 @@ const CrearArticuloPage = () => {
                   onChange={e => handleInputChange('slug', e.target.value)}
                   required
                   placeholder='url-del-articulo'
-                  error={formData.slug && !isValidSlug(formData.slug)}
+                  error={!!formData.slug && !isValidSlug(formData.slug)}
                 />
               </Grid>
 
@@ -412,6 +428,7 @@ const CrearArticuloPage = () => {
                     label='Categoría'
                     onChange={e => {
                       const categoryId = e.target.value || ''
+
                       setFormData(prev => ({ ...prev, categoryId }))
                       setHasUnsavedChanges(true)
                     }}
@@ -446,6 +463,8 @@ const CrearArticuloPage = () => {
                   value={formData.coverImage}
                   onChange={imageUrl => handleInputChange('coverImage', imageUrl)}
                   onTempImageIdChange={tempImageId => handleInputChange('coverImageTempId', tempImageId)}
+                  altText={formData.coverImageAlt}
+                  onAltTextChange={altText => handleInputChange('coverImageAlt', altText)}
                   label='Imagen Principal'
                   maxSize={8}
                 />
@@ -460,6 +479,7 @@ const CrearArticuloPage = () => {
                     label='Estado'
                     onChange={e => {
                       const isPublished = e.target.value === 'true'
+
                       setFormData(prev => ({ ...prev, isPublished }))
                       setHasUnsavedChanges(true)
                     }}
@@ -488,6 +508,7 @@ const CrearArticuloPage = () => {
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                     {formData.tagIds.map(tagId => {
                       const tag = tags.find(t => t.id === tagId)
+
                       return (
                         <Chip
                           key={tagId}
@@ -554,8 +575,8 @@ const CrearArticuloPage = () => {
                   onChange={e => handleInputChange('metaDescription', e.target.value)}
                   placeholder='Descripción para motores de búsqueda'
                   inputProps={{ maxLength: 160 }}
-                  helperText={`${formData.metaDescription.length}/160 caracteres`}
-                  color={formData.metaDescription.length > 150 ? 'warning' : 'primary'}
+                  helperText={`${formData.metaDescription?.length}/160 caracteres`}
+                  color={formData.metaDescription?.length && formData.metaDescription?.length > 150 ? 'warning' : 'primary'} 
                 />
               </Grid>
 
@@ -589,14 +610,14 @@ const CrearArticuloPage = () => {
             title={formData.title}
             summary={formData.summary}
             content={formData.content}
-            coverImage={formData.coverImage}
+            coverImage={formData.coverImage || ''}
             category={categories.find(cat => cat.id === formData.categoryId)}
             author={{ name: 'Usuario Actual', email: 'usuario@ejemplo.com' }}
             isPublished={formData.isPublished}
             tags={formData.tagIds}
             metaTitle={formData.metaTitle}
-            metaDescription={formData.metaDescription}
-            keywords={formData.metaKeywords}
+            metaDescription={formData.metaDescription || ''}
+            keywords={formData.metaKeywords || ''}
           />
         </Box>
       )}

@@ -1,7 +1,9 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+
 import { Alert, AlertTitle, Button, Snackbar, Box, Typography } from '@mui/material'
+
 import { useAuth } from '@/hooks/useAuth'
 
 interface SessionExpirationAlertProps {
@@ -52,7 +54,8 @@ export function SessionExpirationAlert({ warningMinutes = 5 }: SessionExpiration
   const formatTime = (minutes: number): string => {
     if (minutes <= 0) return '0 minutos'
     if (minutes === 1) return '1 minuto'
-    return `${minutes} minutos`
+    
+return `${minutes} minutos`
   }
 
   return (

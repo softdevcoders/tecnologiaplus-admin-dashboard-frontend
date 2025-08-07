@@ -6,18 +6,17 @@ import NotFound from '@views/misc/NotFound'
 // Config Imports
 
 // Util Imports
-import { getSystemMode, getServerMode } from '@core/utils/serverHelpers'
+import { getSystemMode } from '@core/utils/serverHelpers'
 
 const NotFoundPage = async () => {
   // Vars
   const direction = 'ltr'
   const systemMode = await getSystemMode()
-  const mode = await getServerMode()
 
   return (
     <Providers direction={direction}>
       <BlankLayout systemMode={systemMode}>
-        <NotFound mode={mode} />
+        <NotFound /> 
       </BlankLayout>
     </Providers>
   )

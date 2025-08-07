@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+
 import {
   Box,
   Typography,
@@ -13,6 +14,7 @@ import {
   ListItemText,
   Divider
 } from '@mui/material'
+
 import { useAuth } from '@/hooks/useAuth'
 
 interface SessionInfoProps {
@@ -44,13 +46,16 @@ export function SessionInfo({ variant = 'compact' }: SessionInfoProps) {
     if (minutes < 60) return `${minutes}m`
     const hours = Math.floor(minutes / 60)
     const remainingMinutes = minutes % 60
-    return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}m` : `${hours}h`
+
+    
+return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}m` : `${hours}h`
   }
 
   const getStatusColor = (minutes: number): 'default' | 'warning' | 'error' => {
     if (minutes <= 0) return 'error'
     if (minutes <= 5) return 'warning'
-    return 'default'
+    
+return 'default'
   }
 
   if (!sessionInfo.isAuthenticated) {

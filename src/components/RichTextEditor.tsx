@@ -1,7 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+
 import dynamic from 'next/dynamic'
+
 import { Box, Typography } from '@mui/material'
 
 // Importar React Quill dinámicamente para evitar problemas de SSR
@@ -72,7 +74,12 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           '& .ql-container': {
             minHeight: 300,
             fontSize: '14px',
-            fontFamily: 'inherit'
+            fontFamily: 'inherit',
+            borderBottom: '1px solid #ccc',
+            borderLeft: '1px solid #ccc',
+            borderRight: '1px solid #ccc',
+            borderTop: 'none',
+            borderRadius: '0 0 4px 4px'
           },
           '& .ql-editor': {
             minHeight: 300,
@@ -84,13 +91,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             borderRight: '1px solid #ccc',
             borderBottom: 'none',
             borderRadius: '4px 4px 0 0'
-          },
-          '& .ql-container': {
-            borderBottom: '1px solid #ccc',
-            borderLeft: '1px solid #ccc',
-            borderRight: '1px solid #ccc',
-            borderTop: 'none',
-            borderRadius: '0 0 4px 4px'
           },
           '& .ql-editor.ql-blank::before': {
             color: '#999',

@@ -1,5 +1,4 @@
-import { HttpClient } from '@/libs/http'
-import { API_CONFIG } from '@/configs/api.config'
+import httpClient from '@/libs/http'
 
 // Tipos para las categorías
 export interface Category {
@@ -30,11 +29,7 @@ export interface CategoriesFilters {
 }
 
 export class CategoriesService {
-  private http: HttpClient
-
-  constructor() {
-    this.http = new HttpClient(API_CONFIG.baseURL)
-  }
+  private http = httpClient
 
   /**
    * Obtiene la lista de categorías
@@ -57,21 +52,27 @@ export class CategoriesService {
     const queryString = params.toString()
     const url = queryString ? `/categories?${queryString}` : '/categories'
 
-    return this.http.get<CategoriesListResponse>(url)
+    const response = await this.http.get<CategoriesListResponse>(url)
+
+    return response.data
   }
 
   /**
    * Obtiene una categoría por ID
    */
   async getCategoryById(id: string): Promise<Category> {
-    return this.http.get<Category>(`/categories/${id}`)
+    const response = await this.http.get<Category>(`/categories/${id}`)
+
+    return response.data
   }
 
   /**
    * Crea una nueva categoría
    */
   async createCategory(categoryData: Omit<Category, 'id' | 'createdAt' | 'updatedAt'>): Promise<Category> {
-    return this.http.post<Category>('/categories', categoryData)
+    const response = await this.http.post<Category>('/categories', categoryData)
+
+    return response.data
   }
 
   /**
@@ -81,14 +82,18 @@ export class CategoriesService {
     id: string,
     categoryData: Partial<Omit<Category, 'id' | 'createdAt' | 'updatedAt'>>
   ): Promise<Category> {
-    return this.http.put<Category>(`/categories/${id}`, categoryData)
+    const response = await this.http.put<Category>(`/categories/${id}`, categoryData)
+
+    return response.data
   }
 
   /**
    * Elimina una categoría
    */
   async deleteCategory(id: string): Promise<void> {
-    return this.http.delete(`/categories/${id}`)
+    const response = await this.http.delete(`/categories/${id}`)
+
+    return response.data
   }
 }
 

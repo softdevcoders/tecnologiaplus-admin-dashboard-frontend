@@ -1,5 +1,7 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
+import axios from 'axios'
+import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
 import { getSession, signOut } from 'next-auth/react'
+
 import API_CONFIG from '@/configs/api.config'
 
 // Función para decodificar JWT sin verificación
@@ -20,7 +22,8 @@ function decodeJWT(token: string) {
     return JSON.parse(jsonPayload)
   } catch (error) {
     console.error('Error decoding JWT:', error)
-    return null
+    
+return null
   }
 }
 
@@ -28,15 +31,19 @@ function decodeJWT(token: string) {
 function isTokenExpired(token: string): boolean {
   try {
     const decoded = decodeJWT(token)
+
     if (!decoded || !decoded.exp) {
       return true
     }
 
     const currentTime = Math.floor(Date.now() / 1000)
-    return decoded.exp < currentTime
+
+    
+return decoded.exp < currentTime
   } catch (error) {
     console.error('Error checking token expiration:', error)
-    return true
+    
+return true
   }
 }
 
@@ -76,28 +83,35 @@ class HttpClient {
         if (!config.url?.includes('/auth/')) {
           try {
             const session = await getSession()
-            if (session?.accessToken) {
+
+            const accessToken = (session as any)?.accessToken
+
+            if (accessToken) {
               // Verificar si el token ha expirado antes de usarlo
-              if (isTokenExpired(session.accessToken)) {
+              if (isTokenExpired(accessToken)) {
                 console.warn('Token expired, logging out...')
                 await signOut({
                   redirect: true,
-                  callbackUrl: '/auth/login'
+                  callbackUrl: '/login'
                 })
                 throw new Error('Token expired')
               }
 
-              config.headers.Authorization = `Bearer ${session.accessToken}`
+              config.headers.Authorization = `Bearer ${accessToken}`
             }
           } catch (error) {
             console.warn('Error getting session or token expired:', error)
+
+
             // Si hay un error con la sesión, redirigir al login
             if (error instanceof Error && error.message === 'Token expired') {
               throw error
             }
           }
         }
-        return config
+
+        
+return config
       },
       error => {
         return Promise.reject(error)
@@ -132,7 +146,7 @@ class HttpClient {
         try {
           await signOut({
             redirect: true,
-            callbackUrl: '/auth/login'
+            callbackUrl: '/login'
           })
         } catch (signOutError) {
           console.error('Error during automatic logout:', signOutError)
@@ -141,7 +155,7 @@ class HttpClient {
         apiError.message = 'No tienes permisos para realizar esta acción.'
       } else if (error.response?.status === 404) {
         apiError.message = 'Recurso no encontrado.'
-      } else if (error.response?.status >= 500) {
+      } else if (error.response?.status && error.response?.status >= 500) {
         apiError.message = 'Error del servidor. Inténtalo más tarde.'
       }
 
@@ -158,6 +172,8 @@ class HttpClient {
   // Métodos HTTP
   async get<T = any>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     const response = await this.instance.get(url, config)
+
+
     // Si la respuesta no tiene la estructura ApiResponse, la envuelve
     if (response.data && typeof response.data === 'object' && !('success' in response.data)) {
       return {
@@ -166,11 +182,15 @@ class HttpClient {
         message: 'Operación exitosa'
       }
     }
-    return response.data
+
+    
+return response.data
   }
 
   async post<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     const response = await this.instance.post(url, data, config)
+
+
     // Si la respuesta no tiene la estructura ApiResponse, la envuelve
     if (response.data && typeof response.data === 'object' && !('success' in response.data)) {
       return {
@@ -179,11 +199,15 @@ class HttpClient {
         message: 'Operación exitosa'
       }
     }
-    return response.data
+
+    
+return response.data
   }
 
   async put<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     const response = await this.instance.put(url, data, config)
+
+
     // Si la respuesta no tiene la estructura ApiResponse, la envuelve
     if (response.data && typeof response.data === 'object' && !('success' in response.data)) {
       return {
@@ -192,11 +216,15 @@ class HttpClient {
         message: 'Operación exitosa'
       }
     }
-    return response.data
+
+    
+return response.data
   }
 
   async patch<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     const response = await this.instance.patch(url, data, config)
+
+
     // Si la respuesta no tiene la estructura ApiResponse, la envuelve
     if (response.data && typeof response.data === 'object' && !('success' in response.data)) {
       return {
@@ -205,11 +233,15 @@ class HttpClient {
         message: 'Operación exitosa'
       }
     }
-    return response.data
+
+    
+return response.data
   }
 
   async delete<T = any>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     const response = await this.instance.delete(url, config)
+
+
     // Si la respuesta no tiene la estructura ApiResponse, la envuelve
     if (response.data && typeof response.data === 'object' && !('success' in response.data)) {
       return {
@@ -218,7 +250,9 @@ class HttpClient {
         message: 'Operación exitosa'
       }
     }
-    return response.data
+
+    
+return response.data
   }
 
   // Método para obtener la instancia de axios si necesitas configuración específica

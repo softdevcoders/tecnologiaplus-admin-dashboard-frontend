@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+
 import {
   Paper,
   Table,
@@ -21,7 +22,8 @@ import {
 
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { Article } from '@/services/articles.service'
+
+import type { Article } from '@/services/articles.service'
 
 interface ArticlesListViewProps {
   articles: Article[]
@@ -59,6 +61,7 @@ const ArticlesListView: React.FC<ArticlesListViewProps> = ({
     action()
     handleMenuClose()
   }
+
   const getStatusColor = (isPublished: boolean) => {
     return isPublished ? 'success' : 'warning'
   }

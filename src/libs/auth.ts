@@ -3,6 +3,31 @@ import type { JWT } from 'next-auth/jwt'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import axios from 'axios'
 
+// Extend NextAuth types
+declare module 'next-auth' {
+  interface User {
+    role?: string
+    accessToken?: string
+  }
+  interface Session {
+    accessToken?: string
+    user: {
+      id?: string
+      role?: string
+      name?: string | null
+      email?: string | null
+      image?: string | null
+    }
+  }
+}
+
+declare module 'next-auth/jwt' {
+  interface JWT {
+    role?: string
+    accessToken?: string
+  }
+}
+
 // Function to decode JWT without verification (for client-side use)
 function decodeJWT(token: string) {
   try {
@@ -112,7 +137,7 @@ export const authOptions: NextAuthOptions = {
     }
   },
   pages: {
-    signIn: '/auth/login'
+    signIn: '/login'
   },
   session: {
     strategy: 'jwt'
