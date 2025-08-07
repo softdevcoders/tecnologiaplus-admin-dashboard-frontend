@@ -58,6 +58,7 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
   const [activeTab, setActiveTab] = useState(0) // 0 = Editor, 1 = HTML
   const [htmlCode, setHtmlCode] = useState(value)
   const [imageUploadError, setImageUploadError] = useState<string | null>(null)
+  const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Cloudinary integration
@@ -71,13 +72,9 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
   } = useImages({
     sessionId,
     onSuccess: response => {
-      // Insertar imagen con URL original sin transformaciones
-      const imageHtml = `<img src="${response.url}" alt="${imageAlt || 'Imagen del artículo'}" style="max-width: 100%; height: auto;" />`
-
-      execCommand('insertHTML', imageHtml)
-      setImageDialogOpen(false)
-      setImageUrl('')
-      setImageAlt('')
+      // Guardar la URL de la imagen subida y mantener el modal abierto
+      setUploadedImageUrl(response.url)
+      setImageUrl(response.url)
       setImageUploadError(null)
     },
     onError: error => {
@@ -296,19 +293,21 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
 return
     }
 
-    if (imageUrl) {
+    if (imageUrl || uploadedImageUrl) {
+      const finalImageUrl = imageUrl || uploadedImageUrl
+      
       // Si es una URL de Cloudinary, generar picture element
-      if (imageUrl.includes('res.cloudinary.com')) {
-        const pictureElement = generatePictureElement(imageUrl, imageAlt, {
+      if (finalImageUrl && finalImageUrl.includes('res.cloudinary.com')) {
+        const pictureElement = generatePictureElement(finalImageUrl, imageAlt, {
           desktopWidth: 1000,
           tabletWidth: 600,
           mobileWidth: 400
         })
 
         execCommand('insertHTML', pictureElement)
-      } else {
+      } else if (finalImageUrl) {
         // URL externa, usar img simple
-        const imageHtml = `<img src="${imageUrl}" alt="${imageAlt}" style="max-width: 100%; height: auto;" />`
+        const imageHtml = `<img src="${finalImageUrl}" alt="${imageAlt}" style="max-width: 100%; height: auto;" />`
 
         execCommand('insertHTML', imageHtml)
       }
@@ -316,6 +315,8 @@ return
       setImageDialogOpen(false)
       setImageUrl('')
       setImageAlt('')
+      setUploadedImageUrl(null)
+      setImageUploadError(null)
     }
   }
 
@@ -868,6 +869,21 @@ return
             </Typography>
           </Divider>
 
+          {/* Mostrar imagen subida */}
+          {uploadedImageUrl && (
+            <Box sx={{ mb: 2, p: 2, border: '1px solid', borderColor: 'success.main', borderRadius: 1, bgcolor: 'success.50' }}>
+              <Typography variant='subtitle2' color='success.main' sx={{ mb: 1 }}>
+                ✅ Imagen subida exitosamente
+              </Typography>
+              <Box
+                component='img'
+                src={uploadedImageUrl}
+                alt='Vista previa'
+                sx={{ maxWidth: '100%', maxHeight: 200, objectFit: 'contain' }}
+              />
+            </Box>
+          )}
+
           <TextField
             fullWidth
             label='URL de la imagen'
@@ -894,9 +910,21 @@ return
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setImageDialogOpen(false)}>Cancelar</Button>
-          <Button onClick={handleImageSubmit} variant='contained' disabled={!imageUrl || !imageAlt.trim()}>
-            Insertar desde URL
+          <Button onClick={() => {
+            setImageDialogOpen(false)
+            setImageUrl('')
+            setImageAlt('')
+            setUploadedImageUrl(null)
+            setImageUploadError(null)
+          }}>
+            Cancelar
+          </Button>
+          <Button 
+            onClick={handleImageSubmit} 
+            variant='contained' 
+            disabled={(!imageUrl && !uploadedImageUrl) || !imageAlt.trim()}
+          >
+            {uploadedImageUrl ? 'Insertar imagen subida' : 'Insertar desde URL'}
           </Button>
         </DialogActions>
       </Dialog>

@@ -189,7 +189,9 @@ return response.data
 
   async post<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     console.log('🌐 POST request a:', url, 'con datos:', data)
+
     const response = await this.instance.post(url, data, config)
+
     console.log('📡 Respuesta POST:', response.data)
 
     // Si la respuesta no tiene la estructura ApiResponse, la envuelve
