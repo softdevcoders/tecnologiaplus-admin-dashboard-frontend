@@ -157,23 +157,40 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
     }
 
     const range = selection.getRangeAt(0)
+    const currentNode = range.startContainer
+    const parentElement = currentNode.nodeType === Node.TEXT_NODE ? currentNode.parentElement : (currentNode as Element)
 
-    range.deleteContents()
-    
-    const tempDiv = document.createElement('div')
-    
-    tempDiv.innerHTML = html
-    
-    const fragment = document.createDocumentFragment()
+    // Si estamos dentro de un párrafo y vamos a insertar una imagen, salir del párrafo
+    if (parentElement && parentElement.tagName.toLowerCase() === 'p' && html.includes('<img')) {
+      // Insertar la imagen antes del párrafo actual
+      parentElement.parentNode?.insertBefore(document.createRange().createContextualFragment(html), parentElement)
 
-    while (tempDiv.firstChild) {
-      fragment.appendChild(tempDiv.firstChild)
+      // Insertar un salto de línea después de la imagen
+      const br = document.createElement('br')
+
+      parentElement.parentNode?.insertBefore(br, parentElement.nextSibling)
+
+      // Limpiar el párrafo actual si está vacío
+      if (parentElement.textContent?.trim() === '') {
+        parentElement.remove()
+      }
+    } else {
+      // Inserción normal
+      range.deleteContents()
+      
+      const tempDiv = document.createElement('div')
+      tempDiv.innerHTML = html
+      
+      const fragment = document.createDocumentFragment()
+      while (tempDiv.firstChild) {
+        fragment.appendChild(tempDiv.firstChild)
+      }
+      
+      range.insertNode(fragment)
+      range.collapse(false)
+      selection.removeAllRanges()
+      selection.addRange(range)
     }
-    
-    range.insertNode(fragment)
-    range.collapse(false)
-    selection.removeAllRanges()
-    selection.addRange(range)
   }
 
   const updateContent = () => {
