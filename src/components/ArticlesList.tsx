@@ -2,10 +2,10 @@
 
 import React from 'react'
 import { useArticles } from '@/hooks/useArticles'
-import { 
-  List, 
-  ListItem, 
-  ListItemText, 
+import {
+  List,
+  ListItem,
+  ListItemText,
   ListItemSecondaryAction,
   IconButton,
   Chip,
@@ -14,11 +14,7 @@ import {
   CircularProgress,
   Alert
 } from '@mui/material'
-import { 
-  Edit as EditIcon, 
-  Delete as DeleteIcon,
-  Visibility as VisibilityIcon 
-} from '@mui/icons-material'
+import { Edit as EditIcon, Delete as DeleteIcon, Visibility as VisibilityIcon } from '@mui/icons-material'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 
@@ -28,18 +24,8 @@ interface ArticlesListProps {
   onDelete?: (articleId: string) => void
 }
 
-const ArticlesList: React.FC<ArticlesListProps> = ({ 
-  onEdit, 
-  onView, 
-  onDelete 
-}) => {
-  const { 
-    articles, 
-    loading, 
-    error, 
-    deleteArticle,
-    clearError 
-  } = useArticles()
+const ArticlesList: React.FC<ArticlesListProps> = ({ onEdit, onView, onDelete }) => {
+  const { articles, loading, error, deleteArticle, clearError } = useArticles()
 
   const handleDelete = async (articleId: string) => {
     if (window.confirm('¿Estás seguro de que quieres eliminar este artículo?')) {
@@ -60,7 +46,7 @@ const ArticlesList: React.FC<ArticlesListProps> = ({
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" p={3}>
+      <Box display='flex' justifyContent='center' p={3}>
         <CircularProgress />
       </Box>
     )
@@ -68,7 +54,7 @@ const ArticlesList: React.FC<ArticlesListProps> = ({
 
   if (error) {
     return (
-      <Alert severity="error" onClose={clearError}>
+      <Alert severity='error' onClose={clearError}>
         {error.message}
       </Alert>
     )
@@ -76,7 +62,7 @@ const ArticlesList: React.FC<ArticlesListProps> = ({
 
   if (articles.length === 0) {
     return (
-      <Typography variant="body2" color="text.secondary" align="center" p={3}>
+      <Typography variant='body2' color='text.secondary' align='center' p={3}>
         No se encontraron artículos
       </Typography>
     )
@@ -84,63 +70,51 @@ const ArticlesList: React.FC<ArticlesListProps> = ({
 
   return (
     <List>
-      {articles.map((article) => (
+      {articles.map(article => (
         <ListItem key={article.id} divider>
           <ListItemText
             primary={
-              <Box display="flex" alignItems="center" gap={1}>
-                <Typography variant="subtitle1" component="span">
+              <Box display='flex' alignItems='center' gap={1}>
+                <Typography variant='subtitle1' component='span'>
                   {article.title}
                 </Typography>
                 <Chip
                   label={getStatusText(article.isPublished)}
                   color={getStatusColor(article.isPublished) as any}
-                  size="small"
+                  size='small'
                 />
               </Box>
             }
             secondary={
               <Box>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant='body2' color='text.secondary'>
                   {article.summary || 'Sin descripción'}
                 </Typography>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant='caption' color='text.secondary'>
                   Creado: {format(new Date(article.createdAt), 'dd/MM/yyyy HH:mm', { locale: es })}
-                  {article.isPublished && (
-                    <> | Publicado</>
-                  )}
+                  {article.isPublished && <> | Publicado</>}
                 </Typography>
               </Box>
             }
           />
           <ListItemSecondaryAction>
-            <Box display="flex" gap={0.5}>
+            <Box display='flex' gap={0.5}>
               {onView && (
-                <IconButton
-                  edge="end"
-                  size="small"
-                  onClick={() => onView(article.id)}
-                  title="Ver artículo"
-                >
+                <IconButton edge='end' size='small' onClick={() => onView(article.id)} title='Ver artículo'>
                   <VisibilityIcon />
                 </IconButton>
               )}
               {onEdit && (
-                <IconButton
-                  edge="end"
-                  size="small"
-                  onClick={() => onEdit(article.id)}
-                  title="Editar artículo"
-                >
+                <IconButton edge='end' size='small' onClick={() => onEdit(article.id)} title='Editar artículo'>
                   <EditIcon />
                 </IconButton>
               )}
               <IconButton
-                edge="end"
-                size="small"
+                edge='end'
+                size='small'
                 onClick={() => handleDelete(article.id)}
-                title="Eliminar artículo"
-                color="error"
+                title='Eliminar artículo'
+                color='error'
               >
                 <DeleteIcon />
               </IconButton>
@@ -152,4 +126,4 @@ const ArticlesList: React.FC<ArticlesListProps> = ({
   )
 }
 
-export default ArticlesList 
+export default ArticlesList

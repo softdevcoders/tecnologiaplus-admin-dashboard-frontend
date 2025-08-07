@@ -1,7 +1,7 @@
 // MUI Imports
 import { useTheme } from '@mui/material/styles'
 
-  // Third-party Imports
+// Third-party Imports
 import PerfectScrollbar from 'react-perfect-scrollbar'
 
 // Type Imports

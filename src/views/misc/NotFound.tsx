@@ -10,7 +10,6 @@ import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 
 const NotFound = () => {
-
   return (
     <div className='flex items-center justify-center min-bs-[100dvh] relative p-6 overflow-x-hidden'>
       <div className='flex items-center flex-col text-center gap-10'>

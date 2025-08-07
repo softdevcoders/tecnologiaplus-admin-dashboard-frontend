@@ -1,16 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import {
-  Box,
-  Typography,
-  TextField,
-  ToggleButton,
-  ToggleButtonGroup,
-  Button,
-  Paper,
-  Divider,
-} from '@mui/material'
+import { Box, Typography, TextField, ToggleButton, ToggleButtonGroup, Button, Paper, Divider } from '@mui/material'
 
 interface SimpleRichTextEditorProps {
   value: string
@@ -27,7 +18,7 @@ const SimpleRichTextEditor: React.FC<SimpleRichTextEditorProps> = ({
   placeholder = 'Escribe el contenido del artículo...',
   label,
   error = false,
-  helperText,
+  helperText
 }) => {
   const [selection, setSelection] = useState({ start: 0, end: 0 })
 
@@ -83,7 +74,7 @@ const SimpleRichTextEditor: React.FC<SimpleRichTextEditorProps> = ({
     }
 
     onChange(newText)
-    
+
     // Restaurar selección después del cambio
     setTimeout(() => {
       const textField = document.getElementById('rich-text-field') as HTMLTextAreaElement
@@ -104,39 +95,39 @@ const SimpleRichTextEditor: React.FC<SimpleRichTextEditorProps> = ({
   return (
     <Box>
       {label && (
-        <Typography variant="subtitle2" sx={{ mb: 1, color: error ? 'error.main' : 'text.primary' }}>
+        <Typography variant='subtitle2' sx={{ mb: 1, color: error ? 'error.main' : 'text.primary' }}>
           {label}
         </Typography>
       )}
-      
-      <Paper variant="outlined" sx={{ borderColor: error ? 'error.main' : undefined }}>
+
+      <Paper variant='outlined' sx={{ borderColor: error ? 'error.main' : undefined }}>
         {/* Toolbar */}
         <Box sx={{ p: 1, borderBottom: 1, borderColor: 'divider' }}>
-          <ToggleButtonGroup size="small" sx={{ flexWrap: 'wrap' }}>
-            <ToggleButton value="h1" onClick={() => handleFormat('h1')} title="Título 1">
+          <ToggleButtonGroup size='small' sx={{ flexWrap: 'wrap' }}>
+            <ToggleButton value='h1' onClick={() => handleFormat('h1')} title='Título 1'>
               H1
             </ToggleButton>
-            <ToggleButton value="h2" onClick={() => handleFormat('h2')} title="Título 2">
+            <ToggleButton value='h2' onClick={() => handleFormat('h2')} title='Título 2'>
               H2
             </ToggleButton>
-            <ToggleButton value="h3" onClick={() => handleFormat('h3')} title="Título 3">
+            <ToggleButton value='h3' onClick={() => handleFormat('h3')} title='Título 3'>
               H3
             </ToggleButton>
-            <Divider orientation="vertical" flexItem />
-            <ToggleButton value="bold" onClick={() => handleFormat('bold')} title="Negrita">
+            <Divider orientation='vertical' flexItem />
+            <ToggleButton value='bold' onClick={() => handleFormat('bold')} title='Negrita'>
               <strong>B</strong>
             </ToggleButton>
-            <ToggleButton value="italic" onClick={() => handleFormat('italic')} title="Cursiva">
+            <ToggleButton value='italic' onClick={() => handleFormat('italic')} title='Cursiva'>
               <em>I</em>
             </ToggleButton>
-            <ToggleButton value="underline" onClick={() => handleFormat('underline')} title="Subrayado">
+            <ToggleButton value='underline' onClick={() => handleFormat('underline')} title='Subrayado'>
               <u>U</u>
             </ToggleButton>
-            <Divider orientation="vertical" flexItem />
-            <ToggleButton value="list" onClick={() => handleFormat('list')} title="Lista">
+            <Divider orientation='vertical' flexItem />
+            <ToggleButton value='list' onClick={() => handleFormat('list')} title='Lista'>
               •
             </ToggleButton>
-            <ToggleButton value="link" onClick={() => handleFormat('link')} title="Enlace">
+            <ToggleButton value='link' onClick={() => handleFormat('link')} title='Enlace'>
               🔗
             </ToggleButton>
           </ToggleButtonGroup>
@@ -144,48 +135,49 @@ const SimpleRichTextEditor: React.FC<SimpleRichTextEditorProps> = ({
 
         {/* Text Area */}
         <TextField
-          id="rich-text-field"
+          id='rich-text-field'
           multiline
           rows={5}
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={e => onChange(e.target.value)}
           onSelect={handleSelectionChange}
           placeholder={placeholder}
-          variant="standard"
+          variant='standard'
           fullWidth
           sx={{
             '& .MuiInputBase-root': {
               border: 'none',
               '&:before, &:after': {
-                display: 'none',
-              },
+                display: 'none'
+              }
             },
             '& .MuiInputBase-input': {
               padding: 2,
               minHeight: 100,
               fontFamily: 'monospace',
               fontSize: '14px',
-              lineHeight: 1.6,
-            },
+              lineHeight: 1.6
+            }
           }}
         />
       </Paper>
-      
+
       {helperText && (
-        <Typography 
-          variant="caption" 
+        <Typography
+          variant='caption'
           color={error ? 'error.main' : 'text.secondary'}
           sx={{ mt: 0.5, display: 'block' }}
         >
           {helperText}
         </Typography>
       )}
-      
-      <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-        <strong>Formato disponible:</strong> **negrita**, *cursiva*, &lt;u&gt;subrayado&lt;/u&gt;, # título, - lista, [texto](url)
+
+      <Typography variant='caption' color='text.secondary' sx={{ mt: 1, display: 'block' }}>
+        <strong>Formato disponible:</strong> **negrita**, *cursiva*, &lt;u&gt;subrayado&lt;/u&gt;, # título, - lista,
+        [texto](url)
       </Typography>
     </Box>
   )
 }
 
-export default SimpleRichTextEditor 
+export default SimpleRichTextEditor

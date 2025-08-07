@@ -7,7 +7,9 @@ import { Box, Typography } from '@mui/material'
 // Importar React Quill dinámicamente para evitar problemas de SSR
 const ReactQuill = dynamic(() => import('react-quill'), {
   ssr: false,
-  loading: () => <Box sx={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Cargando editor...</Box>,
+  loading: () => (
+    <Box sx={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Cargando editor...</Box>
+  )
 })
 
 // Importar estilos de Quill
@@ -28,7 +30,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   placeholder = 'Escribe el contenido del artículo...',
   label,
   error = false,
-  helperText,
+  helperText
 }) => {
   const [mounted, setMounted] = useState(false)
 
@@ -39,20 +41,15 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   // Configuración simplificada del editor Quill
   const modules = {
     toolbar: [
-      [{ 'header': [1, 2, 3, false] }],
+      [{ header: [1, 2, 3, false] }],
       ['bold', 'italic', 'underline'],
-      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+      [{ list: 'ordered' }, { list: 'bullet' }],
       ['link'],
       ['clean']
-    ],
+    ]
   }
 
-  const formats = [
-    'header',
-    'bold', 'italic', 'underline',
-    'list', 'bullet',
-    'link'
-  ]
+  const formats = ['header', 'bold', 'italic', 'underline', 'list', 'bullet', 'link']
 
   if (!mounted) {
     return (
@@ -65,45 +62,45 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   return (
     <Box>
       {label && (
-        <Typography variant="subtitle2" sx={{ mb: 1, color: error ? 'error.main' : 'text.primary' }}>
+        <Typography variant='subtitle2' sx={{ mb: 1, color: error ? 'error.main' : 'text.primary' }}>
           {label}
         </Typography>
       )}
-      
+
       <Box
         sx={{
           '& .ql-container': {
             minHeight: 300,
             fontSize: '14px',
-            fontFamily: 'inherit',
+            fontFamily: 'inherit'
           },
           '& .ql-editor': {
             minHeight: 300,
-            padding: '12px 15px',
+            padding: '12px 15px'
           },
           '& .ql-toolbar': {
             borderTop: '1px solid #ccc',
             borderLeft: '1px solid #ccc',
             borderRight: '1px solid #ccc',
             borderBottom: 'none',
-            borderRadius: '4px 4px 0 0',
+            borderRadius: '4px 4px 0 0'
           },
           '& .ql-container': {
             borderBottom: '1px solid #ccc',
             borderLeft: '1px solid #ccc',
             borderRight: '1px solid #ccc',
             borderTop: 'none',
-            borderRadius: '0 0 4px 4px',
+            borderRadius: '0 0 4px 4px'
           },
           '& .ql-editor.ql-blank::before': {
             color: '#999',
-            fontStyle: 'italic',
+            fontStyle: 'italic'
           },
           ...(error && {
             '& .ql-toolbar, & .ql-container': {
-              borderColor: 'error.main',
-            },
-          }),
+              borderColor: 'error.main'
+            }
+          })
         }}
       >
         <ReactQuill
@@ -112,14 +109,14 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           modules={modules}
           formats={formats}
           placeholder={placeholder}
-          theme="snow"
+          theme='snow'
           preserveWhitespace
         />
       </Box>
-      
+
       {helperText && (
-        <Typography 
-          variant="caption" 
+        <Typography
+          variant='caption'
           color={error ? 'error.main' : 'text.secondary'}
           sx={{ mt: 0.5, display: 'block' }}
         >
@@ -130,4 +127,4 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   )
 }
 
-export default RichTextEditor 
+export default RichTextEditor

@@ -4,16 +4,18 @@
  * @returns Un slug limpio y optimizado para SEO
  */
 export const generateSlug = (title: string): string => {
-  return title
-    .toLowerCase()
-    .trim()
-    // Reemplazar caracteres especiales y acentos
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '') // Remover acentos
-    .replace(/[^a-z0-9\s-]/g, '') // Solo letras, números, espacios y guiones
-    .replace(/\s+/g, '-') // Reemplazar espacios con guiones
-    .replace(/-+/g, '-') // Reemplazar múltiples guiones con uno solo
-    .replace(/^-+|-+$/g, '') // Remover guiones al inicio y final
+  return (
+    title
+      .toLowerCase()
+      .trim()
+      // Reemplazar caracteres especiales y acentos
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Remover acentos
+      .replace(/[^a-z0-9\s-]/g, '') // Solo letras, números, espacios y guiones
+      .replace(/\s+/g, '-') // Reemplazar espacios con guiones
+      .replace(/-+/g, '-') // Reemplazar múltiples guiones con uno solo
+      .replace(/^-+|-+$/g, '')
+  ) // Remover guiones al inicio y final
 }
 
 /**
@@ -42,4 +44,4 @@ export const generateUniqueSlug = (baseSlug: string, existingSlugs: string[]): s
   }
 
   return uniqueSlug
-} 
+}

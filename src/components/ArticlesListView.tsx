@@ -1,13 +1,13 @@
 'use client'
 
 import React from 'react'
-import { 
-  Paper, 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableContainer, 
-  TableHead, 
+import {
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
   TableRow,
   Typography,
   Box,
@@ -67,33 +67,41 @@ const ArticlesListView: React.FC<ArticlesListViewProps> = ({
     return isPublished ? 'Publicado' : 'Borrador'
   }
 
-
-
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
       <TableContainer>
         <Table stickyHeader>
           <TableHead>
             <TableRow>
-              <TableCell align="center" sx={{ minWidth: 300 }}>Artículo</TableCell>
-              <TableCell align="center" sx={{ minWidth: 100 }}>Estado</TableCell>
-              <TableCell align="center" sx={{ minWidth: 120 }}>Categoría</TableCell>
-              <TableCell align="center" sx={{ minWidth: 120 }}>Autor</TableCell>
-              <TableCell align="center" sx={{ minWidth: 120, textWrap: 'nowrap' }}>Fecha</TableCell>
-              <TableCell align="center">Acciones</TableCell>
+              <TableCell align='center' sx={{ minWidth: 300 }}>
+                Artículo
+              </TableCell>
+              <TableCell align='center' sx={{ minWidth: 100 }}>
+                Estado
+              </TableCell>
+              <TableCell align='center' sx={{ minWidth: 120 }}>
+                Categoría
+              </TableCell>
+              <TableCell align='center' sx={{ minWidth: 120 }}>
+                Autor
+              </TableCell>
+              <TableCell align='center' sx={{ minWidth: 120, textWrap: 'nowrap' }}>
+                Fecha
+              </TableCell>
+              <TableCell align='center'>Acciones</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {articles.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} align="center">
-                  <Typography variant="body2" color="text.secondary">
+                <TableCell colSpan={6} align='center'>
+                  <Typography variant='body2' color='text.secondary'>
                     No se encontraron artículos
                   </Typography>
                 </TableCell>
               </TableRow>
             ) : (
-              articles.map((article) => (
+              articles.map(article => (
                 <TableRow key={article.id} hover>
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
@@ -103,19 +111,19 @@ const ArticlesListView: React.FC<ArticlesListViewProps> = ({
                           width: 80,
                           height: 60,
                           borderRadius: 1,
-                          background: article.coverImage 
+                          background: article.coverImage
                             ? `url(https://res.cloudinary.com/ddqh0mkx9/image/upload/f_webp,w_100/${article.coverImage}) center/cover`
                             : 'linear-gradient(45deg, #f5f5f5 30%, #e0e0e0 90%)',
                           flexShrink: 0
                         }}
                       />
-                      
+
                       {/* Información del artículo */}
                       <Box sx={{ flexGrow: 1, minWidth: 0, maxWidth: '30rem' }}>
-                        <Typography 
-                          variant="subtitle1" 
-                          color="text.primary"
-                          sx={{ 
+                        <Typography
+                          variant='subtitle1'
+                          color='text.primary'
+                          sx={{
                             fontWeight: 600,
                             mb: 0.5,
                             overflow: 'hidden',
@@ -126,9 +134,9 @@ const ArticlesListView: React.FC<ArticlesListViewProps> = ({
                           {article.title}
                         </Typography>
                         {article.summary && (
-                          <Typography 
-                            variant="body2" 
-                            color="text.secondary"
+                          <Typography
+                            variant='body2'
+                            color='text.secondary'
                             sx={{
                               overflow: 'hidden',
                               textOverflow: 'ellipsis',
@@ -143,44 +151,36 @@ const ArticlesListView: React.FC<ArticlesListViewProps> = ({
                       </Box>
                     </Box>
                   </TableCell>
-                  
+
                   <TableCell>
                     <Chip
                       label={getStatusText(article.isPublished)}
                       color={getStatusColor(article.isPublished) as any}
-                      size="small"
+                      size='small'
                     />
                   </TableCell>
-                  
+
                   <TableCell>
-                    <Chip
-                      label={article.category.label}
-                      variant="outlined"
-                      size="small"
-                    />
+                    <Chip label={article.category.label} variant='outlined' size='small' />
                   </TableCell>
-                  
+
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Typography variant="body2" noWrap>
+                      <Typography variant='body2' noWrap>
                         {article.author.name}
                       </Typography>
                     </Box>
                   </TableCell>
-                  
+
                   <TableCell>
-                    <Typography variant="body2" align="center">
-                      {format(new Date(article.createdAt), 'dd/MM/yyyy', { locale: es })} 
+                    <Typography variant='body2' align='center'>
+                      {format(new Date(article.createdAt), 'dd/MM/yyyy', { locale: es })}
                     </Typography>
                   </TableCell>
-                  
-                  <TableCell align="center">
-                    <IconButton
-                      size="small"
-                      onClick={(e) => handleMenuOpen(e, article.id)}
-                      color="default"
-                    >
-                      <i className="ri-more-2-fill" />
+
+                  <TableCell align='center'>
+                    <IconButton size='small' onClick={e => handleMenuOpen(e, article.id)} color='default'>
+                      <i className='ri-more-2-fill' />
                     </IconButton>
                   </TableCell>
                 </TableRow>
@@ -197,62 +197,80 @@ const ArticlesListView: React.FC<ArticlesListViewProps> = ({
         onClose={handleMenuClose}
         anchorOrigin={{
           vertical: 'bottom',
-          horizontal: 'right',
+          horizontal: 'right'
         }}
         transformOrigin={{
           vertical: 'top',
-          horizontal: 'right',
+          horizontal: 'right'
         }}
       >
         {onView && (
-          <MenuItem sx={{ display: 'flex', alignItems: 'center', gap: 2 }} onClick={() => handleAction(() => onView(selectedArticleId!))}>
+          <MenuItem
+            sx={{ display: 'flex', alignItems: 'center', gap: 2 }}
+            onClick={() => handleAction(() => onView(selectedArticleId!))}
+          >
             <ListItemIcon sx={{ color: 'primary.main' }}>
-              <i className="ri-eye-line" />
+              <i className='ri-eye-line' />
             </ListItemIcon>
             <ListItemText sx={{ color: 'primary.main' }}>Ver artículo</ListItemText>
           </MenuItem>
         )}
-        
+
         {onEdit && (
-          <MenuItem sx={{ display: 'flex', alignItems: 'center', gap: 2 }} onClick={() => handleAction(() => onEdit(selectedArticleId!))}>
+          <MenuItem
+            sx={{ display: 'flex', alignItems: 'center', gap: 2 }}
+            onClick={() => handleAction(() => onEdit(selectedArticleId!))}
+          >
             <ListItemIcon sx={{ color: 'primary.main' }}>
-              <i className="ri-pencil-line" />
+              <i className='ri-pencil-line' />
             </ListItemIcon>
             <ListItemText sx={{ color: 'primary.main' }}>Editar artículo</ListItemText>
           </MenuItem>
         )}
 
         {selectedArticleId && articles.find(a => a.id === selectedArticleId)?.isPublished === false && onPublish && (
-          <MenuItem sx={{ display: 'flex', alignItems: 'center', gap: 2 }} onClick={() => handleAction(() => onPublish(selectedArticleId))}>
+          <MenuItem
+            sx={{ display: 'flex', alignItems: 'center', gap: 2 }}
+            onClick={() => handleAction(() => onPublish(selectedArticleId))}
+          >
             <ListItemIcon sx={{ color: 'success.main' }}>
-              <i className="ri-eye-line" />
+              <i className='ri-eye-line' />
             </ListItemIcon>
             <ListItemText sx={{ color: 'success.main' }}>Publicar</ListItemText>
           </MenuItem>
         )}
 
         {selectedArticleId && articles.find(a => a.id === selectedArticleId)?.isPublished === true && onUnpublish && (
-          <MenuItem sx={{ display: 'flex', alignItems: 'center', gap: 2 }} onClick={() => handleAction(() => onUnpublish(selectedArticleId))}>
+          <MenuItem
+            sx={{ display: 'flex', alignItems: 'center', gap: 2 }}
+            onClick={() => handleAction(() => onUnpublish(selectedArticleId))}
+          >
             <ListItemIcon sx={{ color: 'warning.main' }}>
-              <i className="ri-eye-off-line" />
+              <i className='ri-eye-off-line' />
             </ListItemIcon>
             <ListItemText sx={{ color: 'warning.main' }}>Despublicar</ListItemText>
           </MenuItem>
         )}
 
         {onArchive && (
-          <MenuItem sx={{ display: 'flex', alignItems: 'center', gap: 2 }} onClick={() => handleAction(() => onArchive(selectedArticleId!))}>
+          <MenuItem
+            sx={{ display: 'flex', alignItems: 'center', gap: 2 }}
+            onClick={() => handleAction(() => onArchive(selectedArticleId!))}
+          >
             <ListItemIcon sx={{ color: 'text.secondary' }}>
-              <i className="ri-archive-line" />
+              <i className='ri-archive-line' />
             </ListItemIcon>
             <ListItemText sx={{ color: 'text.secondary' }}>Archivar</ListItemText>
           </MenuItem>
         )}
 
         {onDelete && (
-          <MenuItem sx={{ display: 'flex', alignItems: 'center', gap: 2 }} onClick={() => handleAction(() => onDelete(selectedArticleId!))}>
+          <MenuItem
+            sx={{ display: 'flex', alignItems: 'center', gap: 2 }}
+            onClick={() => handleAction(() => onDelete(selectedArticleId!))}
+          >
             <ListItemIcon sx={{ color: 'error.main' }}>
-              <i className="ri-delete-bin-line" />
+              <i className='ri-delete-bin-line' />
             </ListItemIcon>
             <ListItemText sx={{ color: 'error.main' }}>Eliminar</ListItemText>
           </MenuItem>
@@ -262,4 +280,4 @@ const ArticlesListView: React.FC<ArticlesListViewProps> = ({
   )
 }
 
-export default ArticlesListView 
+export default ArticlesListView

@@ -85,7 +85,7 @@ const VerArticuloPage = () => {
       month: 'long',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit',
+      minute: '2-digit'
     })
   }
 
@@ -118,18 +118,10 @@ const VerArticuloPage = () => {
           Ver Artículo
         </Typography>
         <Box sx={{ display: 'flex', gap: 2 }}>
-          <Button
-            variant='outlined'
-            onClick={handleBack}
-            startIcon={<i className='ri-arrow-left-line' />}
-          >
+          <Button variant='outlined' onClick={handleBack} startIcon={<i className='ri-arrow-left-line' />}>
             Volver
           </Button>
-          <Button
-            variant='contained'
-            onClick={handleEdit}
-            startIcon={<i className='ri-pencil-line' />}
-          >
+          <Button variant='contained' onClick={handleEdit} startIcon={<i className='ri-pencil-line' />}>
             Editar
           </Button>
         </Box>
@@ -164,14 +156,14 @@ const VerArticuloPage = () => {
               {article.coverImage && (
                 <Box sx={{ mb: 3 }}>
                   <Box
-                    component="img"
+                    component='img'
                     src={article.coverImage}
                     alt={article.title}
                     sx={{
                       width: '100%',
                       height: 300,
                       objectFit: 'cover',
-                      borderRadius: 1,
+                      borderRadius: 1
                     }}
                   />
                 </Box>
@@ -188,43 +180,43 @@ const VerArticuloPage = () => {
                     fontSize: '2em',
                     fontWeight: 'bold',
                     margin: '0.67em 0',
-                    color: 'text.primary',
+                    color: 'text.primary'
                   },
                   '& h2': {
                     fontSize: '1.5em',
                     fontWeight: 'bold',
                     margin: '0.83em 0',
-                    color: 'text.primary',
+                    color: 'text.primary'
                   },
                   '& h3': {
                     fontSize: '1.17em',
                     fontWeight: 'bold',
                     margin: '1em 0',
-                    color: 'text.primary',
+                    color: 'text.primary'
                   },
                   '& p': {
                     margin: '1em 0',
-                    fontSize: '16px',
+                    fontSize: '16px'
                   },
                   '& ul, & ol': {
                     margin: '1em 0',
-                    paddingLeft: '2em',
+                    paddingLeft: '2em'
                   },
                   '& li': {
-                    margin: '0.5em 0',
+                    margin: '0.5em 0'
                   },
                   '& a': {
                     color: 'primary.main',
                     textDecoration: 'underline',
                     '&:hover': {
-                      textDecoration: 'none',
-                    },
+                      textDecoration: 'none'
+                    }
                   },
                   '& img': {
                     maxWidth: '100%',
                     height: 'auto',
                     margin: '1em 0',
-                    borderRadius: '4px',
+                    borderRadius: '4px'
                   },
                   '& blockquote': {
                     borderLeft: '4px solid',
@@ -232,7 +224,7 @@ const VerArticuloPage = () => {
                     paddingLeft: '1em',
                     margin: '1em 0',
                     fontStyle: 'italic',
-                    color: 'text.secondary',
+                    color: 'text.secondary'
                   },
                   '& pre': {
                     backgroundColor: 'grey.100',
@@ -241,15 +233,15 @@ const VerArticuloPage = () => {
                     fontFamily: 'monospace',
                     fontSize: '14px',
                     overflow: 'auto',
-                    margin: '1em 0',
+                    margin: '1em 0'
                   },
                   '& code': {
                     backgroundColor: 'grey.100',
                     padding: '0.2em 0.4em',
                     borderRadius: '3px',
                     fontFamily: 'monospace',
-                    fontSize: '0.9em',
-                  },
+                    fontSize: '0.9em'
+                  }
                 }}
               />
             </CardContent>
@@ -284,9 +276,7 @@ const VerArticuloPage = () => {
                     <Typography variant='subtitle2' color='text.secondary'>
                       Categoría
                     </Typography>
-                    <Typography variant='body2'>
-                      {getCategoryName(article.categoryId)}
-                    </Typography>
+                    <Typography variant='body2'>{getCategoryName(article.categoryId)}</Typography>
                   </Box>
 
                   {/* Tags */}
@@ -296,13 +286,8 @@ const VerArticuloPage = () => {
                         Etiquetas
                       </Typography>
                       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                        {article.tags.map((tag) => (
-                          <Chip
-                            key={tag}
-                            label={tag}
-                            size='small'
-                            variant='outlined'
-                          />
+                        {article.tags.map(tag => (
+                          <Chip key={tag} label={tag} size='small' variant='outlined' />
                         ))}
                       </Box>
                     </Box>
@@ -314,9 +299,7 @@ const VerArticuloPage = () => {
                       <Typography variant='subtitle2' color='text.secondary'>
                         Autor
                       </Typography>
-                      <Typography variant='body2'>
-                        {article.author.name}
-                      </Typography>
+                      <Typography variant='body2'>{article.author.name}</Typography>
                       <Typography variant='caption' color='text.secondary'>
                         {article.author.email}
                       </Typography>
@@ -328,18 +311,14 @@ const VerArticuloPage = () => {
                     <Typography variant='subtitle2' color='text.secondary'>
                       Fecha de creación
                     </Typography>
-                    <Typography variant='body2'>
-                      {formatDate(article.createdAt)}
-                    </Typography>
+                    <Typography variant='body2'>{formatDate(article.createdAt)}</Typography>
                   </Box>
 
                   <Box>
                     <Typography variant='subtitle2' color='text.secondary'>
                       Última actualización
                     </Typography>
-                    <Typography variant='body2'>
-                      {formatDate(article.updatedAt)}
-                    </Typography>
+                    <Typography variant='body2'>{formatDate(article.updatedAt)}</Typography>
                   </Box>
                 </Box>
               </CardContent>
@@ -378,4 +357,4 @@ const VerArticuloPage = () => {
   )
 }
 
-export default VerArticuloPage 
+export default VerArticuloPage

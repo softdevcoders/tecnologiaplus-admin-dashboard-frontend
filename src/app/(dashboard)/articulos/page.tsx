@@ -26,7 +26,7 @@ import ArticlesFilters from '@/components/ArticlesFilters'
 
 const ArticulosPage = () => {
   const router = useRouter()
-  
+
   const {
     articles,
     total,
@@ -39,14 +39,12 @@ const ArticulosPage = () => {
     publishArticle,
     unpublishArticle,
     archiveArticle,
-    clearError,
+    clearError
   } = useArticles()
 
   const { categories: categoriesData, loading: categoriesLoading } = useCategories()
-  
+
   const { getSessionInfo, logout } = useAuth()
-
-
 
   const [viewMode, setViewMode] = useState<ViewMode>('list')
 
@@ -61,7 +59,7 @@ const ArticulosPage = () => {
     dateFrom: null,
     dateTo: null,
     sortBy: 'createdAt',
-    sortOrder: 'desc',
+    sortOrder: 'desc'
   })
 
   // Manejar cambio de página
@@ -79,7 +77,7 @@ const ArticulosPage = () => {
     const apiFilters: any = {
       page: 1,
       sortBy: filters.sortBy,
-      sortOrder: filters.sortOrder,
+      sortOrder: filters.sortOrder
     }
 
     // Agregar filtros solo si tienen valor
@@ -109,7 +107,7 @@ const ArticulosPage = () => {
       dateFrom: null,
       dateTo: null,
       sortBy: 'createdAt',
-      sortOrder: 'desc',
+      sortOrder: 'desc'
     })
     fetchArticles({ page: 1 })
   }
@@ -133,8 +131,6 @@ const ArticulosPage = () => {
     await archiveArticle(id)
   }
 
-
-
   return (
     <Box sx={{ p: 3 }}>
       {/* Header */}
@@ -143,10 +139,7 @@ const ArticulosPage = () => {
           Artículos
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <ArticlesViewToggle 
-            viewMode={viewMode} 
-            onViewModeChange={setViewMode} 
-          />
+          <ArticlesViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
           <Button
             variant='contained'
             startIcon={<i className='ri-folder-line' />}
@@ -173,7 +166,7 @@ const ArticulosPage = () => {
         <Alert severity='error' sx={{ mb: 3 }} onClose={clearError}>
           {error.message}
         </Alert>
-      )}  
+      )}
 
       {/* Loading */}
       {loading && (
@@ -188,8 +181,8 @@ const ArticulosPage = () => {
           {viewMode === 'list' ? (
             <ArticlesListView
               articles={articles}
-              onEdit={(id) => router.push(`/articulos/editar/${id}`)} 
-              onView={(id) => router.push(`/articulos/ver/${id}`)}
+              onEdit={id => router.push(`/articulos/editar/${id}`)}
+              onView={id => router.push(`/articulos/ver/${id}`)}
               onDelete={handleDeleteArticle}
               onPublish={handlePublishArticle}
               onUnpublish={handleUnpublishArticle}
@@ -198,15 +191,15 @@ const ArticulosPage = () => {
           ) : (
             <ArticlesGridView
               articles={articles}
-              onEdit={(id) => router.push(`/articulos/editar/${id}`)}
-              onView={(id) => router.push(`/articulos/ver/${id}`)}
+              onEdit={id => router.push(`/articulos/editar/${id}`)}
+              onView={id => router.push(`/articulos/ver/${id}`)}
               onDelete={handleDeleteArticle}
               onPublish={handlePublishArticle}
               onUnpublish={handleUnpublishArticle}
               onArchive={handleArchiveArticle}
             />
           )}
-          
+
           {/* Paginación */}
           <Box sx={{ mt: 3 }}>
             <TablePagination
@@ -218,9 +211,7 @@ const ArticulosPage = () => {
               onPageChange={handleChangePage}
               onRowsPerPageChange={handleChangeRowsPerPage}
               labelRowsPerPage='Filas por página:'
-              labelDisplayedRows={({ from, to, count }) =>
-                `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`
-              }
+              labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`}
             />
           </Box>
         </>

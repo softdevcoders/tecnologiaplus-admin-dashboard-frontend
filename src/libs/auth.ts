@@ -1,4 +1,4 @@
-import type { NextAuthOptions, Session } from 'next-auth';
+import type { NextAuthOptions, Session } from 'next-auth'
 import type { JWT } from 'next-auth/jwt'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import axios from 'axios'
@@ -21,7 +21,7 @@ function decodeJWT(token: string) {
     return JSON.parse(jsonPayload)
   } catch (error) {
     console.error('Error decoding JWT:', error)
-    
+
     return null
   }
 }
@@ -75,7 +75,7 @@ export const authOptions: NextAuthOptions = {
             if (error.response?.status === 401) {
               // Extraer el mensaje de error de la respuesta de la API
               const errorMessage = 'Credenciales incorrectas'
-              
+
               throw new Error(errorMessage)
             } else if (error.response?.status) {
               // Otros errores HTTP
@@ -85,7 +85,7 @@ export const authOptions: NextAuthOptions = {
               throw new Error('No se pudo conectar con el servidor')
             }
           }
-          
+
           // Error genérico para otros tipos de errores
           throw new Error('Error durante la autenticación')
         }
@@ -98,16 +98,16 @@ export const authOptions: NextAuthOptions = {
         token.role = user.role
         token.accessToken = user.accessToken
       }
-      
+
       return token
     },
-    async session({ session, token }: { session: Session, token: JWT }) { 
+    async session({ session, token }: { session: Session; token: JWT }) {
       if (token) {
         session.user.id = token.sub as string
         session.user.role = token.role as string
         session.accessToken = token.accessToken as string
       }
-      
+
       return session
     }
   },

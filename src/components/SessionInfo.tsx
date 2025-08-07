@@ -1,11 +1,11 @@
 'use client'
 
 import React from 'react'
-import { 
-  Box, 
-  Typography, 
-  Chip, 
-  IconButton, 
+import {
+  Box,
+  Typography,
+  Chip,
+  IconButton,
   Tooltip,
   Menu,
   MenuItem,
@@ -22,7 +22,7 @@ interface SessionInfoProps {
 export function SessionInfo({ variant = 'compact' }: SessionInfoProps) {
   const { getSessionInfo, logout } = useAuth()
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
-  
+
   const sessionInfo = getSessionInfo()
   const open = Boolean(anchorEl)
 
@@ -60,61 +60,61 @@ export function SessionInfo({ variant = 'compact' }: SessionInfoProps) {
   if (variant === 'compact') {
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        <Tooltip title="Información de sesión">
+        <Tooltip title='Información de sesión'>
           <IconButton
             onClick={handleClick}
-            size="small"
-            sx={{ 
+            size='small'
+            sx={{
               color: 'text.secondary',
               '&:hover': { color: 'primary.main' }
             }}
           >
-            <i className="ri-user-line" />
+            <i className='ri-user-line' />
           </IconButton>
         </Tooltip>
-        
+
         <Menu
           anchorEl={anchorEl}
           open={open}
           onClose={handleClose}
           anchorOrigin={{
             vertical: 'bottom',
-            horizontal: 'right',
+            horizontal: 'right'
           }}
           transformOrigin={{
             vertical: 'top',
-            horizontal: 'right',
+            horizontal: 'right'
           }}
         >
           <MenuItem disabled>
             <ListItemIcon>
-              <i className="ri-user-line" />
+              <i className='ri-user-line' />
             </ListItemIcon>
-            <ListItemText 
+            <ListItemText
               primary={sessionInfo.user?.name || sessionInfo.user?.email}
               secondary={sessionInfo.user?.role}
             />
           </MenuItem>
-          
+
           <Divider />
-          
+
           <MenuItem disabled>
             <ListItemIcon>
-              <i className="ri-time-line" />
+              <i className='ri-time-line' />
             </ListItemIcon>
-            <ListItemText 
-              primary="Sesión activa"
+            <ListItemText
+              primary='Sesión activa'
               secondary={`Expira en ${formatTime(sessionInfo.timeUntilExpiration)}`}
             />
           </MenuItem>
-          
+
           <Divider />
-          
+
           <MenuItem onClick={handleLogout}>
             <ListItemIcon>
-              <i className="ri-logout-box-r-line" />
+              <i className='ri-logout-box-r-line' />
             </ListItemIcon>
-            <ListItemText primary="Cerrar sesión" />
+            <ListItemText primary='Cerrar sesión' />
           </MenuItem>
         </Menu>
       </Box>
@@ -124,30 +124,26 @@ export function SessionInfo({ variant = 'compact' }: SessionInfoProps) {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
       <Box sx={{ textAlign: 'right' }}>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant='body2' color='text.secondary'>
           {sessionInfo.user?.name || sessionInfo.user?.email}
         </Typography>
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant='caption' color='text.secondary'>
           {sessionInfo.user?.role}
         </Typography>
       </Box>
-      
+
       <Chip
         label={`Sesión: ${formatTime(sessionInfo.timeUntilExpiration)}`}
         color={getStatusColor(sessionInfo.timeUntilExpiration)}
-        size="small"
-        variant="outlined"
+        size='small'
+        variant='outlined'
       />
-      
-      <Tooltip title="Cerrar sesión">
-        <IconButton
-          onClick={handleLogout}
-          size="small"
-          color="error"
-        >
-          <i className="ri-logout-box-r-line" />
+
+      <Tooltip title='Cerrar sesión'>
+        <IconButton onClick={handleLogout} size='small' color='error'>
+          <i className='ri-logout-box-r-line' />
         </IconButton>
       </Tooltip>
     </Box>
   )
-} 
+}

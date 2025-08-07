@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
-import articlesService, { 
-  Article, 
-  ArticlesListResponse, 
-  ArticlesFilters, 
-  CreateArticleRequest, 
-  UpdateArticleRequest 
+import articlesService, {
+  Article,
+  ArticlesListResponse,
+  ArticlesFilters,
+  CreateArticleRequest,
+  UpdateArticleRequest
 } from '@/services/articles.service'
 import { ApiError } from '@/libs/http'
 
@@ -40,7 +40,7 @@ export const useArticles = (initialFilters: ArticlesFilters = {}): UseArticlesRe
     limit: 10,
     totalPages: 0,
     loading: false,
-    error: null,
+    error: null
   })
 
   const clearError = () => {
@@ -57,7 +57,7 @@ export const useArticles = (initialFilters: ArticlesFilters = {}): UseArticlesRe
         page: state.page,
         limit: state.limit,
         ...initialFilters,
-        ...filters,
+        ...filters
       })
 
       if (response.success) {
@@ -68,7 +68,7 @@ export const useArticles = (initialFilters: ArticlesFilters = {}): UseArticlesRe
           page: response.data.meta.page,
           limit: response.data.meta.limit,
           totalPages: response.data.meta.totalPages,
-          loading: false,
+          loading: false
         }))
       } else {
         throw new Error(response.message || 'Error al obtener artículos')
@@ -78,7 +78,7 @@ export const useArticles = (initialFilters: ArticlesFilters = {}): UseArticlesRe
       setState(prev => ({
         ...prev,
         loading: false,
-        error: apiError,
+        error: apiError
       }))
     }
   }
@@ -100,7 +100,7 @@ export const useArticles = (initialFilters: ArticlesFilters = {}): UseArticlesRe
       setState(prev => ({
         ...prev,
         loading: false,
-        error: apiError,
+        error: apiError
       }))
       return null
     }
@@ -124,7 +124,7 @@ export const useArticles = (initialFilters: ArticlesFilters = {}): UseArticlesRe
       setState(prev => ({
         ...prev,
         loading: false,
-        error: apiError,
+        error: apiError
       }))
       return null
     }
@@ -140,10 +140,8 @@ export const useArticles = (initialFilters: ArticlesFilters = {}): UseArticlesRe
         // Actualizar el artículo en la lista
         setState(prev => ({
           ...prev,
-          articles: prev.articles.map(article =>
-            article.id === articleData.id ? response.data : article
-          ),
-          loading: false,
+          articles: prev.articles.map(article => (article.id === articleData.id ? response.data : article)),
+          loading: false
         }))
         return response.data
       } else {
@@ -154,7 +152,7 @@ export const useArticles = (initialFilters: ArticlesFilters = {}): UseArticlesRe
       setState(prev => ({
         ...prev,
         loading: false,
-        error: apiError,
+        error: apiError
       }))
       return null
     }
@@ -172,7 +170,7 @@ export const useArticles = (initialFilters: ArticlesFilters = {}): UseArticlesRe
           ...prev,
           articles: prev.articles.filter(article => article.id !== id),
           total: prev.total - 1,
-          loading: false,
+          loading: false
         }))
         return true
       } else {
@@ -183,7 +181,7 @@ export const useArticles = (initialFilters: ArticlesFilters = {}): UseArticlesRe
       setState(prev => ({
         ...prev,
         loading: false,
-        error: apiError,
+        error: apiError
       }))
       return false
     }
@@ -199,10 +197,8 @@ export const useArticles = (initialFilters: ArticlesFilters = {}): UseArticlesRe
         // Actualizar el artículo en la lista
         setState(prev => ({
           ...prev,
-          articles: prev.articles.map(article =>
-            article.id === id ? response.data : article
-          ),
-          loading: false,
+          articles: prev.articles.map(article => (article.id === id ? response.data : article)),
+          loading: false
         }))
         return response.data
       } else {
@@ -213,7 +209,7 @@ export const useArticles = (initialFilters: ArticlesFilters = {}): UseArticlesRe
       setState(prev => ({
         ...prev,
         loading: false,
-        error: apiError,
+        error: apiError
       }))
       return null
     }
@@ -229,10 +225,8 @@ export const useArticles = (initialFilters: ArticlesFilters = {}): UseArticlesRe
         // Actualizar el artículo en la lista
         setState(prev => ({
           ...prev,
-          articles: prev.articles.map(article =>
-            article.id === id ? response.data : article
-          ),
-          loading: false,
+          articles: prev.articles.map(article => (article.id === id ? response.data : article)),
+          loading: false
         }))
         return response.data
       } else {
@@ -243,7 +237,7 @@ export const useArticles = (initialFilters: ArticlesFilters = {}): UseArticlesRe
       setState(prev => ({
         ...prev,
         loading: false,
-        error: apiError,
+        error: apiError
       }))
       return null
     }
@@ -259,10 +253,8 @@ export const useArticles = (initialFilters: ArticlesFilters = {}): UseArticlesRe
         // Actualizar el artículo en la lista
         setState(prev => ({
           ...prev,
-          articles: prev.articles.map(article =>
-            article.id === id ? response.data : article
-          ),
-          loading: false,
+          articles: prev.articles.map(article => (article.id === id ? response.data : article)),
+          loading: false
         }))
         return response.data
       } else {
@@ -273,7 +265,7 @@ export const useArticles = (initialFilters: ArticlesFilters = {}): UseArticlesRe
       setState(prev => ({
         ...prev,
         loading: false,
-        error: apiError,
+        error: apiError
       }))
       return null
     }
@@ -296,6 +288,6 @@ export const useArticles = (initialFilters: ArticlesFilters = {}): UseArticlesRe
     publishArticle,
     unpublishArticle,
     archiveArticle,
-    clearError,
+    clearError
   }
-} 
+}

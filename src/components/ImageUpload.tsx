@@ -1,15 +1,7 @@
 'use client'
 
 import { useState, useRef, useCallback } from 'react'
-import {
-  Box,
-  Typography,
-  Paper,
-  Button,
-  IconButton,
-  Alert,
-  CircularProgress,
-} from '@mui/material'
+import { Box, Typography, Paper, Button, IconButton, Alert, CircularProgress } from '@mui/material'
 
 interface ImageUploadProps {
   value?: string
@@ -28,7 +20,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   error = false,
   helperText,
   accept = 'image/*',
-  maxSize = 5, // 5MB por defecto
+  maxSize = 5 // 5MB por defecto
 }) => {
   const [isDragOver, setIsDragOver] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
@@ -48,7 +40,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()
     setIsDragOver(false)
-    
+
     const files = Array.from(e.dataTransfer.files)
     if (files.length > 0) {
       handleFile(files[0])
@@ -62,41 +54,44 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     }
   }, [])
 
-  const handleFile = useCallback(async (file: File) => {
-    // Validar tipo de archivo
-    if (!file.type.startsWith('image/')) {
-      setUploadError('Solo se permiten archivos de imagen')
-      return
-    }
+  const handleFile = useCallback(
+    async (file: File) => {
+      // Validar tipo de archivo
+      if (!file.type.startsWith('image/')) {
+        setUploadError('Solo se permiten archivos de imagen')
+        return
+      }
 
-    // Validar tamaño
-    if (file.size > maxSize * 1024 * 1024) {
-      setUploadError(`El archivo es demasiado grande. Máximo ${maxSize}MB`)
-      return
-    }
+      // Validar tamaño
+      if (file.size > maxSize * 1024 * 1024) {
+        setUploadError(`El archivo es demasiado grande. Máximo ${maxSize}MB`)
+        return
+      }
 
-    setIsUploading(true)
-    setUploadError(null)
+      setIsUploading(true)
+      setUploadError(null)
 
-    try {
-      // Por ahora, convertimos a base64 para simular una subida
-      // En producción, aquí subirías a un servidor de archivos
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        const result = e.target?.result as string
-        onChange(result)
+      try {
+        // Por ahora, convertimos a base64 para simular una subida
+        // En producción, aquí subirías a un servidor de archivos
+        const reader = new FileReader()
+        reader.onload = e => {
+          const result = e.target?.result as string
+          onChange(result)
+          setIsUploading(false)
+        }
+        reader.onerror = () => {
+          setUploadError('Error al leer el archivo')
+          setIsUploading(false)
+        }
+        reader.readAsDataURL(file)
+      } catch (error) {
+        setUploadError('Error al procesar la imagen')
         setIsUploading(false)
       }
-      reader.onerror = () => {
-        setUploadError('Error al leer el archivo')
-        setIsUploading(false)
-      }
-      reader.readAsDataURL(file)
-    } catch (error) {
-      setUploadError('Error al procesar la imagen')
-      setIsUploading(false)
-    }
-  }, [maxSize, onChange])
+    },
+    [maxSize, onChange]
+  )
 
   const handleRemoveImage = useCallback(() => {
     onChange('')
@@ -109,13 +104,13 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 
   return (
     <Box>
-      <Typography variant="subtitle2" sx={{ mb: 1, color: error ? 'error.main' : 'text.primary' }}>
+      <Typography variant='subtitle2' sx={{ mb: 1, color: error ? 'error.main' : 'text.primary' }}>
         {label}
       </Typography>
 
       {/* Área de drag and drop */}
       <Paper
-        variant="outlined"
+        variant='outlined'
         sx={{
           borderColor: error ? 'error.main' : isDragOver ? 'primary.main' : undefined,
           borderWidth: isDragOver ? 2 : 1,
@@ -124,7 +119,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
           transition: 'all 0.2s ease',
           cursor: 'pointer',
           position: 'relative',
-          overflow: 'hidden',
+          overflow: 'hidden'
         }}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -135,14 +130,14 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
           // Vista previa de la imagen
           <Box sx={{ position: 'relative' }}>
             <Box
-              component="img"
+              component='img'
               src={value}
-              alt="Vista previa"
+              alt='Vista previa'
               sx={{
                 width: '100%',
                 height: 200,
                 objectFit: 'cover',
-                display: 'block',
+                display: 'block'
               }}
             />
             <Box
@@ -154,18 +149,18 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
+                justifyContent: 'center'
               }}
             >
               <IconButton
-                size="small"
-                onClick={(e) => {
+                size='small'
+                onClick={e => {
                   e.stopPropagation()
                   handleRemoveImage()
                 }}
                 sx={{ color: 'white' }}
               >
-                <i className="ri-close-line" />
+                <i className='ri-close-line' />
               </IconButton>
             </Box>
             <Box
@@ -177,7 +172,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
                 background: 'linear-gradient(transparent, rgba(0,0,0,0.7))',
                 color: 'white',
                 padding: 1,
-                fontSize: '12px',
+                fontSize: '12px'
               }}
             >
               Haz clic para cambiar la imagen
@@ -193,25 +188,25 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
               alignItems: 'center',
               justifyContent: 'center',
               padding: 3,
-              textAlign: 'center',
+              textAlign: 'center'
             }}
           >
             {isUploading ? (
               <CircularProgress size={40} />
             ) : (
               <>
-                <i className="ri-image-line" style={{ fontSize: '48px', color: '#999', marginBottom: '16px' }} />
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                <i className='ri-image-line' style={{ fontSize: '48px', color: '#999', marginBottom: '16px' }} />
+                <Typography variant='body2' color='text.secondary' sx={{ mb: 1 }}>
                   Arrastra una imagen aquí o haz clic para seleccionar
                 </Typography>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant='caption' color='text.secondary'>
                   PNG, JPG, GIF hasta {maxSize}MB
                 </Typography>
                 <Button
-                  variant="outlined"
-                  size="small"
+                  variant='outlined'
+                  size='small'
                   sx={{ mt: 2 }}
-                  onClick={(e) => {
+                  onClick={e => {
                     e.stopPropagation()
                     handleClick()
                   }}
@@ -225,24 +220,18 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
       </Paper>
 
       {/* Input de archivo oculto */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept={accept}
-        onChange={handleFileSelect}
-        style={{ display: 'none' }}
-      />
+      <input ref={fileInputRef} type='file' accept={accept} onChange={handleFileSelect} style={{ display: 'none' }} />
 
       {/* Mensajes de error */}
       {uploadError && (
-        <Alert severity="error" sx={{ mt: 1 }}>
+        <Alert severity='error' sx={{ mt: 1 }}>
           {uploadError}
         </Alert>
       )}
 
       {helperText && (
-        <Typography 
-          variant="caption" 
+        <Typography
+          variant='caption'
           color={error ? 'error.main' : 'text.secondary'}
           sx={{ mt: 0.5, display: 'block' }}
         >
@@ -253,4 +242,4 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   )
 }
 
-export default ImageUpload 
+export default ImageUpload

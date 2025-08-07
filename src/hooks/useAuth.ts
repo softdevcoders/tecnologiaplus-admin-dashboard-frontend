@@ -53,7 +53,7 @@ function getTimeUntilExpiration(token: string): number {
 
     const currentTime = Math.floor(Date.now() / 1000)
     const timeRemaining = decoded.exp - currentTime
-    
+
     // Convertir a minutos
     return Math.floor(timeRemaining / 60)
   } catch (error) {
@@ -69,7 +69,7 @@ export function useAuth() {
   // Función para cerrar sesión
   const logout = useCallback(async () => {
     try {
-      await signOut({ 
+      await signOut({
         redirect: true,
         callbackUrl: '/auth/login'
       })
@@ -130,7 +130,7 @@ export function useAuth() {
     if (status === 'authenticated' && session?.accessToken) {
       const interval = setInterval(() => {
         const sessionInfo = getSessionInfo()
-        
+
         if (sessionInfo.isExpired) {
           console.warn('Session expired during interval check, logging out...')
           logout()
@@ -154,4 +154,4 @@ export function useAuth() {
     isAuthenticated: status === 'authenticated',
     isLoading: status === 'loading'
   }
-} 
+}

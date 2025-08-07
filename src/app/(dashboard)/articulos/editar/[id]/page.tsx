@@ -64,7 +64,7 @@ const EditarArticuloPage = () => {
     coverImage: '',
     categoryId: '',
     isPublished: false,
-    tags: [],
+    tags: []
   })
 
   const [tagInput, setTagInput] = useState('')
@@ -88,7 +88,7 @@ const EditarArticuloPage = () => {
               coverImage: article.coverImage || '',
               categoryId: article.categoryId,
               isPublished: article.isPublished,
-              tags: article.tags || [],
+              tags: article.tags || []
             })
           }
         } catch (error) {
@@ -105,7 +105,7 @@ const EditarArticuloPage = () => {
   const handleInputChange = (field: keyof ArticleFormData, value: any) => {
     setFormData(prev => ({
       ...prev,
-      [field]: value,
+      [field]: value
     }))
   }
 
@@ -113,7 +113,7 @@ const EditarArticuloPage = () => {
     if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
       setFormData(prev => ({
         ...prev,
-        tags: [...prev.tags, tagInput.trim()],
+        tags: [...prev.tags, tagInput.trim()]
       }))
       setTagInput('')
     }
@@ -122,19 +122,19 @@ const EditarArticuloPage = () => {
   const handleRemoveTag = (tagToRemove: string) => {
     setFormData(prev => ({
       ...prev,
-      tags: prev.tags.filter(tag => tag !== tagToRemove),
+      tags: prev.tags.filter(tag => tag !== tagToRemove)
     }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     // Validar slug
     if (!isValidSlug(formData.slug)) {
       alert('El slug no es válido. Debe contener solo letras minúsculas, números y guiones.')
       return
     }
-    
+
     try {
       const updatedArticle = await updateArticle(articleId, {
         title: formData.title,
@@ -146,7 +146,7 @@ const EditarArticuloPage = () => {
         metaKeywords: formData.keywords,
         coverImage: formData.coverImage,
         categoryId: formData.categoryId,
-        tags: formData.tags,
+        tags: formData.tags
       })
 
       if (updatedArticle) {
@@ -176,11 +176,7 @@ const EditarArticuloPage = () => {
         <Typography variant='h4' component='h1'>
           Editar Artículo
         </Typography>
-        <Button
-          variant='outlined'
-          onClick={handleCancel}
-          startIcon={<i className='ri-arrow-left-line' />}
-        >
+        <Button variant='outlined' onClick={handleCancel} startIcon={<i className='ri-arrow-left-line' />}>
           Volver
         </Button>
       </Box>
@@ -195,17 +191,17 @@ const EditarArticuloPage = () => {
       {/* Form */}
       <Card>
         <CardContent>
-          <Box component="form" onSubmit={handleSubmit}>
+          <Box component='form' onSubmit={handleSubmit}>
             <Grid container spacing={3}>
               {/* Título */}
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  label="Título del artículo"
+                  label='Título del artículo'
                   value={formData.title}
-                  onChange={(e) => handleInputChange('title', e.target.value)}
+                  onChange={e => handleInputChange('title', e.target.value)}
                   required
-                  placeholder="Ingresa el título del artículo..."
+                  placeholder='Ingresa el título del artículo...'
                 />
               </Grid>
 
@@ -213,13 +209,13 @@ const EditarArticuloPage = () => {
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  label="Resumen"
+                  label='Resumen'
                   value={formData.summary}
-                  onChange={(e) => handleInputChange('summary', e.target.value)}
+                  onChange={e => handleInputChange('summary', e.target.value)}
                   multiline
                   rows={3}
-                  placeholder="Escribe un resumen del artículo..."
-                  helperText="Breve descripción que aparecerá en las vistas previas"
+                  placeholder='Escribe un resumen del artículo...'
+                  helperText='Breve descripción que aparecerá en las vistas previas'
                 />
               </Grid>
 
@@ -227,9 +223,9 @@ const EditarArticuloPage = () => {
               <Grid item xs={12}>
                 <ImageUpload
                   value={formData.coverImage}
-                  onChange={(imageUrl) => handleInputChange('coverImage', imageUrl)}
-                  label="Imagen Principal"
-                  helperText="Imagen destacada del artículo. Recomendado: 1200x630px"
+                  onChange={imageUrl => handleInputChange('coverImage', imageUrl)}
+                  label='Imagen Principal'
+                  helperText='Imagen destacada del artículo. Recomendado: 1200x630px'
                   maxSize={5}
                 />
               </Grid>
@@ -240,11 +236,11 @@ const EditarArticuloPage = () => {
                   <InputLabel>Categoría</InputLabel>
                   <Select
                     value={formData.categoryId}
-                    label="Categoría"
-                    onChange={(e) => handleInputChange('categoryId', e.target.value)}
+                    label='Categoría'
+                    onChange={e => handleInputChange('categoryId', e.target.value)}
                     disabled={categoriesLoading}
                   >
-                    {categories.map((category) => (
+                    {categories.map(category => (
                       <MenuItem key={category.id} value={category.id}>
                         {category.label}
                       </MenuItem>
@@ -259,8 +255,8 @@ const EditarArticuloPage = () => {
                   <InputLabel>Estado</InputLabel>
                   <Select
                     value={formData.isPublished}
-                    label="Estado"
-                    onChange={(e) => handleInputChange('isPublished', e.target.value)}
+                    label='Estado'
+                    onChange={e => handleInputChange('isPublished', e.target.value)}
                   >
                     <MenuItem value={false}>Borrador</MenuItem>
                     <MenuItem value={true}>Publicado</MenuItem>
@@ -271,34 +267,30 @@ const EditarArticuloPage = () => {
               {/* Tags */}
               <Grid item xs={12}>
                 <Box>
-                  <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                  <Typography variant='subtitle2' sx={{ mb: 1 }}>
                     Etiquetas
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
                     <TextField
-                      size="small"
-                      placeholder="Agregar etiqueta..."
+                      size='small'
+                      placeholder='Agregar etiqueta...'
                       value={tagInput}
-                      onChange={(e) => setTagInput(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
+                      onChange={e => setTagInput(e.target.value)}
+                      onKeyPress={e => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
                       sx={{ flexGrow: 1 }}
                     />
-                    <Button
-                      variant="outlined"
-                      onClick={handleAddTag}
-                      disabled={!tagInput.trim()}
-                    >
+                    <Button variant='outlined' onClick={handleAddTag} disabled={!tagInput.trim()}>
                       Agregar
                     </Button>
                   </Box>
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                    {formData.tags.map((tag) => (
+                    {formData.tags.map(tag => (
                       <Chip
                         key={tag}
                         label={tag}
                         onDelete={() => handleRemoveTag(tag)}
-                        color="primary"
-                        variant="outlined"
+                        color='primary'
+                        variant='outlined'
                       />
                     ))}
                   </Box>
@@ -309,25 +301,21 @@ const EditarArticuloPage = () => {
               <Grid item xs={12}>
                 <WYSIWYGEditor
                   value={formData.content}
-                  onChange={(value) => handleInputChange('content', value)}
-                  label="Contenido del artículo"
-                  placeholder="Escribe el contenido del artículo. Usa los botones de la barra de herramientas para dar formato..."
+                  onChange={value => handleInputChange('content', value)}
+                  label='Contenido del artículo'
+                  placeholder='Escribe el contenido del artículo. Usa los botones de la barra de herramientas para dar formato...'
                 />
               </Grid>
 
               {/* Botones de acción */}
               <Grid item xs={12}>
                 <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
-                  <Button
-                    variant="outlined"
-                    onClick={handleCancel}
-                    disabled={updateLoading}
-                  >
+                  <Button variant='outlined' onClick={handleCancel} disabled={updateLoading}>
                     Cancelar
                   </Button>
                   <Button
-                    type="submit"
-                    variant="contained"
+                    type='submit'
+                    variant='contained'
                     disabled={updateLoading || !formData.title || !formData.content || !formData.categoryId}
                     startIcon={updateLoading ? <CircularProgress size={20} /> : <i className='ri-save-line' />}
                   >
@@ -343,4 +331,4 @@ const EditarArticuloPage = () => {
   )
 }
 
-export default EditarArticuloPage 
+export default EditarArticuloPage

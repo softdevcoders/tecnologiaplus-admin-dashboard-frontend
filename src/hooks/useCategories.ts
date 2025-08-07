@@ -8,7 +8,10 @@ interface UseCategoriesReturn {
   fetchCategories: (filters?: CategoriesFilters) => Promise<void>
   getCategoryById: (id: string) => Promise<Category | null>
   createCategory: (categoryData: Omit<Category, 'id' | 'createdAt' | 'updatedAt'>) => Promise<Category | null>
-  updateCategory: (id: string, categoryData: Partial<Omit<Category, 'id' | 'createdAt' | 'updatedAt'>>) => Promise<Category | null>
+  updateCategory: (
+    id: string,
+    categoryData: Partial<Omit<Category, 'id' | 'createdAt' | 'updatedAt'>>
+  ) => Promise<Category | null>
   deleteCategory: (id: string) => Promise<boolean>
 }
 
@@ -21,7 +24,7 @@ export const useCategories = (): UseCategoriesReturn => {
     try {
       setLoading(true)
       setError(null)
-      
+
       const response = await categoriesService.getCategories(filters)
       setCategories(response.data)
     } catch (err) {
@@ -44,46 +47,55 @@ export const useCategories = (): UseCategoriesReturn => {
     }
   }, [])
 
-  const createCategory = useCallback(async (categoryData: Omit<Category, 'id' | 'createdAt' | 'updatedAt'>): Promise<Category | null> => {
-    try {
-      setError(null)
-      const newCategory = await categoriesService.createCategory(categoryData)
-      
-      // Actualizar la lista local
-      setCategories(prev => [...prev, newCategory])
-      
-      return newCategory
-    } catch (err) {
-      console.error('Error al crear categoría:', err)
-      setError('Error al crear categoría')
-      return null
-    }
-  }, [])
+  const createCategory = useCallback(
+    async (categoryData: Omit<Category, 'id' | 'createdAt' | 'updatedAt'>): Promise<Category | null> => {
+      try {
+        setError(null)
+        const newCategory = await categoriesService.createCategory(categoryData)
 
-  const updateCategory = useCallback(async (id: string, categoryData: Partial<Omit<Category, 'id' | 'createdAt' | 'updatedAt'>>): Promise<Category | null> => {
-    try {
-      setError(null)
-      const updatedCategory = await categoriesService.updateCategory(id, categoryData)
-      
-      // Actualizar la lista local
-      setCategories(prev => prev.map(cat => cat.id === id ? updatedCategory : cat))
-      
-      return updatedCategory
-    } catch (err) {
-      console.error('Error al actualizar categoría:', err)
-      setError('Error al actualizar categoría')
-      return null
-    }
-  }, [])
+        // Actualizar la lista local
+        setCategories(prev => [...prev, newCategory])
+
+        return newCategory
+      } catch (err) {
+        console.error('Error al crear categoría:', err)
+        setError('Error al crear categoría')
+        return null
+      }
+    },
+    []
+  )
+
+  const updateCategory = useCallback(
+    async (
+      id: string,
+      categoryData: Partial<Omit<Category, 'id' | 'createdAt' | 'updatedAt'>>
+    ): Promise<Category | null> => {
+      try {
+        setError(null)
+        const updatedCategory = await categoriesService.updateCategory(id, categoryData)
+
+        // Actualizar la lista local
+        setCategories(prev => prev.map(cat => (cat.id === id ? updatedCategory : cat)))
+
+        return updatedCategory
+      } catch (err) {
+        console.error('Error al actualizar categoría:', err)
+        setError('Error al actualizar categoría')
+        return null
+      }
+    },
+    []
+  )
 
   const deleteCategory = useCallback(async (id: string): Promise<boolean> => {
     try {
       setError(null)
       await categoriesService.deleteCategory(id)
-      
+
       // Actualizar la lista local
       setCategories(prev => prev.filter(cat => cat.id !== id))
-      
+
       return true
     } catch (err) {
       console.error('Error al eliminar categoría:', err)
@@ -105,6 +117,6 @@ export const useCategories = (): UseCategoriesReturn => {
     getCategoryById,
     createCategory,
     updateCategory,
-    deleteCategory,
+    deleteCategory
   }
-} 
+}

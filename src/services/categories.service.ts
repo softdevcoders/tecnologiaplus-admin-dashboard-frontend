@@ -77,7 +77,10 @@ export class CategoriesService {
   /**
    * Actualiza una categoría existente
    */
-  async updateCategory(id: string, categoryData: Partial<Omit<Category, 'id' | 'createdAt' | 'updatedAt'>>): Promise<Category> {
+  async updateCategory(
+    id: string,
+    categoryData: Partial<Omit<Category, 'id' | 'createdAt' | 'updatedAt'>>
+  ): Promise<Category> {
     return this.http.put<Category>(`/categories/${id}`, categoryData)
   }
 
@@ -90,4 +93,4 @@ export class CategoriesService {
 }
 
 // Instancia singleton del servicio
-export const categoriesService = new CategoriesService() 
+export const categoriesService = new CategoriesService()

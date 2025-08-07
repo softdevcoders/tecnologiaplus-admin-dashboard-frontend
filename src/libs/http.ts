@@ -57,7 +57,7 @@ export interface ApiError {
 const DEFAULT_CONFIG: AxiosRequestConfig = {
   baseURL: API_CONFIG.BASE_URL,
   timeout: API_CONFIG.TIMEOUT,
-  headers: API_CONFIG.DEFAULT_HEADERS,
+  headers: API_CONFIG.DEFAULT_HEADERS
 }
 
 class HttpClient {
@@ -66,12 +66,12 @@ class HttpClient {
   constructor(config: AxiosRequestConfig = {}) {
     this.instance = axios.create({
       ...DEFAULT_CONFIG,
-      ...config,
+      ...config
     })
 
     // Interceptor para agregar el token de autenticación
     this.instance.interceptors.request.use(
-      async (config) => {
+      async config => {
         // Solo agregar token si no es una petición de autenticación
         if (!config.url?.includes('/auth/')) {
           try {
@@ -80,13 +80,13 @@ class HttpClient {
               // Verificar si el token ha expirado antes de usarlo
               if (isTokenExpired(session.accessToken)) {
                 console.warn('Token expired, logging out...')
-                await signOut({ 
+                await signOut({
                   redirect: true,
                   callbackUrl: '/auth/login'
                 })
                 throw new Error('Token expired')
               }
-              
+
               config.headers.Authorization = `Bearer ${session.accessToken}`
             }
           } catch (error) {
@@ -99,7 +99,7 @@ class HttpClient {
         }
         return config
       },
-      (error) => {
+      error => {
         return Promise.reject(error)
       }
     )
@@ -109,7 +109,7 @@ class HttpClient {
       (response: AxiosResponse) => {
         return response
       },
-      async (error) => {
+      async error => {
         return this.handleError(error)
       }
     )
@@ -120,17 +120,17 @@ class HttpClient {
       const apiError: ApiError = {
         message: error.response?.data?.message || error.message || 'Error de conexión',
         status: error.response?.status || 500,
-        code: error.code,
+        code: error.code
       }
 
       // Manejar errores específicos
       if (error.response?.status === 401) {
         // Token expirado o inválido
         apiError.message = 'Sesión expirada. Por favor, inicia sesión nuevamente.'
-        
+
         // Cerrar sesión automáticamente
         try {
-          await signOut({ 
+          await signOut({
             redirect: true,
             callbackUrl: '/auth/login'
           })
@@ -151,7 +151,7 @@ class HttpClient {
     // Error no relacionado con axios
     throw {
       message: error.message || 'Error desconocido',
-      status: 500,
+      status: 500
     }
   }
 
@@ -231,4 +231,4 @@ class HttpClient {
 const httpClient = new HttpClient()
 
 export default httpClient
-export { HttpClient } 
+export { HttpClient }

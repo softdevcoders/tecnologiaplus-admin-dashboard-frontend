@@ -8,7 +8,7 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 // Util Imports
-import Image from 'next/image' 
+import Image from 'next/image'
 
 // MUI Imports
 import Typography from '@mui/material/Typography'
@@ -38,7 +38,11 @@ type ErrorType = {
 type FormData = InferInput<typeof schema>
 
 const schema = object({
-  email: pipe(string(), minLength(1, 'Este campo es requerido'), email('Por favor, ingrese una dirección de correo electrónico válida')),
+  email: pipe(
+    string(),
+    minLength(1, 'Este campo es requerido'),
+    email('Por favor, ingrese una dirección de correo electrónico válida')
+  ),
   password: pipe(
     string(),
     nonEmpty('Este campo es requerido'),
@@ -169,7 +173,7 @@ const Login = () => {
                             edge='end'
                             onClick={handleClickShowPassword}
                             onMouseDown={e => e.preventDefault()}
-                            aria-label='toggle password visibility'   
+                            aria-label='toggle password visibility'
                           >
                             <i className={isPasswordShown ? 'ri-eye-off-line' : 'ri-eye-line'} />
                           </IconButton>

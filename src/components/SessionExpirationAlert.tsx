@@ -1,14 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { 
-  Alert, 
-  AlertTitle, 
-  Button, 
-  Snackbar,
-  Box,
-  Typography
-} from '@mui/material'
+import { Alert, AlertTitle, Button, Snackbar, Box, Typography } from '@mui/material'
 import { useAuth } from '@/hooks/useAuth'
 
 interface SessionExpirationAlertProps {
@@ -23,7 +16,7 @@ export function SessionExpirationAlert({ warningMinutes = 5 }: SessionExpiration
   useEffect(() => {
     const checkSession = () => {
       const sessionInfo = getSessionInfo()
-      
+
       if (sessionInfo.isAuthenticated && !sessionInfo.isExpired) {
         if (sessionInfo.timeUntilExpiration <= warningMinutes && sessionInfo.timeUntilExpiration > 0) {
           setTimeRemaining(sessionInfo.timeUntilExpiration)
@@ -63,14 +56,10 @@ export function SessionExpirationAlert({ warningMinutes = 5 }: SessionExpiration
   }
 
   return (
-    <Snackbar
-      open={showWarning}
-      anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-      sx={{ zIndex: 9999 }}
-    >
-      <Alert 
-        severity="warning" 
-        sx={{ 
+    <Snackbar open={showWarning} anchorOrigin={{ vertical: 'top', horizontal: 'center' }} sx={{ zIndex: 9999 }}>
+      <Alert
+        severity='warning'
+        sx={{
           width: '100%',
           maxWidth: 400,
           '& .MuiAlert-message': {
@@ -80,23 +69,14 @@ export function SessionExpirationAlert({ warningMinutes = 5 }: SessionExpiration
       >
         <AlertTitle>Sesión por expirar</AlertTitle>
         <Box>
-          <Typography variant="body2" sx={{ mb: 2 }}>
+          <Typography variant='body2' sx={{ mb: 2 }}>
             Tu sesión expirará en {formatTime(timeRemaining)}.
           </Typography>
           <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
-            <Button 
-              size="small" 
-              variant="outlined" 
-              onClick={handleLogout}
-              color="error"
-            >
+            <Button size='small' variant='outlined' onClick={handleLogout} color='error'>
               Cerrar sesión
             </Button>
-            <Button 
-              size="small" 
-              variant="contained" 
-              onClick={handleExtendSession}
-            >
+            <Button size='small' variant='contained' onClick={handleExtendSession}>
               Extender sesión
             </Button>
           </Box>
@@ -104,4 +84,4 @@ export function SessionExpirationAlert({ warningMinutes = 5 }: SessionExpiration
       </Alert>
     </Snackbar>
   )
-} 
+}

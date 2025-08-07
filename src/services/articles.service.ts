@@ -6,14 +6,15 @@ export interface Article {
   title: string
   content: string
   slug: string
-  summary: string
-  metaKeywords: string
-  metaDescription: string
-  coverImage: string
-  images: string[] | null
+  summary?: string
+  metaTitle?: string
+  metaKeywords?: string
+  metaDescription?: string
+  coverImage?: string
+  images?: string
   isPublished: boolean
   isPublishedInProduction: boolean
-  deletedAt: string | null
+  deletedAt?: string
   createdAt: string
   updatedAt: string
   author: {
@@ -31,20 +32,26 @@ export interface Article {
     description: string | null
     category_key: string
   }
-  tags: string[]
+  tags: Array<{
+    id: string
+    name: string
+    slug: string
+  }>
 }
 
 export interface CreateArticleRequest {
   title: string
   content: string
-  slug?: string
+  slug: string
   summary?: string
   metaTitle?: string
   metaKeywords?: string
   metaDescription?: string
   coverImage?: string
+  images?: string
+  isPublished?: boolean
   categoryId?: string
-  tags?: string[]
+  tagIds?: string[]
 }
 
 export interface UpdateArticleRequest extends Partial<CreateArticleRequest> {
@@ -81,7 +88,7 @@ class ArticlesService {
    */
   async getArticles(filters: ArticlesFilters = {}): Promise<ApiResponse<ArticlesListResponse>> {
     const params = new URLSearchParams()
-    
+
     // Agregar filtros a los parámetros de la URL
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
@@ -162,9 +169,12 @@ class ArticlesService {
   /**
    * Obtener artículos por categoría
    */
-  async getArticlesByCategory(categoryId: string, filters: Omit<ArticlesFilters, 'category_id'> = {}): Promise<ApiResponse<ArticlesListResponse>> {
+  async getArticlesByCategory(
+    categoryId: string,
+    filters: Omit<ArticlesFilters, 'category_id'> = {}
+  ): Promise<ApiResponse<ArticlesListResponse>> {
     const params = new URLSearchParams()
-    
+
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
         params.append(key, value.toString())
@@ -180,4 +190,4 @@ class ArticlesService {
 const articlesService = new ArticlesService()
 
 export default articlesService
-export { ArticlesService } 
+export { ArticlesService }

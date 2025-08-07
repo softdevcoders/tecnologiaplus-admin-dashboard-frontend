@@ -3,7 +3,6 @@
 import React from 'react'
 import { Box, ToggleButton, ToggleButtonGroup, Tooltip } from '@mui/material'
 
-
 export type ViewMode = 'list' | 'grid'
 
 interface ArticlesViewToggleProps {
@@ -11,14 +10,8 @@ interface ArticlesViewToggleProps {
   onViewModeChange: (viewMode: ViewMode) => void
 }
 
-const ArticlesViewToggle: React.FC<ArticlesViewToggleProps> = ({
-  viewMode,
-  onViewModeChange
-}) => {
-  const handleViewModeChange = (
-    event: React.MouseEvent<HTMLElement>,
-    newViewMode: ViewMode | null
-  ) => {
+const ArticlesViewToggle: React.FC<ArticlesViewToggleProps> = ({ viewMode, onViewModeChange }) => {
+  const handleViewModeChange = (event: React.MouseEvent<HTMLElement>, newViewMode: ViewMode | null) => {
     if (newViewMode !== null) {
       onViewModeChange(newViewMode)
     }
@@ -30,17 +23,17 @@ const ArticlesViewToggle: React.FC<ArticlesViewToggleProps> = ({
         value={viewMode}
         exclusive
         onChange={handleViewModeChange}
-        aria-label="modo de vista"
-        size="small"
+        aria-label='modo de vista'
+        size='small'
       >
-        <ToggleButton value="list" aria-label="vista lista">
-          <Tooltip title="Vista de lista">
-            <i className="ri-list-check" />
+        <ToggleButton value='list' aria-label='vista lista'>
+          <Tooltip title='Vista de lista'>
+            <i className='ri-list-check' />
           </Tooltip>
         </ToggleButton>
-        <ToggleButton value="grid" aria-label="vista grid">
-          <Tooltip title="Vista de tarjetas">
-            <i className="ri-grid-line" />
+        <ToggleButton value='grid' aria-label='vista grid'>
+          <Tooltip title='Vista de tarjetas'>
+            <i className='ri-grid-line' />
           </Tooltip>
         </ToggleButton>
       </ToggleButtonGroup>
@@ -48,4 +41,4 @@ const ArticlesViewToggle: React.FC<ArticlesViewToggleProps> = ({
   )
 }
 
-export default ArticlesViewToggle 
+export default ArticlesViewToggle
