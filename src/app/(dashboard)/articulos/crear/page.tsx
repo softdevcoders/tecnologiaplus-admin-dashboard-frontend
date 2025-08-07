@@ -62,6 +62,10 @@ const CrearArticuloPage = () => {
   const { tags, createTag } = useTags()
   const { createArticle, loading: createLoading, error, clearError } = useArticles()
 
+  // Debug logs
+  console.log('🔍 Componente CrearArticuloPage - categories:', categories)
+  console.log('🔍 Componente CrearArticuloPage - categoriesLoading:', categoriesLoading)
+
   const [formData, setFormData] = useState<ArticleFormData>({
     title: '',
     summary: '',
@@ -434,7 +438,7 @@ return () => window.removeEventListener('beforeunload', handleBeforeUnload)
                     }}
                     disabled={categoriesLoading}
                   >
-                    {categories.map(category => (
+                    {(categories || []).map(category => (
                       <MenuItem key={category.id} value={category.id}>
                         {category.label}
                       </MenuItem>
@@ -507,7 +511,7 @@ return () => window.removeEventListener('beforeunload', handleBeforeUnload)
                   </Box>
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                     {formData.tagIds.map(tagId => {
-                      const tag = tags.find(t => t.id === tagId)
+                      const tag = (tags || []).find(t => t.id === tagId)
 
                       return (
                         <Chip

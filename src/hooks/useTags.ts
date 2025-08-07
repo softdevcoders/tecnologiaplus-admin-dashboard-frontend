@@ -49,7 +49,7 @@ return response.data
   }, [])
 
   return {
-    tags,
+    tags: tags || [],
     loading,
     error,
     fetchTags,

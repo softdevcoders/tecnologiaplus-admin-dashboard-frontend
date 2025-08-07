@@ -26,12 +26,25 @@ export const useCategories = (): UseCategoriesReturn => {
     try {
       setLoading(true)
       setError(null)
+      console.log('🔄 Iniciando fetch de categorías...')
 
       const response = await categoriesService.getCategories(filters)
+      console.log('✅ Respuesta de categorías:', response)
 
-      setCategories(response.data)
+      // Verificar la estructura de la respuesta
+      if (response && response.data) {
+        setCategories(response.data)
+        console.log('📝 Categorías establecidas:', response.data)
+      } else if (Array.isArray(response)) {
+        // Si la respuesta es directamente un array
+        setCategories(response)
+        console.log('📝 Categorías establecidas (array directo):', response)
+      } else {
+        console.error('❌ Estructura de respuesta inesperada:', response)
+        setCategories([])
+      }
     } catch (err) {
-      console.error('Error al obtener categorías:', err)
+      console.error('❌ Error al obtener categorías:', err)
       setError('Error al obtener categorías')
     } finally {
       setLoading(false)
@@ -119,7 +132,7 @@ return false
   }, [fetchCategories])
 
   return {
-    categories,
+    categories: categories || [],
     loading,
     error,
     fetchCategories,
