@@ -16,6 +16,7 @@ import VerticalFooter from '@components/layout/vertical/Footer'
 import ScrollToTop from '@core/components/scroll-to-top'
 import AuthGuard from '@/hocs/AuthGuard'
 import { SessionExpirationAlert } from '@/components/SessionExpirationAlert'
+import { NotificationProvider } from '@/contexts/NotificationContext'
 
 // Util Imports
 import { getMode, getSystemMode } from '@core/utils/serverHelpers'
@@ -31,23 +32,25 @@ const Layout = async (props: ChildrenType) => {
   return (
     <Providers direction={direction}>
       <AuthGuard>
-        <LayoutWrapper
-          systemMode={systemMode}
-          verticalLayout={
-            <VerticalLayout navigation={<Navigation mode={mode} />} navbar={<Navbar />} footer={<VerticalFooter />}>
-              {children}
-            </VerticalLayout>
-          }
-        />
-        <ScrollToTop className='mui-fixed'>
-          <Button
-            variant='contained'
-            className='is-10 bs-10 rounded-full p-0 min-is-0 flex items-center justify-center'
-          >
-            <i className='ri-arrow-up-line' />
-          </Button>
-        </ScrollToTop>
-        <SessionExpirationAlert warningMinutes={5} />
+        <NotificationProvider>
+          <LayoutWrapper
+            systemMode={systemMode}
+            verticalLayout={
+              <VerticalLayout navigation={<Navigation mode={mode} />} navbar={<Navbar />} footer={<VerticalFooter />}>
+                {children}
+              </VerticalLayout>
+            }
+          />
+          <ScrollToTop className='mui-fixed'>
+            <Button
+              variant='contained'
+              className='is-10 bs-10 rounded-full p-0 min-is-0 flex items-center justify-center'
+            >
+              <i className='ri-arrow-up-line' />
+            </Button>
+          </ScrollToTop>
+          <SessionExpirationAlert warningMinutes={5} />
+        </NotificationProvider>
       </AuthGuard>
     </Providers>
   )

@@ -29,6 +29,7 @@ export const useCategories = (): UseCategoriesReturn => {
       console.log('🔄 Iniciando fetch de categorías...')
 
       const response = await categoriesService.getCategories(filters)
+
       console.log('✅ Respuesta de categorías:', response)
 
       // Verificar la estructura de la respuesta

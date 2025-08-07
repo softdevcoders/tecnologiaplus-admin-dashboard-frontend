@@ -23,13 +23,13 @@ import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
-import Snackbar from '@mui/material/Snackbar'
 import Tooltip from '@mui/material/Tooltip'
 
 // Custom hooks and services
 import { useCategories } from '@/hooks/useCategories'
 import { useArticles } from '@/hooks/useArticles'
 import { useTags } from '@/hooks/useTags'
+import { useNotification } from '@/contexts/NotificationContext'
 
 // Components
 import WYSIWYGEditor from '@/components/WYSIWYGEditor'
@@ -61,10 +61,7 @@ const CrearArticuloPage = () => {
   const { categories, loading: categoriesLoading } = useCategories()
   const { tags, createTag } = useTags()
   const { createArticle, loading: createLoading, error, clearError } = useArticles()
-
-  // Debug logs
-  console.log('🔍 Componente CrearArticuloPage - categories:', categories)
-  console.log('🔍 Componente CrearArticuloPage - categoriesLoading:', categoriesLoading)
+  const { showSuccess, showError } = useNotification()
 
   const [formData, setFormData] = useState<ArticleFormData>({
     title: '',
@@ -85,7 +82,7 @@ const CrearArticuloPage = () => {
   const [tagInput, setTagInput] = useState('')
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [showExitDialog, setShowExitDialog] = useState(false)
-  const [showSuccessSnackbar, setShowSuccessSnackbar] = useState(false)
+
   const [autoSaveEnabled] = useState(true)
   const [showPreview, setShowPreview] = useState(false)
 
@@ -131,6 +128,9 @@ const CrearArticuloPage = () => {
               ...prev,
               tagIds: [...prev.tagIds, existingTag.id]
             }))
+            showSuccess(`Etiqueta "${existingTag.name}" agregada`)
+          } else {
+            showError('Esta etiqueta ya está agregada')
           }
         } else {
           // Si no existe, crear el tag
@@ -146,16 +146,20 @@ const CrearArticuloPage = () => {
 
         setTagInput('')
       } catch (error) {
-        console.error('Error al agregar etiqueta:', error)
+        showError('Error al agregar etiqueta. Por favor, intenta de nuevo.')
       }
     }
   }
 
   const handleRemoveTag = (tagToRemove: string) => {
+    const tagName = tags.find(t => t.id === tagToRemove)?.name || 'Etiqueta'
+    
     setFormData(prev => ({
       ...prev,
       tagIds: prev.tagIds.filter(tagId => tagId !== tagToRemove)
     }))
+    
+    showSuccess(`Etiqueta "${tagName}" removida`)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -163,32 +167,32 @@ const CrearArticuloPage = () => {
 
     // Validar slug
     if (!isValidSlug(formData.slug)) {
-      alert('El slug no es válido. Debe contener solo letras minúsculas, números y guiones.')
+      showError('El slug no es válido. Debe contener solo letras minúsculas, números y guiones.')
       
 return
     }
 
     // Validar campos requeridos
     if (!formData.title.trim()) {
-      alert('El título es obligatorio.')
+      showError('El título es obligatorio.')
       
 return
     }
 
     if (!formData.content.trim()) {
-      alert('El contenido es obligatorio.')
+      showError('El contenido es obligatorio.')
       
 return
     }
 
     if (!formData.slug.trim()) {
-      alert('El slug es obligatorio.')
+      showError('El slug es obligatorio.')
       
 return
     }
 
     if (!formData.categoryId) {
-      alert('Debes seleccionar una categoría.')
+      showError('Debes seleccionar una categoría.')
       
 return
     }
@@ -210,13 +214,13 @@ return
 
       if (newArticle) {
         setHasUnsavedChanges(false)
-        setShowSuccessSnackbar(true)
+        showSuccess('Artículo creado exitosamente')
         setTimeout(() => {
           router.push('/articulos')
         }, 1500)
       }
     } catch (error) {
-      console.error('Error al crear artículo:', error)
+      showError('Error al crear el artículo. Por favor, intenta de nuevo.')
     }
   }
 
@@ -240,9 +244,9 @@ return
         isPublished: false // Siempre guardar como borrador
       })
       setHasUnsavedChanges(false)
-      setShowSuccessSnackbar(true)
+      showSuccess('Borrador guardado automáticamente')
     } catch (error) {
-      console.error('Error en guardado automático:', error)
+      showError('Error al guardar automáticamente')
     }
   }, [autoSaveEnabled, hasUnsavedChanges, formData, createArticle])
 
@@ -640,17 +644,7 @@ return () => window.removeEventListener('beforeunload', handleBeforeUnload)
         </DialogActions>
       </Dialog>
 
-      {/* Snackbar de éxito */}
-      <Snackbar
-        open={showSuccessSnackbar}
-        autoHideDuration={3000}
-        onClose={() => setShowSuccessSnackbar(false)}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-      >
-        <Alert onClose={() => setShowSuccessSnackbar(false)} severity='success' sx={{ width: '100%' }}>
-          ¡Artículo guardado exitosamente!
-        </Alert>
-      </Snackbar>
+
     </Box>
   )
 }

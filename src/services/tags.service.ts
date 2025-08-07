@@ -42,7 +42,9 @@ class TagsService {
    * Crear un nuevo tag
    */
   async createTag(tagData: CreateTagRequest): Promise<ApiResponse<Tag>> {
-    return httpClient.post<Tag>(this.baseUrl, tagData)
+    const response = await httpClient.post<Tag>(this.baseUrl, tagData)
+    
+    return response
   }
 
   /**
