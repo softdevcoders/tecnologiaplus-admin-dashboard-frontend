@@ -53,6 +53,7 @@ const CursorFixedWYSIWYGEditor: React.FC<CursorFixedWYSIWYGEditorProps> = ({
   const [linkTargetBlank, setLinkTargetBlank] = useState(true)
   const [isEditingLink, setIsEditingLink] = useState(false)
   const [selectedLinkElement, setSelectedLinkElement] = useState<HTMLAnchorElement | null>(null)
+  const [savedSelection, setSavedSelection] = useState<Range | null>(null)
 
   // Image dialog state
   const [imageDialogOpen, setImageDialogOpen] = useState(false)
@@ -181,7 +182,10 @@ const CursorFixedWYSIWYGEditor: React.FC<CursorFixedWYSIWYGEditorProps> = ({
       case 'link':
         const selection = window.getSelection()
         if (selection && selection.toString()) {
+          saveSelection() // Guardar la selección actual
           setLinkText(selection.toString())
+          setIsEditingLink(false) // No es edición, es creación
+          setSelectedLinkElement(null)
           setLinkDialogOpen(true)
         }
         break
@@ -250,9 +254,23 @@ const CursorFixedWYSIWYGEditor: React.FC<CursorFixedWYSIWYGEditorProps> = ({
       }
     } else {
       // Crear nuevo enlace
-      const targetAttr = linkTargetBlank ? ' target="_blank" rel="noopener noreferrer"' : ''
-      const linkHTML = `<a href="${linkUrl}"${targetAttr}>${linkText}</a>`
-      execCommand('insertHTML', linkHTML)
+      if (savedSelection) {
+        // Restaurar la selección y reemplazar el texto seleccionado
+        restoreSelection()
+        const targetAttr = linkTargetBlank ? ' target="_blank" rel="noopener noreferrer"' : ''
+        const linkHTML = `<a href="${linkUrl}"${targetAttr}>${linkText}</a>`
+        
+        // Usar execCommand para insertar el HTML en la selección
+        document.execCommand('insertHTML', false, linkHTML)
+        
+        // Limpiar la selección guardada
+        setSavedSelection(null)
+      } else {
+        // Fallback: insertar al final si no hay selección
+        const targetAttr = linkTargetBlank ? ' target="_blank" rel="noopener noreferrer"' : ''
+        const linkHTML = `<a href="${linkUrl}"${targetAttr}>${linkText}</a>`
+        execCommand('insertHTML', linkHTML)
+      }
     }
 
     // Limpiar estado
@@ -261,6 +279,7 @@ const CursorFixedWYSIWYGEditor: React.FC<CursorFixedWYSIWYGEditorProps> = ({
     setLinkTargetBlank(true)
     setIsEditingLink(false)
     setSelectedLinkElement(null)
+    setSavedSelection(null)
     setLinkDialogOpen(false)
   }
 
@@ -285,6 +304,7 @@ const CursorFixedWYSIWYGEditor: React.FC<CursorFixedWYSIWYGEditorProps> = ({
     setLinkTargetBlank(true)
     setIsEditingLink(false)
     setSelectedLinkElement(null)
+    setSavedSelection(null)
     setLinkDialogOpen(false)
   }
 
@@ -370,6 +390,23 @@ const CursorFixedWYSIWYGEditor: React.FC<CursorFixedWYSIWYGEditorProps> = ({
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       execCommand('insertParagraph')
+    }
+  }
+
+  const saveSelection = () => {
+    const selection = window.getSelection()
+    if (selection && selection.rangeCount > 0) {
+      setSavedSelection(selection.getRangeAt(0).cloneRange())
+    }
+  }
+
+  const restoreSelection = () => {
+    if (savedSelection) {
+      const selection = window.getSelection()
+      if (selection) {
+        selection.removeAllRanges()
+        selection.addRange(savedSelection)
+      }
     }
   }
 
@@ -1008,6 +1045,7 @@ const CursorFixedWYSIWYGEditor: React.FC<CursorFixedWYSIWYGEditorProps> = ({
             setLinkUrl('')
             setLinkText('')
             setLinkTargetBlank(true)
+            setSavedSelection(null)
           }}>Cancelar</Button>
           {isEditingLink && (
             <Button onClick={handleDeleteLink} color='error' variant='outlined'>
