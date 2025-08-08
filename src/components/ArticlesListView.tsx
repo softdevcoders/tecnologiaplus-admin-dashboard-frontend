@@ -191,8 +191,18 @@ const ArticlesListView: React.FC<ArticlesListViewProps> = ({
                   </TableCell>
 
                   <TableCell align='center'>
-                    <IconButton size='small' onClick={e => handleMenuOpen(e, article.id)} color='default'>
+                    <IconButton size='small' onClick={e => handleMenuOpen(e, article.id)} color='primary'>
                       <i className='ri-more-2-fill' />
+                    </IconButton>
+                    <IconButton 
+                      size='small' 
+                      component='a'
+                      href={`https://tecnologiaplus.com/blog/${article.category.slug}/${article.slug}`}
+                      target='_blank'
+                      title='Ver artículo' 
+                      color='primary'
+                    >
+                      <i className='ri-external-link-line' />
                     </IconButton>
                   </TableCell>
                 </TableRow>

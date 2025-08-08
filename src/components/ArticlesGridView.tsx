@@ -112,13 +112,35 @@ const ArticlesGridView: React.FC<ArticlesGridViewProps> = ({
                       title='Acciones' 
                       color='primary'
                       sx={{
-                        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                        transition: 'transform 0.2s ease-in-out',
                         '&:hover': {
-                          backgroundColor: 'rgba(255, 255, 255, 1) !important'
+                          backgroundColor: 'rgba(255, 255, 255, 1) !important',
+                          transform: 'scale(1.1)'
                         }
                       }}
                     >
                       <i className='ri-more-2-fill' />
+                    </IconButton>
+                  </Box>
+                  <Box sx={{ display: 'flex', position: 'absolute', top: 10, right: 50, zIndex: 1 }}>
+                    <IconButton 
+                      size='small' 
+                      component='a'
+                      href={`https://tecnologiaplus.com/blog/${article.category.slug}/${article.slug}`}
+                      target='_blank'
+                      title='Ver artículo' 
+                      color='primary'
+                      sx={{
+                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                        transition: 'transform 0.2s ease-in-out',
+                        '&:hover': {
+                          backgroundColor: 'rgba(255, 255, 255, 1) !important',
+                          transform: 'scale(1.1)'
+                        }
+                      }}
+                    >
+                      <i className='ri-external-link-line' />
                     </IconButton>
                   </Box>
                   <Box
