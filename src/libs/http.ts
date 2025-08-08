@@ -22,8 +22,8 @@ function decodeJWT(token: string) {
     return JSON.parse(jsonPayload)
   } catch (error) {
     console.error('Error decoding JWT:', error)
-    
-return null
+
+    return null
   }
 }
 
@@ -38,12 +38,11 @@ function isTokenExpired(token: string): boolean {
 
     const currentTime = Math.floor(Date.now() / 1000)
 
-    
-return decoded.exp < currentTime
+    return decoded.exp < currentTime
   } catch (error) {
     console.error('Error checking token expiration:', error)
-    
-return true
+
+    return true
   }
 }
 
@@ -102,7 +101,6 @@ class HttpClient {
           } catch (error) {
             console.warn('Error getting session or token expired:', error)
 
-
             // Si hay un error con la sesión, redirigir al login
             if (error instanceof Error && error.message === 'Token expired') {
               throw error
@@ -110,8 +108,7 @@ class HttpClient {
           }
         }
 
-        
-return config
+        return config
       },
       error => {
         return Promise.reject(error)
@@ -173,7 +170,6 @@ return config
   async get<T = any>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     const response = await this.instance.get(url, config)
 
-
     // Si la respuesta no tiene la estructura ApiResponse, la envuelve
     if (response.data && typeof response.data === 'object' && !('success' in response.data)) {
       return {
@@ -183,8 +179,7 @@ return config
       }
     }
 
-    
-return response.data
+    return response.data
   }
 
   async post<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
@@ -203,14 +198,12 @@ return response.data
       }
     }
 
-    
-return response.data
+    return response.data
   }
 
   async put<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     const response = await this.instance.put(url, data, config)
 
-
     // Si la respuesta no tiene la estructura ApiResponse, la envuelve
     if (response.data && typeof response.data === 'object' && !('success' in response.data)) {
       return {
@@ -220,14 +213,12 @@ return response.data
       }
     }
 
-    
-return response.data
+    return response.data
   }
 
   async patch<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     const response = await this.instance.patch(url, data, config)
 
-
     // Si la respuesta no tiene la estructura ApiResponse, la envuelve
     if (response.data && typeof response.data === 'object' && !('success' in response.data)) {
       return {
@@ -237,14 +228,12 @@ return response.data
       }
     }
 
-    
-return response.data
+    return response.data
   }
 
   async delete<T = any>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     const response = await this.instance.delete(url, config)
 
-
     // Si la respuesta no tiene la estructura ApiResponse, la envuelve
     if (response.data && typeof response.data === 'object' && !('success' in response.data)) {
       return {
@@ -254,8 +243,7 @@ return response.data
       }
     }
 
-    
-return response.data
+    return response.data
   }
 
   // Método para obtener la instancia de axios si necesitas configuración específica

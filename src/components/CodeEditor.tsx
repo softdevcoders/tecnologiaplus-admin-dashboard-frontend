@@ -184,8 +184,8 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
       return formatted
     } catch (error) {
       console.error('Error al formatear HTML:', error)
-      
-return html // Retornar HTML original si hay error
+
+      return html // Retornar HTML original si hay error
     }
   }
 

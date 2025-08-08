@@ -27,8 +27,7 @@ export const generateSlug = (title: string): string => {
 export const isValidSlug = (slug: string): boolean => {
   const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 
-  
-return slugRegex.test(slug)
+  return slugRegex.test(slug)
 }
 
 /**

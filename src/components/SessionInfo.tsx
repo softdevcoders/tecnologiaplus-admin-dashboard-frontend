@@ -47,15 +47,14 @@ export function SessionInfo({ variant = 'compact' }: SessionInfoProps) {
     const hours = Math.floor(minutes / 60)
     const remainingMinutes = minutes % 60
 
-    
-return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}m` : `${hours}h`
+    return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}m` : `${hours}h`
   }
 
   const getStatusColor = (minutes: number): 'default' | 'warning' | 'error' => {
     if (minutes <= 0) return 'error'
     if (minutes <= 5) return 'warning'
-    
-return 'default'
+
+    return 'default'
   }
 
   if (!sessionInfo.isAuthenticated) {

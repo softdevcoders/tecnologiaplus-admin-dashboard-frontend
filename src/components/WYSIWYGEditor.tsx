@@ -126,21 +126,21 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
   const execCommand = (command: string, value?: string) => {
     // Asegurar que el editor tenga el foco
     editorRef.current?.focus()
-    
+
     if (command === 'insertHTML' && value) {
       // Usar una función más robusta para insertar HTML
       insertHTML(value)
     } else {
       document.execCommand(command, false, value)
     }
-    
+
     updateContent()
   }
 
   const insertHTML = (html: string) => {
     if (!editorRef.current) {
       showError('❌ Editor ref no disponible')
-      
+
       return
     }
 
@@ -152,7 +152,7 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
     if (!selection || selection.rangeCount === 0) {
       // Si no hay selección, insertar al final
       editorRef.current.innerHTML += html
-      
+
       return
     }
 
@@ -177,15 +177,17 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
     } else {
       // Inserción normal
       range.deleteContents()
-      
+
       const tempDiv = document.createElement('div')
+
       tempDiv.innerHTML = html
-      
+
       const fragment = document.createDocumentFragment()
+
       while (tempDiv.firstChild) {
         fragment.appendChild(tempDiv.firstChild)
       }
-      
+
       range.insertNode(fragment)
       range.collapse(false)
       selection.removeAllRanges()
@@ -229,13 +231,12 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
     setHtmlCode(newHtml)
     onChange(newHtml)
 
-
     // Solo actualizar el editor si estamos en la pestaña HTML
     if (editorRef.current && activeTab === 1) {
       editorRef.current.innerHTML = newHtml
     }
   }
-  
+
   const handleFormat = (format: string) => {
     switch (format) {
       case 'bold':
@@ -357,13 +358,13 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
   const handleImageSubmit = () => {
     if (!imageAlt.trim()) {
       showError('El texto alternativo (alt) es obligatorio para la accesibilidad y SEO.')
-      
+
       return
     }
 
     if (imageUrl || uploadedImageUrl) {
       const finalImageUrl = imageUrl || uploadedImageUrl
-      
+
       // Si es una URL de Cloudinary y tenemos publicId, generar picture element
       if (finalImageUrl && finalImageUrl.includes('res.cloudinary.com') && uploadedImagePublicId) {
         const pictureElement = generatePictureElement(finalImageUrl, uploadedImagePublicId, imageAlt, {
@@ -399,7 +400,7 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
       if (!result) {
         // El error ya se maneja en el hook
         showError('Error al subir la imagen. Por favor, intenta de nuevo.')
-        
+
         return
       }
     },
@@ -942,7 +943,16 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
 
           {/* Mostrar imagen subida */}
           {uploadedImageUrl && (
-            <Box sx={{ mb: 2, p: 2, border: '1px solid', borderColor: 'success.main', borderRadius: 1, bgcolor: 'success.50' }}>
+            <Box
+              sx={{
+                mb: 2,
+                p: 2,
+                border: '1px solid',
+                borderColor: 'success.main',
+                borderRadius: 1,
+                bgcolor: 'success.50'
+              }}
+            >
               <Typography variant='subtitle2' color='success.main' sx={{ mb: 1 }}>
                 ✅ Imagen subida exitosamente
               </Typography>
@@ -981,19 +991,21 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => {
-            setImageDialogOpen(false)
-            setImageUrl('')
-            setImageAlt('')
-            setUploadedImageUrl(null)
-            setUploadedImagePublicId(null)
-            setImageUploadError(null)
-          }}>
+          <Button
+            onClick={() => {
+              setImageDialogOpen(false)
+              setImageUrl('')
+              setImageAlt('')
+              setUploadedImageUrl(null)
+              setUploadedImagePublicId(null)
+              setImageUploadError(null)
+            }}
+          >
             Cancelar
           </Button>
-          <Button 
-            onClick={handleImageSubmit} 
-            variant='contained' 
+          <Button
+            onClick={handleImageSubmit}
+            variant='contained'
             disabled={(!imageUrl && !uploadedImageUrl) || !imageAlt.trim()}
           >
             {uploadedImageUrl ? 'Insertar imagen subida' : 'Insertar desde URL'}

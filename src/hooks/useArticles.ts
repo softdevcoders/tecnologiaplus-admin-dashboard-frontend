@@ -2,12 +2,7 @@ import { useState, useEffect } from 'react'
 
 import { useSession } from 'next-auth/react'
 
-import type {
-  Article,
-  ArticlesFilters,
-  CreateArticleRequest,
-  UpdateArticleRequest
-} from '@/services/articles.service';
+import type { Article, ArticlesFilters, CreateArticleRequest, UpdateArticleRequest } from '@/services/articles.service'
 import articlesService from '@/services/articles.service'
 import type { ApiError } from '@/libs/http'
 
@@ -95,8 +90,8 @@ export const useArticles = (initialFilters: ArticlesFilters = {}): UseArticlesRe
 
       if (response.success) {
         setState(prev => ({ ...prev, loading: false }))
-        
-return response.data
+
+        return response.data
       } else {
         throw new Error(response.message || 'Error al obtener artículo')
       }
@@ -108,8 +103,8 @@ return response.data
         loading: false,
         error: apiError
       }))
-      
-return null
+
+      return null
     }
   }
 
@@ -122,8 +117,8 @@ return null
       if (response.success) {
         // Recargar la lista de artículos
         await fetchArticles()
-        
-return response.data
+
+        return response.data
       } else {
         throw new Error(response.message || 'Error al crear artículo')
       }
@@ -135,8 +130,8 @@ return response.data
         loading: false,
         error: apiError
       }))
-      
-return null
+
+      return null
     }
   }
 
@@ -153,8 +148,8 @@ return null
           articles: prev.articles.map(article => (article.id === articleData.id ? response.data : article)),
           loading: false
         }))
-        
-return response.data
+
+        return response.data
       } else {
         throw new Error(response.message || 'Error al actualizar artículo')
       }
@@ -166,8 +161,8 @@ return response.data
         loading: false,
         error: apiError
       }))
-      
-return null
+
+      return null
     }
   }
 
@@ -185,8 +180,8 @@ return null
           total: prev.total - 1,
           loading: false
         }))
-        
-return true
+
+        return true
       } else {
         throw new Error(response.message || 'Error al eliminar artículo')
       }
@@ -198,8 +193,8 @@ return true
         loading: false,
         error: apiError
       }))
-      
-return false
+
+      return false
     }
   }
 
@@ -216,8 +211,8 @@ return false
           articles: prev.articles.map(article => (article.id === id ? response.data : article)),
           loading: false
         }))
-        
-return response.data
+
+        return response.data
       } else {
         throw new Error(response.message || 'Error al publicar artículo')
       }
@@ -229,8 +224,8 @@ return response.data
         loading: false,
         error: apiError
       }))
-      
-return null
+
+      return null
     }
   }
 
@@ -247,8 +242,8 @@ return null
           articles: prev.articles.map(article => (article.id === id ? response.data : article)),
           loading: false
         }))
-        
-return response.data
+
+        return response.data
       } else {
         throw new Error(response.message || 'Error al despublicar artículo')
       }
@@ -260,8 +255,8 @@ return response.data
         loading: false,
         error: apiError
       }))
-      
-return null
+
+      return null
     }
   }
 
@@ -278,8 +273,8 @@ return null
           articles: prev.articles.map(article => (article.id === id ? response.data : article)),
           loading: false
         }))
-        
-return response.data
+
+        return response.data
       } else {
         throw new Error(response.message || 'Error al archivar artículo')
       }
@@ -291,8 +286,8 @@ return response.data
         loading: false,
         error: apiError
       }))
-      
-return null
+
+      return null
     }
   }
 

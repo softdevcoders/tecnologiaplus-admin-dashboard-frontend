@@ -54,8 +54,8 @@ export function SessionExpirationAlert({ warningMinutes = 5 }: SessionExpiration
   const formatTime = (minutes: number): string => {
     if (minutes <= 0) return '0 minutos'
     if (minutes === 1) return '1 minuto'
-    
-return `${minutes} minutos`
+
+    return `${minutes} minutos`
   }
 
   return (

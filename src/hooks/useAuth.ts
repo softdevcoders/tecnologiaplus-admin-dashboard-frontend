@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation'
 
 import { useSession, signOut } from 'next-auth/react'
 
-
 // Función para decodificar JWT sin verificación
 function decodeJWT(token: string) {
   try {
@@ -25,8 +24,8 @@ function decodeJWT(token: string) {
     return JSON.parse(jsonPayload)
   } catch (error) {
     console.error('Error decoding JWT:', error)
-    
-return null
+
+    return null
   }
 }
 
@@ -42,12 +41,11 @@ function isTokenExpired(token: string): boolean {
     // exp está en segundos, Date.now() está en milisegundos
     const currentTime = Math.floor(Date.now() / 1000)
 
-    
-return decoded.exp < currentTime
+    return decoded.exp < currentTime
   } catch (error) {
     console.error('Error checking token expiration:', error)
-    
-return true
+
+    return true
   }
 }
 
@@ -67,8 +65,8 @@ function getTimeUntilExpiration(token: string): number {
     return Math.floor(timeRemaining / 60)
   } catch (error) {
     console.error('Error calculating time until expiration:', error)
-    
-return 0
+
+    return 0
   }
 }
 
@@ -99,13 +97,12 @@ export function useAuth() {
       if (isTokenExpired(accessToken)) {
         console.warn('Session expired, logging out...')
         logout()
-        
-return true
+
+        return true
       }
     }
 
-    
-return false
+    return false
   }, [session, logout])
 
   // Función para obtener información de la sesión
@@ -166,7 +163,7 @@ return false
 
       return () => clearInterval(interval)
     }
-  }, [status, session, getSessionInfo, logout]) 
+  }, [status, session, getSessionInfo, logout])
 
   return {
     session,

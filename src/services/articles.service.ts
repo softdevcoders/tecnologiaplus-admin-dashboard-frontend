@@ -1,4 +1,4 @@
-import type { ApiResponse } from '@/libs/http';
+import type { ApiResponse } from '@/libs/http'
 import httpClient from '@/libs/http'
 
 // Tipos para los artículos
@@ -103,8 +103,7 @@ class ArticlesService {
 
     const url = `${this.baseUrl}?${params.toString()}`
 
-    
-return httpClient.get<ArticlesListResponse>(url)
+    return httpClient.get<ArticlesListResponse>(url)
   }
 
   /**
@@ -134,8 +133,7 @@ return httpClient.get<ArticlesListResponse>(url)
   async updateArticle(articleData: UpdateArticleRequest): Promise<ApiResponse<Article>> {
     const { id, ...data } = articleData
 
-    
-return httpClient.put<Article>(`${this.baseUrl}/${id}`, data)
+    return httpClient.put<Article>(`${this.baseUrl}/${id}`, data)
   }
 
   /**
@@ -190,8 +188,7 @@ return httpClient.put<Article>(`${this.baseUrl}/${id}`, data)
 
     const url = `${this.baseUrl}/category/${categoryId}?${params.toString()}`
 
-    
-return httpClient.get<ArticlesListResponse>(url)
+    return httpClient.get<ArticlesListResponse>(url)
   }
 }
 

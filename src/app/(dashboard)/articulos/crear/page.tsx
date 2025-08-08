@@ -29,6 +29,7 @@ import Tooltip from '@mui/material/Tooltip'
 import { useCategories } from '@/hooks/useCategories'
 import { useArticles } from '@/hooks/useArticles'
 import { useTags } from '@/hooks/useTags'
+import { useImages } from '@/hooks/useImages'
 import { useNotification } from '@/contexts/NotificationContext'
 
 // Components
@@ -62,6 +63,12 @@ const CrearArticuloPage = () => {
   const { tags, createTag } = useTags()
   const { createArticle, loading: createLoading, error, clearError } = useArticles()
   const { showSuccess, showError } = useNotification()
+
+  // Hook para manejar imágenes
+  const { moveImagesToArticle } = useImages({
+    sessionId: 'temp', // Se usará solo para mover imágenes
+    onError: showError
+  })
 
   const [formData, setFormData] = useState<ArticleFormData>({
     title: '',
@@ -153,12 +160,12 @@ const CrearArticuloPage = () => {
 
   const handleRemoveTag = (tagToRemove: string) => {
     const tagName = tags.find(t => t.id === tagToRemove)?.name || 'Etiqueta'
-    
+
     setFormData(prev => ({
       ...prev,
       tagIds: prev.tagIds.filter(tagId => tagId !== tagToRemove)
     }))
-    
+
     showSuccess(`Etiqueta "${tagName}" removida`)
   }
 
@@ -168,36 +175,84 @@ const CrearArticuloPage = () => {
     // Validar slug
     if (!isValidSlug(formData.slug)) {
       showError('El slug no es válido. Debe contener solo letras minúsculas, números y guiones.')
-      
-return
+
+      return
     }
 
     // Validar campos requeridos
     if (!formData.title.trim()) {
       showError('El título es obligatorio.')
-      
-return
+
+      return
     }
 
     if (!formData.content.trim()) {
       showError('El contenido es obligatorio.')
-      
-return
+
+      return
     }
 
     if (!formData.slug.trim()) {
       showError('El slug es obligatorio.')
-      
-return
+
+      return
     }
 
     if (!formData.categoryId) {
       showError('Debes seleccionar una categoría.')
-      
-return
+
+      return
     }
 
     try {
+      // Obtener la categoría para el slug
+      const category = categories.find(cat => cat.id === formData.categoryId)
+
+      if (!category) {
+        showError('Categoría no encontrada.')
+
+        return
+      }
+
+      // Recolectar todos los tempImageIds que necesitamos mover
+      const tempImageIds: string[] = []
+
+      // Agregar imagen principal si existe
+      if (formData.coverImageTempId) {
+        tempImageIds.push(formData.coverImageTempId)
+      }
+
+      // TODO: Recolectar tempImageIds de las imágenes del contenido
+      // Esto requerirá rastrear las imágenes insertadas en el editor
+
+      // Mover imágenes a su ubicación final
+      if (tempImageIds.length > 0) {
+        const movedImages = await moveImagesToArticle(tempImageIds, category.slug, formData.slug)
+
+        if (movedImages) {
+          // Actualizar las URLs de las imágenes con las nuevas URLs
+          const updatedContent = formData.content
+          let updatedCoverImage = formData.coverImage
+
+          movedImages.forEach(movedImage => {
+            // Actualizar imagen principal si corresponde
+            if (movedImage.tempImageId === formData.coverImageTempId) {
+              updatedCoverImage = movedImage.newUrl
+            }
+
+            // TODO: Actualizar URLs en el contenido del artículo
+            // Esto requerirá reemplazar las URLs temporales con las nuevas URLs
+          })
+
+          // Actualizar el formData con las nuevas URLs
+          setFormData(prev => ({
+            ...prev,
+            content: updatedContent,
+            coverImage: updatedCoverImage
+          }))
+        }
+      }
+
       const newArticle = await createArticle({
         title: formData.title,
         summary: formData.summary,
@@ -220,6 +275,7 @@ return
         }, 1500)
       }
     } catch (error) {
+      console.error('Error al crear artículo:', error)
       showError('Error al crear el artículo. Por favor, intenta de nuevo.')
     }
   }
@@ -256,8 +312,7 @@ return
 
     const interval = setInterval(autoSave, 30000)
 
-    
-return () => clearInterval(interval)
+    return () => clearInterval(interval)
   }, [autoSave, autoSaveEnabled])
 
   // Confirmar antes de salir si hay cambios no guardados
@@ -273,8 +328,8 @@ return () => clearInterval(interval)
 
   useEffect(() => {
     window.addEventListener('beforeunload', handleBeforeUnload)
-    
-return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
   }, [handleBeforeUnload])
 
   const handleCancel = () => {
@@ -584,7 +639,9 @@ return () => window.removeEventListener('beforeunload', handleBeforeUnload)
                   placeholder='Descripción para motores de búsqueda'
                   inputProps={{ maxLength: 160 }}
                   helperText={`${formData.metaDescription?.length}/160 caracteres`}
-                  color={formData.metaDescription?.length && formData.metaDescription?.length > 150 ? 'warning' : 'primary'} 
+                  color={
+                    formData.metaDescription?.length && formData.metaDescription?.length > 150 ? 'warning' : 'primary'
+                  }
                 />
               </Grid>
 
@@ -643,8 +700,6 @@ return () => window.removeEventListener('beforeunload', handleBeforeUnload)
           </Button>
         </DialogActions>
       </Dialog>
-
-
     </Box>
   )
 }

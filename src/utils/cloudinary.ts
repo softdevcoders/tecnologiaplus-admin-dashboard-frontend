@@ -16,8 +16,7 @@ export interface CloudinaryTransformOptions {
 export function getPublicId(url: string): string {
   const match = url.match(/\/v\d+\/([^/]+)$/)
 
-  
-return match ? match[1] : ''
+  return match ? match[1] : ''
 }
 
 /**

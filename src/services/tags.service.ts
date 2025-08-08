@@ -1,4 +1,4 @@
-import type { ApiResponse } from '@/libs/http';
+import type { ApiResponse } from '@/libs/http'
 import httpClient from '@/libs/http'
 
 export interface Tag {
@@ -43,7 +43,7 @@ class TagsService {
    */
   async createTag(tagData: CreateTagRequest): Promise<ApiResponse<Tag>> {
     const response = await httpClient.post<Tag>(this.baseUrl, tagData)
-    
+
     return response
   }
 

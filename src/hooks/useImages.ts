@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 
-import type { UploadImageResponse } from '@/services/images.service';
+import type { UploadImageResponse } from '@/services/images.service'
 import { imagesService } from '@/services/images.service'
 
 interface UseImagesOptions {
@@ -31,8 +31,8 @@ export const useImages = ({ sessionId, onSuccess, onError }: UseImagesOptions) =
 
         if (response.data) {
           onSuccess?.(response.data)
-          
-return response.data
+
+          return response.data
         } else {
           throw new Error('Error al subir la imagen')
         }
@@ -41,8 +41,8 @@ return response.data
 
         setError(errorMessage)
         onError?.(errorMessage)
-        
-return null
+
+        return null
       } finally {
         setUploading(false)
       }
@@ -68,8 +68,8 @@ return null
 
         if (response.data) {
           onSuccess?.(response.data)
-          
-return response.data
+
+          return response.data
         } else {
           throw new Error('Error al subir la imagen')
         }
@@ -78,8 +78,8 @@ return response.data
 
         setError(errorMessage)
         onError?.(errorMessage)
-        
-return null
+
+        return null
       } finally {
         setUploading(false)
       }
@@ -91,15 +91,15 @@ return null
     async (tempImageId: string): Promise<boolean> => {
       try {
         await imagesService.deleteTempImage(tempImageId)
-        
-return true
+
+        return true
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Error al eliminar la imagen'
 
         setError(errorMessage)
         onError?.(errorMessage)
-        
-return false
+
+        return false
       }
     },
     [onError]
@@ -110,21 +110,47 @@ return false
       const response = await imagesService.cleanupSessionImages(sessionId)
 
       console.log(`Limpieza completada: ${response.data?.deletedCount} imágenes eliminadas`)
-      
-return true
+
+      return true
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error al limpiar imágenes'
 
       setError(errorMessage)
       onError?.(errorMessage)
-      
-return false
+
+      return false
     }
   }, [sessionId, onError])
 
   const clearError = useCallback(() => {
     setError(null)
   }, [])
+
+  const moveImagesToArticle = useCallback(
+    async (
+      tempImageIds: string[],
+      categorySlug: string,
+      articleSlug: string
+    ): Promise<Array<{ tempImageId: string; newUrl: string; newPublicId: string }> | null> => {
+      try {
+        const response = await imagesService.moveImagesToArticle(tempImageIds, categorySlug, articleSlug)
+
+        if (response.data) {
+          return response.data.movedImages
+        }
+
+        return null
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Error al mover imágenes al artículo'
+
+        setError(errorMessage)
+        onError?.(errorMessage)
+
+        return null
+      }
+    },
+    [onError]
+  )
 
   return {
     uploading,
@@ -133,6 +159,7 @@ return false
     uploadContentImage,
     deleteTempImage,
     cleanupSessionImages,
+    moveImagesToArticle,
     clearError
   }
 }

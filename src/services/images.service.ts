@@ -1,4 +1,4 @@
-import type { ApiResponse } from '@/libs/http';
+import type { ApiResponse } from '@/libs/http'
 import httpClient from '@/libs/http'
 
 export interface UploadImageResponse {
@@ -60,6 +60,24 @@ class ImagesService {
    */
   async cleanupSessionImages(sessionId: string): Promise<ApiResponse<{ message: string; deletedCount: number }>> {
     return httpClient.delete<{ message: string; deletedCount: number }>(`${this.baseUrl}/cleanup/${sessionId}`)
+  }
+
+  /**
+   * Mover imágenes temporales a ubicación final del artículo
+   */
+  async moveImagesToArticle(
+    tempImageIds: string[],
+    categorySlug: string,
+    articleSlug: string
+  ): Promise<ApiResponse<{ movedImages: Array<{ tempImageId: string; newUrl: string; newPublicId: string }> }>> {
+    return httpClient.post<{ movedImages: Array<{ tempImageId: string; newUrl: string; newPublicId: string }> }>(
+      `${this.baseUrl}/move-to-article`,
+      {
+        tempImageIds,
+        categorySlug,
+        articleSlug
+      }
+    )
   }
 
   /**

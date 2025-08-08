@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 
-import type { Tag } from '@/services/tags.service';
+import type { Tag } from '@/services/tags.service'
 import { tagsService } from '@/services/tags.service'
 import { useNotification } from '@/contexts/NotificationContext'
 import { generateSlug } from '@/utils/slug'
@@ -36,7 +36,7 @@ export const useTags = () => {
   const createTag = async (name: string) => {
     try {
       const slug = generateSlug(name)
-      
+
       const response = await tagsService.createTag({ name, slug })
 
       if (response.data) {

@@ -134,8 +134,8 @@ const EditarArticuloPage = () => {
     // Validar slug
     if (!isValidSlug(formData.slug)) {
       alert('El slug no es válido. Debe contener solo letras minúsculas, números y guiones.')
-      
-return
+
+      return
     }
 
     try {
@@ -150,7 +150,7 @@ return
         metaKeywords: formData.keywords,
         coverImage: formData.coverImage,
         categoryId: formData.categoryId,
-        tagIds: formData.tags,
+        tagIds: formData.tags
       })
 
       if (updatedArticle) {
