@@ -86,40 +86,34 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
     }
   })
 
+  const [isUserTyping, setIsUserTyping] = useState(false)
+  const [lastExternalValue, setLastExternalValue] = useState(value)
+
   useEffect(() => {
-    // Solo actualizar si estamos en la pestaña del editor y hay un cambio real
-    if (editorRef.current && activeTab === 0 && value !== editorRef.current.innerHTML) {
-      const selection = window.getSelection()
-      const range = selection?.getRangeAt(0)
-      const wasAtEnd = range && range.endOffset === range.endContainer.textContent?.length
-
-      // Si el valor está vacío, inicializar con un párrafo vacío
-      if (!value || value.trim() === '') {
-        editorRef.current.innerHTML = '<p></p>'
-        setHtmlCode('<p></p>')
-      } else {
-        editorRef.current.innerHTML = value
-        setHtmlCode(value)
-      }
-
-      // Restaurar cursor al final si estaba al final
-      if (wasAtEnd && editorRef.current.textContent) {
-        const newRange = document.createRange()
-
-        newRange.selectNodeContents(editorRef.current)
-        newRange.collapse(false)
-        selection?.removeAllRanges()
-        selection?.addRange(newRange)
+    // Solo actualizar si el valor viene de fuera (no del usuario escribiendo)
+    // Y si realmente cambió
+    if (value !== lastExternalValue && !isUserTyping) {
+      setLastExternalValue(value)
+      
+      if (editorRef.current && activeTab === 0) {
+        // Si el valor está vacío, inicializar sin párrafo automático
+        if (!value || value.trim() === '') {
+          editorRef.current.innerHTML = ''
+          setHtmlCode('')
+        } else {
+          editorRef.current.innerHTML = value
+          setHtmlCode(value)
+        }
       }
     }
-  }, [value, activeTab])
+  }, [value, activeTab, isUserTyping, lastExternalValue])
 
-  // Inicializar con un párrafo cuando el componente se monta
+  // Inicializar sin párrafo automático cuando el componente se monta
   useEffect(() => {
     if (editorRef.current && (!value || value.trim() === '')) {
-      editorRef.current.innerHTML = '<p></p>'
-      setHtmlCode('<p></p>')
-      onChange('<p></p>')
+      editorRef.current.innerHTML = ''
+      setHtmlCode('')
+      onChange('')
     }
   }, []) // Solo se ejecuta al montar
 
@@ -200,12 +194,42 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
       // Solo actualizar si estamos en la pestaña del editor
       let newContent = editorRef.current.innerHTML
 
-      // Si el contenido está vacío, crear un párrafo vacío
+      // Limpiar contenido innecesario
       if (!newContent || newContent.trim() === '' || newContent === '<br>') {
-        newContent = '<p></p>'
+        newContent = ''
+        editorRef.current.innerHTML = newContent
+      } else {
+        // Verificar si hay texto suelto que necesita ser envuelto en párrafo
+        const tempDiv = document.createElement('div')
+
+        tempDiv.innerHTML = newContent
+
+        // Buscar nodos de texto que no estén dentro de elementos de bloque
+        const walker = document.createTreeWalker(
+          tempDiv,
+          NodeFilter.SHOW_TEXT,
+          null
+        )
+
+        let textNode
+
+        while (textNode = walker.nextNode()) {
+          const parent = textNode.parentElement
+
+          if (parent && !parent.closest('p, h1, h2, h3, h4, h5, h6, blockquote, pre, ul, ol, li, div')) {
+            // Si el texto no está en un elemento de bloque, envolverlo en párrafo
+            const p = document.createElement('p')
+
+            textNode.parentNode?.insertBefore(p, textNode)
+            p.appendChild(textNode)
+          }
+        }
+
+        newContent = tempDiv.innerHTML
         editorRef.current.innerHTML = newContent
       }
 
+      // Siempre actualizar el estado, pero marcar que viene del usuario
       onChange(newContent)
       setHtmlCode(newContent)
     }
@@ -259,14 +283,6 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
         break
       case 'p':
         execCommand('formatBlock', '<p>')
-
-        // Asegurar que siempre haya al menos un párrafo
-        setTimeout(() => {
-          if (editorRef.current && !editorRef.current.querySelector('p')) {
-            editorRef.current.innerHTML = '<p></p>'
-            updateContent()
-          }
-        }, 0)
         break
       case 'ul':
         execCommand('insertUnorderedList')
@@ -437,9 +453,48 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
 
   const handlePaste = (e: React.ClipboardEvent) => {
     e.preventDefault()
+    
     const text = e.clipboardData.getData('text/plain')
+    const html = e.clipboardData.getData('text/html')
 
-    document.execCommand('insertText', false, text)
+    if (html) {
+      // Si hay HTML, insertarlo manteniendo la estructura
+      const selection = window.getSelection()
+      
+      if (selection && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0)
+        
+        // Crear un elemento temporal para limpiar el HTML
+        const tempDiv = document.createElement('div')
+
+        tempDiv.innerHTML = html
+
+        // Limpiar TODOS los estilos pero mantener estructura semántica
+        const cleanHtml = tempDiv.innerHTML
+          .replace(/<div>/g, '<p>')
+          .replace(/<\/div>/g, '</p>')
+          .replace(/<span[^>]*>/g, '')
+          .replace(/<\/span>/g, '')
+          .replace(/style="[^"]*"/g, '')  // Eliminar todos los atributos style
+          .replace(/class="[^"]*"/g, '')  // Eliminar todas las clases
+          .replace(/id="[^"]*"/g, '')     // Eliminar todos los IDs
+          .replace(/<[^>]*\s+style="[^"]*"[^>]*>/g, (match) => {
+            // Eliminar style de cualquier tag que lo tenga
+            return match.replace(/\s+style="[^"]*"/g, '')
+          })
+
+        // Insertar el HTML limpio
+        const fragment = document.createRange().createContextualFragment(cleanHtml)
+
+        range.deleteContents()
+        range.insertNode(fragment)
+        range.collapse(false)
+      }
+    } else {
+      // Si solo hay texto plano, insertarlo como texto
+      document.execCommand('insertText', false, text)
+    }
+    
     updateContent()
   }
 
@@ -727,10 +782,27 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
           <Box
             ref={editorRef}
             contentEditable
-            onInput={updateContent}
+            onInput={() => {
+              setIsUserTyping(true)
+              
+              // Actualizar contenido sin interferir con el cursor
+              if (editorRef.current && activeTab === 0) {
+                const newContent = editorRef.current.innerHTML
+
+                onChange(newContent)
+                setHtmlCode(newContent)
+              }
+
+              // Reset después de un delay más largo
+              setTimeout(() => setIsUserTyping(false), 500)
+            }}
             onPaste={handlePaste}
             onKeyDown={handleKeyDown}
-            onBlur={updateContent}
+            onBlur={() => {
+              setIsUserTyping(false)
+              updateContent()
+            }}
+            onFocus={() => setIsUserTyping(false)}
             sx={{
               minHeight: 400,
               padding: 3,

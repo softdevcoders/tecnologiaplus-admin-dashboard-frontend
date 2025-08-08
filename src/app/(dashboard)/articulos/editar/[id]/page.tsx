@@ -25,7 +25,7 @@ import { useCategories } from '@/hooks/useCategories'
 import { useArticles } from '@/hooks/useArticles'
 
 // Components
-import WYSIWYGEditor from '@/components/WYSIWYGEditor'
+import CursorFixedWYSIWYGEditor from '@/components/CursorFixedWYSIWYGEditor'
 import ImageUpload from '@/components/ImageUpload'
 
 // Utils
@@ -302,14 +302,14 @@ const EditarArticuloPage = () => {
               </Grid>
 
               {/* Contenido */}
-              <Grid item xs={12}>
-                <WYSIWYGEditor
-                  value={formData.content}
-                  onChange={value => handleInputChange('content', value)}
-                  label='Contenido del artículo'
-                  placeholder='Escribe el contenido del artículo. Usa los botones de la barra de herramientas para dar formato...'
-                />
-              </Grid>
+                              <Grid item xs={12}>
+                  <CursorFixedWYSIWYGEditor
+                    value={formData.content}
+                    onChange={value => handleInputChange('content', value)}
+                    label='Contenido del artículo'
+                    placeholder='Escribe el contenido del artículo. Usa los botones de la barra de herramientas para dar formato...'
+                  />
+                </Grid>
 
               {/* Botones de acción */}
               <Grid item xs={12}>

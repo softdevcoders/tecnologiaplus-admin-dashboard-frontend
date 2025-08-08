@@ -33,7 +33,7 @@ import { useImages } from '@/hooks/useImages'
 import { useNotification } from '@/contexts/NotificationContext'
 
 // Components
-import WYSIWYGEditor from '@/components/WYSIWYGEditor'
+import CursorFixedWYSIWYGEditor from '@/components/CursorFixedWYSIWYGEditor'
 import ImageUpload from '@/components/ImageUpload'
 import { ArticlePreview } from '@/components/ArticlePreview'
 
@@ -587,14 +587,14 @@ const CrearArticuloPage = () => {
               </Grid>
 
               {/* Contenido */}
-              <Grid item xs={12}>
-                <WYSIWYGEditor
-                  value={formData.content}
-                  onChange={value => handleInputChange('content', value)}
-                  label='Contenido del artículo'
-                  placeholder='Escribe el contenido del artículo. Usa los botones de la barra de herramientas para dar formato...'
-                />
-              </Grid>
+                              <Grid item xs={12}>
+                  <CursorFixedWYSIWYGEditor
+                    value={formData.content}
+                    onChange={value => handleInputChange('content', value)}
+                    label='Contenido del artículo'
+                    placeholder='Escribe el contenido del artículo. Usa los botones de la barra de herramientas para dar formato...'
+                  />
+                </Grid>
 
               {/* SEO Section */}
               <Grid item xs={12}>
