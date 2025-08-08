@@ -35,7 +35,7 @@ import { useNotification } from '@/contexts/NotificationContext'
 // Components
 import CursorFixedWYSIWYGEditor from '@/components/CursorFixedWYSIWYGEditor'
 import ImageUpload from '@/components/ImageUpload'
-import { ArticlePreview } from '@/components/ArticlePreview'
+import { ArticlePreviewModal } from '@/components/ArticlePreviewModal'
 
 // Utils
 import { generateSlug, isValidSlug } from '@/utils/slug'
@@ -90,7 +90,6 @@ const CrearArticuloPage = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [showExitDialog, setShowExitDialog] = useState(false)
 
-  const [autoSaveEnabled] = useState(true)
   const [showPreview, setShowPreview] = useState(false)
 
   const handleInputChange = (field: keyof ArticleFormData, value: any) => {
@@ -280,40 +279,7 @@ const CrearArticuloPage = () => {
     }
   }
 
-  // Guardado automático como borrador
-  const autoSave = useCallback(async () => {
-    if (!autoSaveEnabled || !hasUnsavedChanges || !formData.title) return
 
-    try {
-      await createArticle({
-        title: formData.title,
-        summary: formData.summary,
-        content: formData.content,
-        slug: formData.slug,
-        metaTitle: formData.metaTitle,
-        metaKeywords: formData.metaKeywords,
-        metaDescription: formData.metaDescription,
-        coverImage: formData.coverImage,
-        coverImageAlt: formData.coverImageAlt,
-        categoryId: formData.categoryId,
-        tagIds: formData.tagIds,
-        isPublished: false // Siempre guardar como borrador
-      })
-      setHasUnsavedChanges(false)
-      showSuccess('Borrador guardado automáticamente')
-    } catch (error) {
-      showError('Error al guardar automáticamente')
-    }
-  }, [autoSaveEnabled, hasUnsavedChanges, formData, createArticle])
-
-  // Auto-save cada 30 segundos
-  useEffect(() => {
-    if (!autoSaveEnabled) return
-
-    const interval = setInterval(autoSave, 30000)
-
-    return () => clearInterval(interval)
-  }, [autoSave, autoSaveEnabled])
 
   // Confirmar antes de salir si hay cambios no guardados
   const handleBeforeUnload = useCallback(
@@ -361,9 +327,6 @@ const CrearArticuloPage = () => {
             {hasUnsavedChanges && (
               <Chip label='Cambios no guardados' color='warning' size='small' icon={<i className='ri-save-line' />} />
             )}
-            {autoSaveEnabled && (
-              <Chip label='Auto-guardado activo' color='success' size='small' icon={<i className='ri-time-line' />} />
-            )}
           </Box>
         </Box>
         <Box sx={{ display: 'flex', gap: 1 }}>
@@ -376,18 +339,7 @@ const CrearArticuloPage = () => {
               {showPreview ? 'Ocultar Vista Previa' : 'Vista Previa'}
             </Button>
           </Tooltip>
-          <Tooltip title='Guardar como borrador'>
-            <span>
-              <Button
-                variant='outlined'
-                onClick={autoSave}
-                disabled={!hasUnsavedChanges || createLoading}
-                startIcon={<i className='ri-save-line' />}
-              >
-                Guardar
-              </Button>
-            </span>
-          </Tooltip>
+
           <Button variant='outlined' onClick={handleCancel} startIcon={<i className='ri-arrow-left-line' />}>
             Volver
           </Button>
@@ -587,14 +539,14 @@ const CrearArticuloPage = () => {
               </Grid>
 
               {/* Contenido */}
-                              <Grid item xs={12}>
-                  <CursorFixedWYSIWYGEditor
-                    value={formData.content}
-                    onChange={value => handleInputChange('content', value)}
-                    label='Contenido del artículo'
-                    placeholder='Escribe el contenido del artículo. Usa los botones de la barra de herramientas para dar formato...'
-                  />
-                </Grid>
+              <Grid item xs={12}>
+                <CursorFixedWYSIWYGEditor
+                  value={formData.content}
+                  onChange={value => handleInputChange('content', value)}
+                  label='Contenido del artículo'
+                  placeholder='Escribe el contenido del artículo. Usa los botones de la barra de herramientas para dar formato...'
+                />
+              </Grid>
 
               {/* SEO Section */}
               <Grid item xs={12}>
@@ -668,24 +620,18 @@ const CrearArticuloPage = () => {
         </CardContent>
       </Card>
 
-      {/* Vista previa del artículo */}
-      {showPreview && (
-        <Box sx={{ mt: 4 }}>
-          <ArticlePreview
-            title={formData.title}
-            summary={formData.summary}
-            content={formData.content}
-            coverImage={formData.coverImage || ''}
-            category={categories.find(cat => cat.id === formData.categoryId)}
-            author={{ name: 'Usuario Actual', email: 'usuario@ejemplo.com' }}
-            isPublished={formData.isPublished}
-            tags={formData.tagIds}
-            metaTitle={formData.metaTitle}
-            metaDescription={formData.metaDescription || ''}
-            keywords={formData.metaKeywords || ''}
-          />
-        </Box>
-      )}
+      {/* Modal de vista previa del artículo */}
+      <ArticlePreviewModal
+        open={showPreview}
+        onClose={() => setShowPreview(false)}
+        title={formData.title}
+        summary={formData.summary}
+        content={formData.content}
+        coverImage={formData.coverImage || ''}
+        category={categories.find(cat => cat.id === formData.categoryId)}
+        isPublished={formData.isPublished}
+        tags={formData.tagIds}
+      />
 
       {/* Dialog de confirmación de salida */}
       <Dialog open={showExitDialog} onClose={handleCancelExit}>

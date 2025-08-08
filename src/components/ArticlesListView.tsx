@@ -170,7 +170,7 @@ const ArticlesListView: React.FC<ArticlesListViewProps> = ({
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <Typography variant='body2' noWrap>
-                        {article.author.name}
+                        {article?.author?.name}
                       </Typography>
                     </Box>
                   </TableCell>

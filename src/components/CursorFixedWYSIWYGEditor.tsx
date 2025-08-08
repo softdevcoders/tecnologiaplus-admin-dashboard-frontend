@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useRef, useEffect, useCallback } from 'react'
+
 import {
   Box,
   Typography,
@@ -22,7 +23,9 @@ import {
 } from '@mui/material'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism'
+
 import { useImages } from '@/hooks/useImages'
+import { useAuth } from '@/hooks/useAuth'
 
 interface CursorFixedWYSIWYGEditorProps {
   value: string
@@ -69,8 +72,13 @@ const CursorFixedWYSIWYGEditor: React.FC<CursorFixedWYSIWYGEditorProps> = ({
   const [fontSizeDialogOpen, setFontSizeDialogOpen] = useState(false)
   const [selectedFontSize, setSelectedFontSize] = useState('16px')
 
+  // Get session for image upload
+  const { session } = useAuth()
+  const sessionId = session?.user?.id || session?.user?.email || 'anonymous'
+
   // Image upload hook
-  const { uploadImage, uploading } = useImages({
+  const { uploadContentImage, uploading } = useImages({
+    sessionId,
     onSuccess: response => {
       setImageUrl(response.url)
       setImageUploadError(null)
@@ -143,12 +151,7 @@ const CursorFixedWYSIWYGEditor: React.FC<CursorFixedWYSIWYGEditorProps> = ({
     }
   }
 
-  const handleHtmlChange = (newHtml: string) => {
-    // Aplicar formateo automático al HTML cuando se edita
-    const formattedHtml = formatHtml(newHtml)
-    setHtmlCode(formattedHtml)
-    // No actualizar onChange aquí para evitar interferencias
-  }
+
 
   const handleFormat = (format: string) => {
     switch (format) {
@@ -356,7 +359,7 @@ const CursorFixedWYSIWYGEditor: React.FC<CursorFixedWYSIWYGEditorProps> = ({
       setImageUploadError(null)
       
       // Subir la imagen
-      await uploadImage(file)
+      await uploadContentImage(file)
     } catch (error) {
       console.error('Error uploading image:', error)
       setImageUploadError('Error al subir la imagen. Inténtalo de nuevo.')
@@ -462,7 +465,6 @@ const CursorFixedWYSIWYGEditor: React.FC<CursorFixedWYSIWYGEditorProps> = ({
     const inlineTags = ['span', 'strong', 'em', 'b', 'i', 'u', 'a', 'code', 'mark', 'small', 'sub', 'sup']
     const blockTags = ['div', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'section', 'article', 'header', 'footer', 'nav', 'aside']
     const listTags = ['ul', 'ol', 'li']
-    const tableTags = ['table', 'thead', 'tbody', 'tr', 'td', 'th']
     
     // Función para verificar si un tag es self-closing
     const isSelfClosing = (tag: string) => {
@@ -516,7 +518,6 @@ const CursorFixedWYSIWYGEditor: React.FC<CursorFixedWYSIWYGEditorProps> = ({
     const lines = formatted.split('\n')
     let indentLevel = 0
     const indentSize = 2
-    let inInlineContext = false
     let currentBlockContent: string[] = []
     
     const processBlockContent = () => {
@@ -535,7 +536,7 @@ const CursorFixedWYSIWYGEditor: React.FC<CursorFixedWYSIWYGEditorProps> = ({
       return currentBlockContent.join('\n')
     }
     
-    formatted = lines.map((line, index) => {
+    const formattedLines = lines.map((line, index) => {
       const trimmedLine = line.trim()
       
       // Manejar tags de cierre
@@ -578,15 +579,13 @@ const CursorFixedWYSIWYGEditor: React.FC<CursorFixedWYSIWYGEditorProps> = ({
         if (!isSelfClosing(trimmedLine)) {
           // Para tags inline, no aumentar indentación
           if (isInlineTag(trimmedLine)) {
-            inInlineContext = true
+            // No aumentar indentación para tags inline
           } else if (isBlockTag(trimmedLine) || isListTag(trimmedLine)) {
             // Para tags de bloque y lista, aumentar indentación
             indentLevel++
-            inInlineContext = false
           } else {
             // Para otros tags, aumentar indentación
             indentLevel++
-            inInlineContext = false
           }
         }
         
@@ -634,11 +633,11 @@ const CursorFixedWYSIWYGEditor: React.FC<CursorFixedWYSIWYGEditorProps> = ({
       const blockContent = processBlockContent()
       if (blockContent) {
         const indent = ' '.repeat(indentLevel * indentSize)
-        formatted.push(indent + blockContent)
+        formattedLines.push(indent + blockContent)
       }
     }
     
-    formatted = formatted.join('\n')
+    formatted = formattedLines.join('\n')
     
     // Limpiar líneas vacías excesivas y mejorar el formato final
     formatted = formatted

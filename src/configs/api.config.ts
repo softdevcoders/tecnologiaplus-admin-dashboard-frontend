@@ -1,7 +1,7 @@
 // Configuración de la API
 export const API_CONFIG = {
   // URL base de la API
-  BASE_URL: process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || 'http://localhost:3001',
+  BASE_URL: process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || 'http://localhost:3000',
 
   // Timeout para las peticiones (en milisegundos)
   TIMEOUT: 10000,
