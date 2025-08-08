@@ -158,13 +158,6 @@ class ArticlesService {
   }
 
   /**
-   * Archivar un artículo (cambiar status a archived)
-   */
-  async archiveArticle(id: string): Promise<ApiResponse<Article>> {
-    return httpClient.patch<Article>(`${this.baseUrl}/${id}/archive`)
-  }
-
-  /**
    * Obtener artículos destacados
    */
   async getFeaturedArticles(limit: number = 5): Promise<ApiResponse<Article[]>> {

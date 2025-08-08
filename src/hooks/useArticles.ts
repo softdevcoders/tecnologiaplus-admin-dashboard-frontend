@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 
 import { useSession } from 'next-auth/react'
 
@@ -19,12 +19,12 @@ interface UseArticlesState {
 interface UseArticlesReturn extends UseArticlesState {
   fetchArticles: (filters?: ArticlesFilters) => Promise<void>
   getArticleById: (id: string) => Promise<Article | null>
+  getArticleBySlug: (slug: string) => Promise<Article | null>
   createArticle: (articleData: CreateArticleRequest) => Promise<Article | null>
   updateArticle: (articleData: UpdateArticleRequest) => Promise<Article | null>
   deleteArticle: (id: string) => Promise<boolean>
   publishArticle: (id: string) => Promise<Article | null>
   unpublishArticle: (id: string) => Promise<Article | null>
-  archiveArticle: (id: string) => Promise<Article | null>
   clearError: () => void
 }
 
@@ -41,11 +41,14 @@ export const useArticles = (initialFilters: ArticlesFilters = {}): UseArticlesRe
     error: null
   })
 
-  const clearError = () => {
-    setState(prev => ({ ...prev, error: null }))
-  }
+  // Usar useRef para mantener una referencia estable a los filtros iniciales
+  const initialFiltersRef = useRef(initialFilters)
 
-  const fetchArticles = async (filters: ArticlesFilters = {}) => {
+  const clearError = useCallback(() => {
+    setState(prev => ({ ...prev, error: null }))
+  }, [])
+
+  const fetchArticles = useCallback(async (filters: ArticlesFilters = {}) => {
     if (status === 'loading') return
 
     setState(prev => ({ ...prev, loading: true, error: null }))
@@ -54,7 +57,7 @@ export const useArticles = (initialFilters: ArticlesFilters = {}): UseArticlesRe
       const response = await articlesService.getArticles({
         page: state.page,
         limit: state.limit,
-        ...initialFilters,
+        ...initialFiltersRef.current,
         ...filters
       })
 
@@ -80,9 +83,9 @@ export const useArticles = (initialFilters: ArticlesFilters = {}): UseArticlesRe
         error: apiError
       }))
     }
-  }
+  }, [status])
 
-  const getArticleById = async (id: string): Promise<Article | null> => {
+  const getArticleById = useCallback(async (id: string): Promise<Article | null> => {
     setState(prev => ({ ...prev, loading: true, error: null }))
 
     try {
@@ -106,9 +109,35 @@ export const useArticles = (initialFilters: ArticlesFilters = {}): UseArticlesRe
 
       return null
     }
-  }
+  }, [])
 
-  const createArticle = async (articleData: CreateArticleRequest): Promise<Article | null> => {
+  const getArticleBySlug = useCallback(async (slug: string): Promise<Article | null> => {
+    setState(prev => ({ ...prev, loading: true, error: null }))
+
+    try {
+      const response = await articlesService.getArticleBySlug(slug)
+
+      if (response.success) {
+        setState(prev => ({ ...prev, loading: false }))
+
+        return response.data
+      } else {
+        throw new Error(response.message || 'Error al obtener artículo por slug')
+      }
+    } catch (error) {
+      const apiError = error as ApiError
+
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        error: apiError
+      }))
+
+      return null
+    }
+  }, [])
+
+  const createArticle = useCallback(async (articleData: CreateArticleRequest): Promise<Article | null> => {
     setState(prev => ({ ...prev, loading: true, error: null }))
 
     try {
@@ -133,9 +162,9 @@ export const useArticles = (initialFilters: ArticlesFilters = {}): UseArticlesRe
 
       return null
     }
-  }
+  }, [fetchArticles])
 
-  const updateArticle = async (articleData: UpdateArticleRequest): Promise<Article | null> => {
+  const updateArticle = useCallback(async (articleData: UpdateArticleRequest): Promise<Article | null> => {
     setState(prev => ({ ...prev, loading: true, error: null }))
 
     try {
@@ -164,9 +193,9 @@ export const useArticles = (initialFilters: ArticlesFilters = {}): UseArticlesRe
 
       return null
     }
-  }
+  }, [])
 
-  const deleteArticle = async (id: string): Promise<boolean> => {
+  const deleteArticle = useCallback(async (id: string): Promise<boolean> => {
     setState(prev => ({ ...prev, loading: true, error: null }))
 
     try {
@@ -196,9 +225,9 @@ export const useArticles = (initialFilters: ArticlesFilters = {}): UseArticlesRe
 
       return false
     }
-  }
+  }, [])
 
-  const publishArticle = async (id: string): Promise<Article | null> => {
+  const publishArticle = useCallback(async (id: string): Promise<Article | null> => {
     setState(prev => ({ ...prev, loading: true, error: null }))
 
     try {
@@ -227,9 +256,9 @@ export const useArticles = (initialFilters: ArticlesFilters = {}): UseArticlesRe
 
       return null
     }
-  }
+  }, [])
 
-  const unpublishArticle = async (id: string): Promise<Article | null> => {
+  const unpublishArticle = useCallback(async (id: string): Promise<Article | null> => {
     setState(prev => ({ ...prev, loading: true, error: null }))
 
     try {
@@ -258,56 +287,25 @@ export const useArticles = (initialFilters: ArticlesFilters = {}): UseArticlesRe
 
       return null
     }
-  }
-
-  const archiveArticle = async (id: string): Promise<Article | null> => {
-    setState(prev => ({ ...prev, loading: true, error: null }))
-
-    try {
-      const response = await articlesService.archiveArticle(id)
-
-      if (response.success) {
-        // Actualizar el artículo en la lista
-        setState(prev => ({
-          ...prev,
-          articles: prev.articles.map(article => (article.id === id ? response.data : article)),
-          loading: false
-        }))
-
-        return response.data
-      } else {
-        throw new Error(response.message || 'Error al archivar artículo')
-      }
-    } catch (error) {
-      const apiError = error as ApiError
-
-      setState(prev => ({
-        ...prev,
-        loading: false,
-        error: apiError
-      }))
-
-      return null
-    }
-  }
+  }, [])
 
   // Cargar artículos cuando la sesión esté lista
   useEffect(() => {
     if (status === 'authenticated') {
       fetchArticles()
     }
-  }, [status])
+  }, [status, fetchArticles])
 
   return {
     ...state,
     fetchArticles,
     getArticleById,
+    getArticleBySlug,
     createArticle,
     updateArticle,
     deleteArticle,
     publishArticle,
     unpublishArticle,
-    archiveArticle,
     clearError
   }
 }

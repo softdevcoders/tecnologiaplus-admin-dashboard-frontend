@@ -38,7 +38,6 @@ const ArticulosPage = () => {
     deleteArticle,
     publishArticle,
     unpublishArticle,
-    archiveArticle,
     clearError
   } = useArticles()
 
@@ -127,10 +126,6 @@ const ArticulosPage = () => {
     await unpublishArticle(id)
   }
 
-  const handleArchiveArticle = async (id: string) => {
-    await archiveArticle(id)
-  }
-
   return (
     <Box sx={{ p: 3 }}>
       {/* Header */}
@@ -182,21 +177,19 @@ const ArticulosPage = () => {
             <ArticlesListView
               articles={articles}
               onEdit={id => router.push(`/articulos/editar/${id}`)}
-              onView={id => router.push(`/articulos/ver/${id}`)}
+              onView={slug => router.push(`/articulos/ver/${slug}`)}
               onDelete={handleDeleteArticle}
               onPublish={handlePublishArticle}
               onUnpublish={handleUnpublishArticle}
-              onArchive={handleArchiveArticle}
             />
           ) : (
             <ArticlesGridView
               articles={articles}
               onEdit={id => router.push(`/articulos/editar/${id}`)}
-              onView={id => router.push(`/articulos/ver/${id}`)}
+              onView={slug => router.push(`/articulos/ver/${slug}`)}
               onDelete={handleDeleteArticle}
               onPublish={handlePublishArticle}
               onUnpublish={handleUnpublishArticle}
-              onArchive={handleArchiveArticle}
             />
           )}
 

@@ -28,11 +28,10 @@ import type { Article } from '@/services/articles.service'
 interface ArticlesListViewProps {
   articles: Article[]
   onEdit?: (articleId: string) => void
-  onView?: (articleId: string) => void
+  onView?: (articleSlug: string) => void
   onDelete?: (articleId: string) => void
   onPublish?: (articleId: string) => void
   onUnpublish?: (articleId: string) => void
-  onArchive?: (articleId: string) => void
 }
 
 const ArticlesListView: React.FC<ArticlesListViewProps> = ({
@@ -41,8 +40,7 @@ const ArticlesListView: React.FC<ArticlesListViewProps> = ({
   onView,
   onDelete,
   onPublish,
-  onUnpublish,
-  onArchive
+  onUnpublish
 }) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
   const [selectedArticleId, setSelectedArticleId] = React.useState<string | null>(null)
@@ -210,7 +208,12 @@ const ArticlesListView: React.FC<ArticlesListViewProps> = ({
         {onView && (
           <MenuItem
             sx={{ display: 'flex', alignItems: 'center', gap: 2 }}
-            onClick={() => handleAction(() => onView(selectedArticleId!))}
+            onClick={() => {
+              const article = articles.find(a => a.id === selectedArticleId)
+              if (article) {
+                handleAction(() => onView(article.slug))
+              }
+            }}
           >
             <ListItemIcon sx={{ color: 'primary.main' }}>
               <i className='ri-eye-line' />
@@ -252,18 +255,6 @@ const ArticlesListView: React.FC<ArticlesListViewProps> = ({
               <i className='ri-eye-off-line' />
             </ListItemIcon>
             <ListItemText sx={{ color: 'warning.main' }}>Despublicar</ListItemText>
-          </MenuItem>
-        )}
-
-        {onArchive && (
-          <MenuItem
-            sx={{ display: 'flex', alignItems: 'center', gap: 2 }}
-            onClick={() => handleAction(() => onArchive(selectedArticleId!))}
-          >
-            <ListItemIcon sx={{ color: 'text.secondary' }}>
-              <i className='ri-archive-line' />
-            </ListItemIcon>
-            <ListItemText sx={{ color: 'text.secondary' }}>Archivar</ListItemText>
           </MenuItem>
         )}
 

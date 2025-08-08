@@ -1,7 +1,7 @@
 // Configuración de la API
 export const API_CONFIG = {
   // URL base de la API
-  BASE_URL: process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || 'http://localhost:3000',
+  BASE_URL: process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || 'http://localhost:3001',
 
   // Timeout para las peticiones (en milisegundos)
   TIMEOUT: 10000,
@@ -31,7 +31,6 @@ export const API_CONFIG = {
       DELETE: (id: string) => `/articles/${id}`,
       PUBLISH: (id: string) => `/articles/${id}/publish`,
       UNPUBLISH: (id: string) => `/articles/${id}/unpublish`,
-      ARCHIVE: (id: string) => `/articles/${id}/archive`,
       FEATURED: '/articles/featured',
       BY_CATEGORY: (categoryId: string) => `/articles/category/${categoryId}`
     },

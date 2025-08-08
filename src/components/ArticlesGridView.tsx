@@ -12,11 +12,10 @@ import type { Article } from '@/services/articles.service'
 interface ArticlesGridViewProps {
   articles: Article[]
   onEdit?: (articleId: string) => void
-  onView?: (articleId: string) => void
+  onView?: (articleSlug: string) => void
   onDelete?: (articleId: string) => void
   onPublish?: (articleId: string) => void
   onUnpublish?: (articleId: string) => void
-  onArchive?: (articleId: string) => void
 }
 
 const ArticlesGridView: React.FC<ArticlesGridViewProps> = ({
@@ -25,8 +24,7 @@ const ArticlesGridView: React.FC<ArticlesGridViewProps> = ({
   onView,
   onDelete,
   onPublish,
-  onUnpublish,
-  onArchive
+  onUnpublish
 }) => {
   const getStatusColor = (isPublished: boolean) => {
     return isPublished ? 'success' : 'warning'
@@ -149,7 +147,7 @@ const ArticlesGridView: React.FC<ArticlesGridViewProps> = ({
             <CardActions sx={{ p: 5 }}>
               <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', width: '100%', justifyContent: 'space-around' }}>
                 {onView && (
-                  <IconButton size='small' onClick={() => onView(article.id)} title='Ver artículo' color='primary'>
+                  <IconButton size='small' onClick={() => onView(article.slug)} title='Ver artículo' color='primary'>
                     <i className='ri-eye-line' />
                   </IconButton>
                 )}
@@ -169,12 +167,6 @@ const ArticlesGridView: React.FC<ArticlesGridViewProps> = ({
                 {article.isPublished && onUnpublish && (
                   <IconButton size='small' onClick={() => onUnpublish(article.id)} title='Despublicar' color='warning'>
                     <i className='ri-eye-off-line' />
-                  </IconButton>
-                )}
-
-                {onArchive && (
-                  <IconButton size='small' onClick={() => onArchive(article.id)} title='Archivar' color='default'>
-                    <i className='ri-archive-line' />
                   </IconButton>
                 )}
 

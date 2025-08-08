@@ -1,8 +1,8 @@
-'use client'
+import { Suspense } from 'react'
 
-import { useState, useEffect } from 'react'
-
-import { useRouter, useParams } from 'next/navigation'
+import { notFound } from 'next/navigation'
+ 
+import type { Metadata } from 'next'
 
 // MUI Imports
 import Typography from '@mui/material/Typography'
@@ -11,13 +11,12 @@ import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import Button from '@mui/material/Button'
 import CircularProgress from '@mui/material/CircularProgress'
-import Alert from '@mui/material/Alert'
 import Grid from '@mui/material/Grid'
 import Chip from '@mui/material/Chip'
 import Divider from '@mui/material/Divider'
 
-// Custom hooks and services
-import { useArticles } from '@/hooks/useArticles'
+// Services
+import articlesService from '@/services/articles.service'
 
 // Types
 interface ArticleData {
@@ -25,6 +24,10 @@ interface ArticleData {
   title: string
   summary?: string
   content: string
+  slug: string
+  metaTitle?: string
+  metaDescription?: string
+  metaKeywords?: string
   category?: {
     id: string
     label: string
@@ -44,75 +47,105 @@ interface ArticleData {
   }
 }
 
-const VerArticuloPage = () => {
-  const router = useRouter()
-  const params = useParams()
-  const articleId = params.id as string
+interface PageProps {
+  params: Promise<{ slug: string }>
+}
 
-  const { getArticleById, loading, error, clearError } = useArticles()
-
-  const [article, setArticle] = useState<ArticleData | null>(null)
-
-  // Cargar datos del artículo
-  useEffect(() => {
-    const loadArticle = async () => {
-      if (articleId) {
-        try {
-          const articleData = await getArticleById(articleId)
-
-          if (articleData) {
-            setArticle(articleData)
-          }
-        } catch (error) {
-          console.error('Error al cargar artículo:', error)
-        }
+// Función para generar metadata dinámica
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params
+  
+  try {
+    const response = await articlesService.getArticleBySlug(slug)
+    
+    if (response.success && response.data) {
+      const article = response.data
+      
+      return {
+        title: article.metaTitle || article.title,
+        description: article.metaDescription || article.summary || `Lee el artículo: ${article.title}`,
+        keywords: article.metaKeywords,
+        openGraph: {
+          title: article.metaTitle || article.title,
+          description: article.metaDescription || article.summary,
+          type: 'article',
+          images: article.coverImage ? [article.coverImage] : [],
+          authors: article.author ? [article.author.name] : [],
+          publishedTime: article.createdAt,
+          modifiedTime: article.updatedAt,
+        },
+        twitter: {
+          card: 'summary_large_image',
+          title: article.metaTitle || article.title,
+          description: article.metaDescription || article.summary,
+          images: article.coverImage ? [article.coverImage] : [],
+        },
+        alternates: {
+          canonical: `/articulos/ver/${article.slug}`,
+        },
       }
     }
-
-    loadArticle()
-  }, [articleId, getArticleById])
-
-  const handleEdit = () => {
-    router.push(`/articulos/editar/${articleId}`)
+  } catch (error) {
+    console.error('Error al generar metadata:', error)
   }
-
-  const handleBack = () => {
-    router.push('/articulos')
+  
+  return {
+    title: 'Artículo no encontrado',
+    description: 'El artículo que buscas no existe.',
   }
+}
 
-  const getCategoryName = (category?: { id: string; label: string }) => {
-    return category ? category.label : 'Categoría no encontrada'
+// Función para obtener datos del artículo en el servidor
+async function getArticleData(slug: string): Promise<ArticleData | null> {
+  try {
+    const response = await articlesService.getArticleBySlug(slug)
+    
+    if (response.success) {
+      return response.data
+    }
+    
+    return null
+  } catch (error) {
+    console.error('Error al cargar artículo:', error)
+    return null
   }
+}
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
-  }
+// Función auxiliar para formatear fecha
+function formatDate(dateString: string): string {
+  return new Date(dateString).toLocaleDateString('es-ES', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
 
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
-        <CircularProgress />
-      </Box>
-    )
-  }
+// Función auxiliar para obtener nombre de categoría
+function getCategoryName(category?: { id: string; label: string }): string {
+  return category ? category.label : 'Categoría no encontrada'
+}
 
+// Componente de loading
+function LoadingSpinner() {
+  return (
+    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+      <CircularProgress />
+    </Box>
+  )
+}
+
+// Componente principal de la página
+async function VerArticuloPorSlugPage({ params }: PageProps) {
+  const { slug } = await params
+  
+  // Obtener datos del artículo en el servidor
+  const article = await getArticleData(slug)
+  
+  // Si no se encuentra el artículo, mostrar 404
   if (!article) {
-    return (
-      <Box sx={{ p: 3 }}>
-        <Alert severity='error' sx={{ mb: 3 }}>
-          Artículo no encontrado
-        </Alert>
-        <Button variant='outlined' onClick={handleBack}>
-          Volver a la lista
-        </Button>
-      </Box>
-    )
+    notFound()
   }
 
   return (
@@ -123,21 +156,22 @@ const VerArticuloPage = () => {
           Ver Artículo
         </Typography>
         <Box sx={{ display: 'flex', gap: 2 }}>
-          <Button variant='outlined' onClick={handleBack} startIcon={<i className='ri-arrow-left-line' />}>
+          <Button 
+            variant='outlined' 
+            href='/articulos'
+            startIcon={<i className='ri-arrow-left-line' />}
+          >
             Volver
           </Button>
-          <Button variant='contained' onClick={handleEdit} startIcon={<i className='ri-pencil-line' />}>
+          <Button 
+            variant='contained' 
+            href={`/articulos/editar/${article.id}`}
+            startIcon={<i className='ri-pencil-line' />}
+          >
             Editar
           </Button>
         </Box>
       </Box>
-
-      {/* Error Alert */}
-      {error && (
-        <Alert severity='error' sx={{ mb: 3 }} onClose={clearError}>
-          {error.message}
-        </Alert>
-      )}
 
       {/* Article Content */}
       <Grid container spacing={3}>
@@ -338,7 +372,7 @@ const VerArticuloPage = () => {
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                   <Button
                     variant='contained'
-                    onClick={handleEdit}
+                    href={`/articulos/editar/${article.id}`}
                     startIcon={<i className='ri-pencil-line' />}
                     fullWidth
                   >
@@ -346,7 +380,7 @@ const VerArticuloPage = () => {
                   </Button>
                   <Button
                     variant='outlined'
-                    onClick={handleBack}
+                    href='/articulos'
                     startIcon={<i className='ri-arrow-left-line' />}
                     fullWidth
                   >
@@ -362,4 +396,11 @@ const VerArticuloPage = () => {
   )
 }
 
-export default VerArticuloPage
+// Componente wrapper con Suspense
+export default function Page({ params }: PageProps) {
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <VerArticuloPorSlugPage params={params} />
+    </Suspense>
+  )
+}
