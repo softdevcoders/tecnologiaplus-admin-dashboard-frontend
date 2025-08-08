@@ -274,7 +274,7 @@ export const useArticles = (initialFilters: ArticlesFilters = {}): UseArticlesRe
 
         return response.data
       } else {
-        throw new Error(response.message || 'Error al despublicar artículo')
+        throw new Error(response.message || 'Error al retirar artículo')
       }
     } catch (error) {
       const apiError = error as ApiError

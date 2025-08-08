@@ -15,6 +15,7 @@ import TablePagination from '@mui/material/TablePagination'
 // Custom hooks and services
 import { useArticles } from '@/hooks/useArticles'
 import { useCategories } from '@/hooks/useCategories'
+import { useAuth } from '@/hooks/useAuth'
 
 // Components
 import type { ViewMode } from '@/components/ArticlesViewToggle'
@@ -23,6 +24,7 @@ import ArticlesListView from '@/components/ArticlesListView'
 import ArticlesGridView from '@/components/ArticlesGridView'
 import type { ArticlesFiltersState } from '@/components/ArticlesFilters'
 import ArticlesFilters from '@/components/ArticlesFilters'
+import ConfirmDialog from '@/components/ConfirmDialog'
 
 const ArticulosPage = () => {
   const router = useRouter()
@@ -42,8 +44,11 @@ const ArticulosPage = () => {
   } = useArticles()
 
   const { categories: categoriesData, loading: categoriesLoading } = useCategories()
-
-  // const { getSessionInfo, logout } = useAuth()
+  const { session } = useAuth()
+  const currentUser = session?.user ? {
+    id: session.user.id || '',
+    role: session.user.role || ''
+  } : undefined
 
   const [viewMode, setViewMode] = useState<ViewMode>('list')
 
@@ -59,6 +64,23 @@ const ArticulosPage = () => {
     dateTo: null,
     sortBy: 'createdAt',
     sortOrder: 'desc'
+  })
+
+  // Estados para confirmaciones
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean
+    title: string
+    message: string
+    confirmText: string
+    confirmColor: 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning'
+    action: (() => void) | null
+  }>({
+    open: false,
+    title: '',
+    message: '',
+    confirmText: '',
+    confirmColor: 'primary',
+    action: null
   })
 
   // Manejar cambio de página
@@ -113,17 +135,49 @@ const ArticulosPage = () => {
 
   // Manejar acciones de artículos
   const handleDeleteArticle = async (id: string) => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar este artículo?')) {
-      await deleteArticle(id)
-    }
+    setConfirmDialog({
+      open: true,
+      title: 'Eliminar Artículo',
+      message: '¿Estás seguro de que quieres eliminar este artículo? Esta acción no se puede deshacer.',
+      confirmText: 'Eliminar',
+      confirmColor: 'error',
+      action: async () => {
+        await deleteArticle(id)
+        setConfirmDialog(prev => ({ ...prev, open: false }))
+      }
+    })
   }
 
   const handlePublishArticle = async (id: string) => {
-    await publishArticle(id)
+    setConfirmDialog({
+      open: true,
+      title: 'Publicar Artículo',
+      message: '¿Estás seguro de que quieres publicar este artículo? Será visible para todos los usuarios.',
+      confirmText: 'Publicar',
+      confirmColor: 'success',
+      action: async () => {
+        await publishArticle(id)
+        setConfirmDialog(prev => ({ ...prev, open: false }))
+      }
+    })
   }
 
   const handleUnpublishArticle = async (id: string) => {
-    await unpublishArticle(id)
+    setConfirmDialog({
+      open: true,
+      title: 'Retirar Artículo',
+      message: '¿Estás seguro de que quieres retirar este artículo? Ya no será visible para los usuarios.',
+      confirmText: 'Retirar',
+      confirmColor: 'warning',
+      action: async () => {
+        await unpublishArticle(id)
+        setConfirmDialog(prev => ({ ...prev, open: false }))
+      }
+    })
+  }
+
+  const handleCloseConfirmDialog = () => {
+    setConfirmDialog(prev => ({ ...prev, open: false }))
   }
 
   return (
@@ -181,6 +235,7 @@ const ArticulosPage = () => {
               onDelete={handleDeleteArticle}
               onPublish={handlePublishArticle}
               onUnpublish={handleUnpublishArticle}
+              currentUser={currentUser}
             />
           ) : (
             <ArticlesGridView
@@ -190,6 +245,7 @@ const ArticulosPage = () => {
               onDelete={handleDeleteArticle}
               onPublish={handlePublishArticle}
               onUnpublish={handleUnpublishArticle}
+              currentUser={currentUser}
             />
           )}
 
@@ -209,6 +265,17 @@ const ArticulosPage = () => {
           </Box>
         </>
       )}
+
+      {/* Dialog de confirmación */}
+      <ConfirmDialog
+        open={confirmDialog.open}
+        title={confirmDialog.title}
+        message={confirmDialog.message}
+        confirmText={confirmDialog.confirmText}
+        confirmColor={confirmDialog.confirmColor}
+        onConfirm={confirmDialog.action || (() => {})}
+        onCancel={handleCloseConfirmDialog}
+      />
     </Box>
   )
 }

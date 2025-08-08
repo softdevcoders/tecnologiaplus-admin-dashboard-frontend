@@ -2,12 +2,25 @@
 
 import React from 'react'
 
-import { Grid, Card, CardContent, CardActions, Typography, Box, Chip, IconButton, Divider } from '@mui/material'
-
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 
+// MUI Imports
+import Grid from '@mui/material/Grid'
+import Card from '@mui/material/Card'
+import CardContent from '@mui/material/CardContent'
+import CardActions from '@mui/material/CardActions'
+import Typography from '@mui/material/Typography'
+import Box from '@mui/material/Box'
+import Chip from '@mui/material/Chip'
+import IconButton from '@mui/material/IconButton'
+import Divider from '@mui/material/Divider'
+
+// Types
 import type { Article } from '@/services/articles.service'
+
+// Utils
+import { canDeleteArticle } from '@/utils/permissions'
 
 interface ArticlesGridViewProps {
   articles: Article[]
@@ -16,6 +29,10 @@ interface ArticlesGridViewProps {
   onDelete?: (articleId: string) => void
   onPublish?: (articleId: string) => void
   onUnpublish?: (articleId: string) => void
+  currentUser?: {
+    id: string
+    role: string
+  }
 }
 
 const ArticlesGridView: React.FC<ArticlesGridViewProps> = ({
@@ -24,7 +41,8 @@ const ArticlesGridView: React.FC<ArticlesGridViewProps> = ({
   onView,
   onDelete,
   onPublish,
-  onUnpublish
+  onUnpublish,
+  currentUser
 }) => {
   const getStatusColor = (isPublished: boolean) => {
     return isPublished ? 'success' : 'warning'
@@ -36,7 +54,12 @@ const ArticlesGridView: React.FC<ArticlesGridViewProps> = ({
 
   return (
     <Grid container spacing={5}>
-      {articles.map(article => (
+      {articles.map(article => {
+        if (!article) {
+          console.log('Found undefined article in grid array');
+          return null;
+        }
+        return (
         <Grid item xs={12} sm={6} md={4} lg={3} key={article.id}>
           <Card
             sx={{
@@ -135,7 +158,7 @@ const ArticlesGridView: React.FC<ArticlesGridViewProps> = ({
               {/* Información del autor y fecha */}
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
                 <Typography variant='caption' color='text.secondary'>
-                  {article.author.name}
+                  {article?.author?.name}
                 </Typography>
                 <Typography variant='caption' color='text.secondary'>
                   {format(new Date(article.createdAt), 'dd/MM/yyyy', { locale: es })}
@@ -165,12 +188,12 @@ const ArticlesGridView: React.FC<ArticlesGridViewProps> = ({
                 )}
 
                 {article.isPublished && onUnpublish && (
-                  <IconButton size='small' onClick={() => onUnpublish(article.id)} title='Despublicar' color='warning'>
+                  <IconButton size='small' onClick={() => onUnpublish(article.id)} title='Retirar' color='warning'>
                     <i className='ri-eye-off-line' />
                   </IconButton>
                 )}
 
-                {onDelete && (
+                {onDelete && canDeleteArticle(article, currentUser) && (
                   <IconButton size='small' onClick={() => onDelete(article.id)} title='Eliminar' color='error'>
                     <i className='ri-delete-bin-line' />
                   </IconButton>
@@ -179,7 +202,7 @@ const ArticlesGridView: React.FC<ArticlesGridViewProps> = ({
             </CardActions>
           </Card>
         </Grid>
-      ))}
+      )})}
     </Grid>
   )
 }

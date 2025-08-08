@@ -151,7 +151,7 @@ class ArticlesService {
   }
 
   /**
-   * Despublicar un artículo (cambiar status a draft)
+   * Retirar un artículo (cambiar status a draft)
    */
   async unpublishArticle(id: string): Promise<ApiResponse<Article>> {
     return httpClient.patch<Article>(`${this.baseUrl}/${id}/unpublish`)

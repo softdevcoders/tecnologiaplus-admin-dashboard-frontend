@@ -24,6 +24,7 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 
 import type { Article } from '@/services/articles.service'
+import { canDeleteArticle } from '@/utils/permissions'
 
 interface ArticlesListViewProps {
   articles: Article[]
@@ -32,6 +33,10 @@ interface ArticlesListViewProps {
   onDelete?: (articleId: string) => void
   onPublish?: (articleId: string) => void
   onUnpublish?: (articleId: string) => void
+  currentUser?: {
+    id: string
+    role: string
+  }
 }
 
 const ArticlesListView: React.FC<ArticlesListViewProps> = ({
@@ -40,7 +45,8 @@ const ArticlesListView: React.FC<ArticlesListViewProps> = ({
   onView,
   onDelete,
   onPublish,
-  onUnpublish
+  onUnpublish,
+  currentUser
 }) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
   const [selectedArticleId, setSelectedArticleId] = React.useState<string | null>(null)
@@ -102,7 +108,12 @@ const ArticlesListView: React.FC<ArticlesListViewProps> = ({
                 </TableCell>
               </TableRow>
             ) : (
-              articles.map(article => (
+              articles.map(article => {
+                if (!article) {
+                  console.log('Found undefined article in array');
+                  return null;
+                }
+                return (
                 <TableRow key={article.id} hover>
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
@@ -185,7 +196,7 @@ const ArticlesListView: React.FC<ArticlesListViewProps> = ({
                     </IconButton>
                   </TableCell>
                 </TableRow>
-              ))
+              )})
             )}
           </TableBody>
         </Table>
@@ -254,11 +265,14 @@ const ArticlesListView: React.FC<ArticlesListViewProps> = ({
             <ListItemIcon sx={{ color: 'warning.main' }}>
               <i className='ri-eye-off-line' />
             </ListItemIcon>
-            <ListItemText sx={{ color: 'warning.main' }}>Despublicar</ListItemText>
+            <ListItemText sx={{ color: 'warning.main' }}>Retirar</ListItemText>
           </MenuItem>
         )}
 
-        {onDelete && (
+        {onDelete && (() => {
+          const article = articles.find(a => a.id === selectedArticleId);
+          return article && canDeleteArticle(article, currentUser);
+        })() && (
           <MenuItem
             sx={{ display: 'flex', alignItems: 'center', gap: 2 }}
             onClick={() => handleAction(() => onDelete(selectedArticleId!))}
