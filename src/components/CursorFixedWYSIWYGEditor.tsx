@@ -50,6 +50,9 @@ const CursorFixedWYSIWYGEditor: React.FC<CursorFixedWYSIWYGEditorProps> = ({
   const [linkDialogOpen, setLinkDialogOpen] = useState(false)
   const [linkUrl, setLinkUrl] = useState('')
   const [linkText, setLinkText] = useState('')
+  const [linkTargetBlank, setLinkTargetBlank] = useState(true)
+  const [isEditingLink, setIsEditingLink] = useState(false)
+  const [selectedLinkElement, setSelectedLinkElement] = useState<HTMLAnchorElement | null>(null)
 
   // Image dialog state
   const [imageDialogOpen, setImageDialogOpen] = useState(false)
@@ -232,11 +235,56 @@ const CursorFixedWYSIWYGEditor: React.FC<CursorFixedWYSIWYGEditorProps> = ({
       return
     }
 
-    const linkHTML = `<a href="${linkUrl}" target="_blank" rel="noopener noreferrer">${linkText}</a>`
-    execCommand('insertHTML', linkHTML)
+    if (isEditingLink && selectedLinkElement) {
+      // Editar enlace existente
+      selectedLinkElement.href = linkUrl
+      selectedLinkElement.textContent = linkText
+      selectedLinkElement.target = linkTargetBlank ? '_blank' : ''
+      selectedLinkElement.rel = linkTargetBlank ? 'noopener noreferrer' : ''
+      
+      // Actualizar el contenido
+      if (editorRef.current && activeTab === 0) {
+        const newContent = editorRef.current.innerHTML
+        onChange(newContent)
+        setHtmlCode(newContent)
+      }
+    } else {
+      // Crear nuevo enlace
+      const targetAttr = linkTargetBlank ? ' target="_blank" rel="noopener noreferrer"' : ''
+      const linkHTML = `<a href="${linkUrl}"${targetAttr}>${linkText}</a>`
+      execCommand('insertHTML', linkHTML)
+    }
 
+    // Limpiar estado
     setLinkUrl('')
     setLinkText('')
+    setLinkTargetBlank(true)
+    setIsEditingLink(false)
+    setSelectedLinkElement(null)
+    setLinkDialogOpen(false)
+  }
+
+  const handleDeleteLink = () => {
+    if (selectedLinkElement) {
+      // Reemplazar el enlace con su texto
+      const textContent = selectedLinkElement.textContent || ''
+      const textNode = document.createTextNode(textContent)
+      selectedLinkElement.parentNode?.replaceChild(textNode, selectedLinkElement)
+      
+      // Actualizar el contenido
+      if (editorRef.current && activeTab === 0) {
+        const newContent = editorRef.current.innerHTML
+        onChange(newContent)
+        setHtmlCode(newContent)
+      }
+    }
+    
+    // Limpiar estado
+    setLinkUrl('')
+    setLinkText('')
+    setLinkTargetBlank(true)
+    setIsEditingLink(false)
+    setSelectedLinkElement(null)
     setLinkDialogOpen(false)
   }
 
@@ -322,6 +370,22 @@ const CursorFixedWYSIWYGEditor: React.FC<CursorFixedWYSIWYGEditorProps> = ({
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       execCommand('insertParagraph')
+    }
+  }
+
+  const handleEditorClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement
+    if (target.tagName === 'A') {
+      e.preventDefault()
+      e.stopPropagation()
+      
+      const linkElement = target as HTMLAnchorElement
+      setSelectedLinkElement(linkElement)
+      setLinkUrl(linkElement.href)
+      setLinkText(linkElement.textContent || '')
+      setLinkTargetBlank(linkElement.target === '_blank')
+      setIsEditingLink(true)
+      setLinkDialogOpen(true)
     }
   }
 
@@ -823,6 +887,7 @@ const CursorFixedWYSIWYGEditor: React.FC<CursorFixedWYSIWYGEditorProps> = ({
             onInput={handleInput}
             onPaste={handlePaste}
             onKeyDown={handleKeyDown}
+            onClick={handleEditorClick}
             sx={{
               minHeight: 400,
               padding: 3,
@@ -864,6 +929,15 @@ const CursorFixedWYSIWYGEditor: React.FC<CursorFixedWYSIWYGEditorProps> = ({
                 maxWidth: '100%',
                 height: 'auto',
                 margin: '1em 0'
+              },
+              '& a': {
+                color: 'primary.main',
+                textDecoration: 'underline',
+                cursor: 'pointer',
+                '&:hover': {
+                  color: 'primary.dark',
+                  textDecoration: 'none'
+                }
               }
             }}
           />
@@ -889,10 +963,21 @@ const CursorFixedWYSIWYGEditor: React.FC<CursorFixedWYSIWYGEditorProps> = ({
 
       {/* Link Dialog */}
       <Dialog open={linkDialogOpen} onClose={() => setLinkDialogOpen(false)} maxWidth='sm' fullWidth>
-        <DialogTitle>Insertar Enlace</DialogTitle>
+        <DialogTitle>
+          {isEditingLink ? 'Editar Enlace' : 'Insertar Enlace'}
+        </DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
+            margin='dense'
+            label='Texto del enlace'
+            fullWidth
+            variant='outlined'
+            value={linkText}
+            onChange={e => setLinkText(e.target.value)}
+            placeholder='Texto visible del enlace'
+          />
+          <TextField
             margin='dense'
             label='URL del enlace'
             type='url'
@@ -902,20 +987,35 @@ const CursorFixedWYSIWYGEditor: React.FC<CursorFixedWYSIWYGEditorProps> = ({
             onChange={e => setLinkUrl(e.target.value)}
             placeholder='https://ejemplo.com'
           />
-          <TextField
-            margin='dense'
-            label='Texto del enlace'
-            fullWidth
-            variant='outlined'
-            value={linkText}
-            onChange={e => setLinkText(e.target.value)}
-            placeholder='Texto visible del enlace'
-          />
+          <Box sx={{ mt: 2, display: 'flex', alignItems: 'center' }}>
+            <input
+              type='checkbox'
+              id='target-blank'
+              checked={linkTargetBlank}
+              onChange={e => setLinkTargetBlank(e.target.checked)}
+              style={{ marginRight: '8px' }}
+            />
+            <label htmlFor='target-blank' style={{ cursor: 'pointer' }}>
+              Abrir en nueva pestaña
+            </label>
+          </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setLinkDialogOpen(false)}>Cancelar</Button>
+          <Button onClick={() => {
+            setLinkDialogOpen(false)
+            setIsEditingLink(false)
+            setSelectedLinkElement(null)
+            setLinkUrl('')
+            setLinkText('')
+            setLinkTargetBlank(true)
+          }}>Cancelar</Button>
+          {isEditingLink && (
+            <Button onClick={handleDeleteLink} color='error' variant='outlined'>
+              Eliminar
+            </Button>
+          )}
           <Button onClick={handleLinkSubmit} variant='contained'>
-            Insertar
+            {isEditingLink ? 'Actualizar' : 'Insertar'}
           </Button>
         </DialogActions>
       </Dialog>
