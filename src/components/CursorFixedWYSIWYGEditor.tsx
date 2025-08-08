@@ -20,6 +20,8 @@ import {
   Alert,
   CircularProgress
 } from '@mui/material'
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
+import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { useImages } from '@/hooks/useImages'
 
 interface CursorFixedWYSIWYGEditorProps {
@@ -122,25 +124,22 @@ const CursorFixedWYSIWYGEditor: React.FC<CursorFixedWYSIWYGEditorProps> = ({
     setActiveTab(newValue)
 
     if (newValue === 1) {
-      // Al cambiar a la vista HTML, actualizar el código
+      // Al cambiar a la vista HTML, actualizar el código con el contenido actual del editor
       const currentHtml = editorRef.current?.innerHTML || value
       setHtmlCode(currentHtml)
     } else if (newValue === 0) {
-      // Al cambiar al editor, sincronizar el contenido
+      // Al cambiar al editor, sincronizar el contenido desde HTML solo si hay cambios
       if (editorRef.current && htmlCode !== editorRef.current.innerHTML) {
         editorRef.current.innerHTML = htmlCode
+        // Actualizar el estado principal
+        onChange(htmlCode)
       }
     }
   }
 
   const handleHtmlChange = (newHtml: string) => {
     setHtmlCode(newHtml)
-    onChange(newHtml)
-
-    // Solo actualizar el editor si estamos en la pestaña HTML
-    if (editorRef.current && activeTab === 1) {
-      editorRef.current.innerHTML = newHtml
-    }
+    // No actualizar onChange aquí para evitar interferencias
   }
 
   const handleFormat = (format: string) => {
@@ -324,6 +323,131 @@ const CursorFixedWYSIWYGEditor: React.FC<CursorFixedWYSIWYGEditorProps> = ({
 
   const isFormatActive = (format: string) => {
     return document.queryCommandState(format)
+  }
+
+  // Componente para el editor de HTML con resaltado de sintaxis
+  const HtmlEditor = ({ value, onChange }: { value: string; onChange: (value: string) => void }) => {
+    const [isEditing, setIsEditing] = useState(false)
+    const [editValue, setEditValue] = useState(value)
+
+    const handleEdit = () => {
+      setIsEditing(true)
+      setEditValue(value)
+    }
+
+    const handleSave = () => {
+      setIsEditing(false)
+      onChange(editValue)
+    }
+
+    const handleCancel = () => {
+      setIsEditing(false)
+      setEditValue(value)
+    }
+
+    const formatHtml = (html: string) => {
+      if (!html || html.trim() === '') return ''
+      
+      // Función mejorada para formatear HTML
+      let formatted = html
+        .replace(/></g, '>\n<') // Agregar saltos de línea entre tags
+        .replace(/\n\s*\n/g, '\n') // Remover líneas vacías múltiples
+        .replace(/\n\s+/g, '\n') // Remover espacios al inicio de líneas
+        .trim()
+      
+      // Agregar indentación básica
+      const lines = formatted.split('\n')
+      let indentLevel = 0
+      const indentSize = 2
+      
+      formatted = lines.map(line => {
+        const trimmedLine = line.trim()
+        
+        // Reducir indentación para tags de cierre
+        if (trimmedLine.startsWith('</')) {
+          indentLevel = Math.max(0, indentLevel - 1)
+        }
+        
+        const indent = ' '.repeat(indentLevel * indentSize)
+        const result = indent + trimmedLine
+        
+        // Aumentar indentación para tags de apertura (excepto self-closing)
+        if (trimmedLine.startsWith('<') && !trimmedLine.startsWith('</') && !trimmedLine.endsWith('/>')) {
+          indentLevel++
+        }
+        
+        return result
+      }).join('\n')
+      
+      return formatted
+    }
+
+    return (
+      <Box sx={{ p: 2 }}>
+        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant='subtitle2' color='text.secondary'>
+            HTML con resaltado de sintaxis:
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            {!isEditing ? (
+              <Button variant='outlined' size='small' onClick={handleEdit}>
+                Editar
+              </Button>
+            ) : (
+              <>
+                <Button variant='contained' size='small' onClick={handleSave}>
+                  Guardar
+                </Button>
+                <Button variant='outlined' size='small' onClick={handleCancel}>
+                  Cancelar
+                </Button>
+              </>
+            )}
+          </Box>
+        </Box>
+        
+        {isEditing ? (
+          <TextField
+            multiline
+            rows={20}
+            value={editValue}
+            onChange={e => setEditValue(e.target.value)}
+            fullWidth
+            variant='outlined'
+            placeholder='Escribe tu HTML aquí...'
+            sx={{
+              '& .MuiInputBase-root': {
+                fontFamily: 'monospace',
+                fontSize: '14px'
+              }
+            }}
+          />
+        ) : (
+          <Box
+            sx={{
+              border: '1px solid',
+              borderColor: 'divider',
+              borderRadius: 1,
+              overflow: 'auto',
+              maxHeight: 500
+            }}
+          >
+            <SyntaxHighlighter
+              language='html'
+              style={tomorrow}
+              customStyle={{
+                margin: 0,
+                fontSize: '14px',
+                lineHeight: 1.5,
+                padding: '16px'
+              }}
+            >
+              {formatHtml(value)}
+            </SyntaxHighlighter>
+          </Box>
+        )}
+      </Box>
+    )
   }
 
   return (
@@ -575,15 +699,13 @@ const CursorFixedWYSIWYGEditor: React.FC<CursorFixedWYSIWYGEditorProps> = ({
             }}
           />
         ) : (
-          <TextField
-            multiline
-            rows={20}
+          <HtmlEditor
             value={htmlCode}
-            onChange={e => handleHtmlChange(e.target.value)}
-            sx={{
-              '& .MuiInputBase-root': {
-                fontFamily: 'monospace',
-                fontSize: '14px'
+            onChange={(newHtml) => {
+              setHtmlCode(newHtml)
+              if (editorRef.current) {
+                editorRef.current.innerHTML = newHtml
+                onChange(newHtml)
               }
             }}
           />
