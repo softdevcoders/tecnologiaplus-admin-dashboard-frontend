@@ -126,7 +126,9 @@ const CursorFixedWYSIWYGEditor: React.FC<CursorFixedWYSIWYGEditorProps> = ({
     if (newValue === 1) {
       // Al cambiar a la vista HTML, actualizar el código con el contenido actual del editor
       const currentHtml = editorRef.current?.innerHTML || value
-      setHtmlCode(currentHtml)
+      // Aplicar formateo automático al HTML
+      const formattedHtml = formatHtml(currentHtml)
+      setHtmlCode(formattedHtml)
     } else if (newValue === 0) {
       // Al cambiar al editor, sincronizar el contenido desde HTML solo si hay cambios
       if (editorRef.current && htmlCode !== editorRef.current.innerHTML) {
@@ -138,7 +140,9 @@ const CursorFixedWYSIWYGEditor: React.FC<CursorFixedWYSIWYGEditorProps> = ({
   }
 
   const handleHtmlChange = (newHtml: string) => {
-    setHtmlCode(newHtml)
+    // Aplicar formateo automático al HTML cuando se edita
+    const formattedHtml = formatHtml(newHtml)
+    setHtmlCode(formattedHtml)
     // No actualizar onChange aquí para evitar interferencias
   }
 
@@ -325,6 +329,208 @@ const CursorFixedWYSIWYGEditor: React.FC<CursorFixedWYSIWYGEditorProps> = ({
     return document.queryCommandState(format)
   }
 
+  // Función para formatear HTML (movida fuera del componente para reutilización)
+  const formatHtml = (html: string) => {
+    if (!html || html.trim() === '') return ''
+    
+    // Lista de tags que no necesitan indentación adicional
+    const selfClosingTags = ['img', 'br', 'hr', 'input', 'meta', 'link']
+    const inlineTags = ['span', 'strong', 'em', 'b', 'i', 'u', 'a', 'code', 'mark', 'small', 'sub', 'sup']
+    const blockTags = ['div', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'section', 'article', 'header', 'footer', 'nav', 'aside']
+    const listTags = ['ul', 'ol', 'li']
+    const tableTags = ['table', 'thead', 'tbody', 'tr', 'td', 'th']
+    
+    // Función para verificar si un tag es self-closing
+    const isSelfClosing = (tag: string) => {
+      return selfClosingTags.some(t => tag.includes(`<${t}`) && tag.includes('/>'))
+    }
+    
+    // Función para verificar si un tag es inline
+    const isInlineTag = (tag: string) => {
+      return inlineTags.some(t => tag.includes(`<${t}`) || tag.includes(`</${t}`))
+    }
+    
+    // Función para verificar si un tag es de bloque
+    const isBlockTag = (tag: string) => {
+      return blockTags.some(t => tag.includes(`<${t}`) || tag.includes(`</${t}`))
+    }
+    
+    // Función para verificar si un tag es de lista
+    const isListTag = (tag: string) => {
+      return listTags.some(t => tag.includes(`<${t}`) || tag.includes(`</${t}`))
+    }
+    
+    // Limpiar y preparar el HTML
+    let formatted = html
+      .replace(/<meta charset="utf-8">/gi, '') // Eliminar meta charset utf-8
+      .replace(/<meta[^>]*>/gi, '') // Eliminar cualquier etiqueta meta
+      .replace(/&nbsp;/gi, ' ') // Reemplazar &nbsp; con espacios normales
+      .replace(/&amp;/gi, '&') // Reemplazar &amp; con &
+      .replace(/&lt;/gi, '<') // Reemplazar &lt; con <
+      .replace(/&gt;/gi, '>') // Reemplazar &gt; con >
+      .replace(/&quot;/gi, '"') // Reemplazar &quot; con "
+      .replace(/&#39;/gi, "'") // Reemplazar &#39; con '
+      .replace(/>\s*</g, '>\n<') // Agregar saltos de línea entre tags
+      .replace(/\n\s*\n/g, '\n') // Remover líneas vacías múltiples
+      .replace(/\n\s+/g, '\n') // Remover espacios al inicio de líneas
+      .trim()
+    
+    // Función para verificar si una línea contiene solo elementos inline
+    const containsOnlyInlineElements = (line: string) => {
+      const trimmed = line.trim()
+      if (!trimmed.startsWith('<')) return true // Es texto plano
+      
+      // Verificar si todos los tags en la línea son inline
+      const tags = trimmed.match(/<\/?[^>]+>/g) || []
+      return tags.every(tag => {
+        const tagName = tag.replace(/[<>/]/g, '').split(' ')[0]
+        return inlineTags.includes(tagName)
+      })
+    }
+    
+    // Procesar línea por línea con indentación inteligente
+    const lines = formatted.split('\n')
+    let indentLevel = 0
+    const indentSize = 2
+    let inInlineContext = false
+    let currentBlockContent: string[] = []
+    
+    const processBlockContent = () => {
+      if (currentBlockContent.length === 0) return ''
+      
+      // Si el contenido del bloque es simple (solo inline o texto), mantenerlo en una línea
+      const isSimpleContent = currentBlockContent.every(line => 
+        containsOnlyInlineElements(line) || line.trim() === ''
+      )
+      
+      if (isSimpleContent) {
+        return currentBlockContent.join(' ').trim()
+      }
+      
+      // Si es contenido complejo, mantener la estructura de líneas
+      return currentBlockContent.join('\n')
+    }
+    
+    formatted = lines.map((line, index) => {
+      const trimmedLine = line.trim()
+      
+      // Manejar tags de cierre
+      if (trimmedLine.startsWith('</')) {
+        // Procesar contenido del bloque actual antes de cerrar
+        if (currentBlockContent.length > 0) {
+          const blockContent = processBlockContent()
+          currentBlockContent = []
+          
+          if (blockContent) {
+            const indent = ' '.repeat(indentLevel * indentSize)
+            return indent + blockContent
+          }
+        }
+        
+        // Reducir indentación antes de procesar el tag de cierre
+        indentLevel = Math.max(0, indentLevel - 1)
+        const indent = ' '.repeat(indentLevel * indentSize)
+        return indent + trimmedLine
+      }
+      
+      // Manejar tags de apertura
+      if (trimmedLine.startsWith('<') && !trimmedLine.startsWith('</')) {
+        // Procesar contenido del bloque anterior si existe
+        if (currentBlockContent.length > 0) {
+          const blockContent = processBlockContent()
+          currentBlockContent = []
+          
+          if (blockContent) {
+            const indent = ' '.repeat(indentLevel * indentSize)
+            return indent + blockContent
+          }
+        }
+        
+        // Aplicar indentación actual
+        const indent = ' '.repeat(indentLevel * indentSize)
+        const result = indent + trimmedLine
+        
+        // No aumentar indentación para tags self-closing
+        if (!isSelfClosing(trimmedLine)) {
+          // Para tags inline, no aumentar indentación
+          if (isInlineTag(trimmedLine)) {
+            inInlineContext = true
+          } else if (isBlockTag(trimmedLine) || isListTag(trimmedLine)) {
+            // Para tags de bloque y lista, aumentar indentación
+            indentLevel++
+            inInlineContext = false
+          } else {
+            // Para otros tags, aumentar indentación
+            indentLevel++
+            inInlineContext = false
+          }
+        }
+        
+        return result
+      }
+      
+      // Manejar contenido de texto y elementos inline
+      if (!trimmedLine.startsWith('<') && trimmedLine.length > 0) {
+        // Agregar al contenido del bloque actual
+        currentBlockContent.push(trimmedLine)
+        return null // No retornar nada aquí, se procesará cuando se cierre el bloque
+      }
+      
+      // Manejar elementos inline que están en líneas separadas
+      if (trimmedLine.startsWith('<') && isInlineTag(trimmedLine)) {
+        currentBlockContent.push(trimmedLine)
+        return null
+      }
+      
+      // Manejar líneas vacías
+      if (trimmedLine === '') {
+        // Procesar contenido del bloque actual
+        if (currentBlockContent.length > 0) {
+          const blockContent = processBlockContent()
+          currentBlockContent = []
+          
+          if (blockContent) {
+            const indent = ' '.repeat(indentLevel * indentSize)
+            return indent + blockContent
+          }
+        }
+        
+        // Solo agregar línea vacía si no hay una ya
+        const nextLine = lines[index + 1]
+        if (nextLine && nextLine.trim() !== '') {
+          return ''
+        }
+      }
+      
+      return null
+    }).filter(line => line !== null)
+    
+    // Procesar cualquier contenido restante
+    if (currentBlockContent.length > 0) {
+      const blockContent = processBlockContent()
+      if (blockContent) {
+        const indent = ' '.repeat(indentLevel * indentSize)
+        formatted.push(indent + blockContent)
+      }
+    }
+    
+    formatted = formatted.join('\n')
+    
+    // Limpiar líneas vacías excesivas y mejorar el formato final
+    formatted = formatted
+      .replace(/\n\s*\n\s*\n/g, '\n\n') // Máximo 2 líneas vacías consecutivas
+      .replace(/\n\s*\n\s*\n/g, '\n\n') // Aplicar nuevamente para casos anidados
+      .replace(/\n+$/, '\n') // Solo una línea vacía al final
+      .trim()
+    
+    // Agregar una línea vacía al final para mejor legibilidad
+    if (formatted && !formatted.endsWith('\n')) {
+      formatted += '\n'
+    }
+    
+    return formatted
+  }
+
   // Componente para el editor de HTML con resaltado de sintaxis
   const HtmlEditor = ({ value, onChange }: { value: string; onChange: (value: string) => void }) => {
     const [isEditing, setIsEditing] = useState(false)
@@ -343,43 +549,6 @@ const CursorFixedWYSIWYGEditor: React.FC<CursorFixedWYSIWYGEditorProps> = ({
     const handleCancel = () => {
       setIsEditing(false)
       setEditValue(value)
-    }
-
-    const formatHtml = (html: string) => {
-      if (!html || html.trim() === '') return ''
-      
-      // Función mejorada para formatear HTML
-      let formatted = html
-        .replace(/></g, '>\n<') // Agregar saltos de línea entre tags
-        .replace(/\n\s*\n/g, '\n') // Remover líneas vacías múltiples
-        .replace(/\n\s+/g, '\n') // Remover espacios al inicio de líneas
-        .trim()
-      
-      // Agregar indentación básica
-      const lines = formatted.split('\n')
-      let indentLevel = 0
-      const indentSize = 2
-      
-      formatted = lines.map(line => {
-        const trimmedLine = line.trim()
-        
-        // Reducir indentación para tags de cierre
-        if (trimmedLine.startsWith('</')) {
-          indentLevel = Math.max(0, indentLevel - 1)
-        }
-        
-        const indent = ' '.repeat(indentLevel * indentSize)
-        const result = indent + trimmedLine
-        
-        // Aumentar indentación para tags de apertura (excepto self-closing)
-        if (trimmedLine.startsWith('<') && !trimmedLine.startsWith('</') && !trimmedLine.endsWith('/>')) {
-          indentLevel++
-        }
-        
-        return result
-      }).join('\n')
-      
-      return formatted
     }
 
     return (
