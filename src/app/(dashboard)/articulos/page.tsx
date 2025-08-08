@@ -25,6 +25,7 @@ import ArticlesGridView from '@/components/ArticlesGridView'
 import type { ArticlesFiltersState } from '@/components/ArticlesFilters'
 import ArticlesFilters from '@/components/ArticlesFilters'
 import ConfirmDialog from '@/components/ConfirmDialog'
+import Breadcrumb from '@/components/Breadcrumb'
 
 const ArticulosPage = () => {
   const router = useRouter()
@@ -50,7 +51,7 @@ const ArticulosPage = () => {
     role: session.user.role || ''
   } : undefined
 
-  const [viewMode, setViewMode] = useState<ViewMode>('list')
+  const [viewMode, setViewMode] = useState<ViewMode>('grid')
 
   const [filters, setFilters] = useState<ArticlesFiltersState>({
     keywordSearch: '',
@@ -182,6 +183,17 @@ const ArticulosPage = () => {
 
   return (
     <Box sx={{ p: 3 }}>
+      {/* Breadcrumb */}
+      <Breadcrumb
+        items={[
+          {
+            label: 'Artículos',
+            icon: 'ri-article-line'
+          }
+        ]}
+        currentPage="Lista de artículos"
+      />
+
       {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant='h4' component='h1'>

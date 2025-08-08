@@ -1,19 +1,20 @@
 import { Suspense } from 'react'
 
 import { notFound } from 'next/navigation'
- 
+
 import type { Metadata } from 'next'
 
 // MUI Imports
-import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
+import Typography from '@mui/material/Typography'
+import Chip from '@mui/material/Chip'
+import Divider from '@mui/material/Divider'
 import Button from '@mui/material/Button'
 import CircularProgress from '@mui/material/CircularProgress'
 import Grid from '@mui/material/Grid'
-import Chip from '@mui/material/Chip'
-import Divider from '@mui/material/Divider'
+
+// Components
+import Breadcrumb from '@/components/Breadcrumb'
 
 // Services
 import articlesService from '@/services/articles.service'
@@ -177,218 +178,217 @@ async function VerArticuloPorSlugPage({ params }: PageProps) {
       <Grid container spacing={3}>
         {/* Main Content */}
         <Grid item xs={12} lg={8}>
-          <Card>
-            <CardContent>
-              {/* Title */}
-              <Typography variant='h4' component='h2' sx={{ mb: 2 }}>
-                {article.title}
+          <Box sx={{ mb: 3 }}>
+            <Breadcrumb 
+              items={[
+                { 
+                  label: 'Artículos', 
+                  href: '/articulos',
+                  icon: 'ri-article-line'
+                },
+                { 
+                  label: 'Ver artículo',
+                  icon: 'ri-eye-line'
+                }
+              ]}
+              currentPage={article.title}
+            />
+          </Box>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {/* Title */}
+            <Typography variant='h4' component='h2' sx={{ mb: 2 }}>
+              {article.title}
+            </Typography>
+
+            {/* Summary */}
+            {article.summary && (
+              <Typography variant='body1' color='text.secondary' sx={{ mb: 3 }}>
+                {article.summary}
               </Typography>
+            )}
 
-              {/* Summary */}
-              {article.summary && (
-                <Typography variant='body1' color='text.secondary' sx={{ mb: 3 }}>
-                  {article.summary}
-                </Typography>
-              )}
+            {/* Cover Image */}
+            {article.coverImage && (
+              <Box sx={{ mb: 3 }}>
+                <Box
+                  component='img'
+                  src={article.coverImage}
+                  alt={article.title}
+                  sx={{
+                    width: '100%',
+                    height: 300,
+                    objectFit: 'cover',
+                    borderRadius: 1
+                  }}
+                />
+              </Box>
+            )}
 
-              {/* Cover Image */}
-              {article.coverImage && (
-                <Box sx={{ mb: 3 }}>
-                  <Box
-                    component='img'
-                    src={article.coverImage}
-                    alt={article.title}
-                    sx={{
-                      width: '100%',
-                      height: 300,
-                      objectFit: 'cover',
-                      borderRadius: 1
-                    }}
-                  />
-                </Box>
-              )}
+            <Divider sx={{ my: 3 }} />
 
-              <Divider sx={{ my: 3 }} />
-
-              {/* Content */}
-              <Box
-                dangerouslySetInnerHTML={{ __html: article.content }}
-                sx={{
-                  lineHeight: 1.6,
-                  '& h1': {
-                    fontSize: '2em',
-                    fontWeight: 'bold',
-                    margin: '0.67em 0',
-                    color: 'text.primary'
-                  },
-                  '& h2': {
-                    fontSize: '1.5em',
-                    fontWeight: 'bold',
-                    margin: '0.83em 0',
-                    color: 'text.primary'
-                  },
-                  '& h3': {
-                    fontSize: '1.17em',
-                    fontWeight: 'bold',
-                    margin: '1em 0',
-                    color: 'text.primary'
-                  },
-                  '& p': {
-                    margin: '1em 0',
-                    fontSize: '16px'
-                  },
-                  '& ul, & ol': {
-                    margin: '1em 0',
-                    paddingLeft: '2em'
-                  },
-                  '& li': {
-                    margin: '0.5em 0'
-                  },
-                  '& a': {
-                    color: 'primary.main',
-                    textDecoration: 'underline',
-                    '&:hover': {
-                      textDecoration: 'none'
-                    }
-                  },
-                  '& img': {
-                    maxWidth: '100%',
-                    height: 'auto',
-                    margin: '1em 0',
-                    borderRadius: '4px'
-                  },
-                  '& blockquote': {
-                    borderLeft: '4px solid',
-                    borderColor: 'primary.main',
-                    paddingLeft: '1em',
-                    margin: '1em 0',
-                    fontStyle: 'italic',
-                    color: 'text.secondary'
-                  },
-                  '& pre': {
-                    backgroundColor: 'grey.100',
-                    padding: '1em',
-                    borderRadius: '4px',
-                    fontFamily: 'monospace',
-                    fontSize: '14px',
-                    overflow: 'auto',
-                    margin: '1em 0'
-                  },
-                  '& code': {
-                    backgroundColor: 'grey.100',
-                    padding: '0.2em 0.4em',
-                    borderRadius: '3px',
-                    fontFamily: 'monospace',
-                    fontSize: '0.9em'
+            {/* Content */}
+            <Box
+              dangerouslySetInnerHTML={{ __html: article.content }}
+              sx={{
+                lineHeight: 1.6,
+                '& h1': {
+                  fontSize: '2em',
+                  fontWeight: 'bold',
+                  margin: '0.67em 0',
+                  color: 'text.primary'
+                },
+                '& h2': {
+                  fontSize: '1.5em',
+                  fontWeight: 'bold',
+                  margin: '0.83em 0',
+                  color: 'text.primary'
+                },
+                '& h3': {
+                  fontSize: '1.17em',
+                  fontWeight: 'bold',
+                  margin: '1em 0',
+                  color: 'text.primary'
+                },
+                '& p': {
+                  margin: '1em 0',
+                  fontSize: '16px'
+                },
+                '& ul, & ol': {
+                  margin: '1em 0',
+                  paddingLeft: '2em'
+                },
+                '& li': {
+                  margin: '0.5em 0'
+                },
+                '& a': {
+                  color: 'primary.main',
+                  textDecoration: 'underline',
+                  '&:hover': {
+                    textDecoration: 'none'
                   }
-                }}
-              />
-            </CardContent>
-          </Card>
+                },
+                '& img': {
+                  maxWidth: '100%',
+                  height: 'auto',
+                  margin: '1em 0',
+                  borderRadius: '4px'
+                },
+                '& blockquote': {
+                  borderLeft: '4px solid',
+                  borderColor: 'primary.main',
+                  paddingLeft: '1em',
+                  margin: '1em 0',
+                  fontStyle: 'italic',
+                  color: 'text.secondary'
+                },
+                '& pre': {
+                  backgroundColor: 'grey.100',
+                  padding: '1em',
+                  borderRadius: '4px',
+                  fontFamily: 'monospace',
+                  fontSize: '14px',
+                  overflow: 'auto',
+                  margin: '1em 0'
+                },
+                '& code': {
+                  backgroundColor: 'grey.100',
+                  padding: '0.2em 0.4em',
+                  borderRadius: '3px',
+                  fontFamily: 'monospace',
+                  fontSize: '0.9em'
+                }
+              }}
+            />
+          </Box>
         </Grid>
 
         {/* Sidebar */}
         <Grid item xs={12} lg={4}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {/* Article Info */}
-            <Card>
-              <CardContent>
-                <Typography variant='h6' sx={{ mb: 2 }}>
-                  Información del Artículo
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {/* Status */}
+              <Box>
+                <Typography variant='subtitle2' color='text.secondary'>
+                  Estado
                 </Typography>
+                <Chip
+                  label={article.isPublished ? 'Publicado' : 'Borrador'}
+                  color={article.isPublished ? 'success' : 'warning'}
+                  size='small'
+                />
+              </Box>
 
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  {/* Status */}
-                  <Box>
-                    <Typography variant='subtitle2' color='text.secondary'>
-                      Estado
-                    </Typography>
-                    <Chip
-                      label={article.isPublished ? 'Publicado' : 'Borrador'}
-                      color={article.isPublished ? 'success' : 'warning'}
-                      size='small'
-                    />
-                  </Box>
+              {/* Category */}
+              <Box>
+                <Typography variant='subtitle2' color='text.secondary'>
+                  Categoría
+                </Typography>
+                <Typography variant='body2'>{getCategoryName(article.category)}</Typography>
+              </Box>
 
-                  {/* Category */}
-                  <Box>
-                    <Typography variant='subtitle2' color='text.secondary'>
-                      Categoría
-                    </Typography>
-                    <Typography variant='body2'>{getCategoryName(article.category)}</Typography>
-                  </Box>
-
-                  {/* Tags */}
-                  {article.tags && article.tags.length > 0 && (
-                    <Box>
-                      <Typography variant='subtitle2' color='text.secondary' sx={{ mb: 1 }}>
-                        Etiquetas
-                      </Typography>
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                        {article.tags.map(tag => (
-                          <Chip key={tag.id} label={tag.name} size='small' variant='outlined' />
-                        ))}
-                      </Box>
-                    </Box>
-                  )}
-
-                  {/* Author */}
-                  {article.author && (
-                    <Box>
-                      <Typography variant='subtitle2' color='text.secondary'>
-                        Autor
-                      </Typography>
-                      <Typography variant='body2'>{article.author.name}</Typography>
-                      <Typography variant='caption' color='text.secondary'>
-                        {article.author.email}
-                      </Typography>
-                    </Box>
-                  )}
-
-                  {/* Dates */}
-                  <Box>
-                    <Typography variant='subtitle2' color='text.secondary'>
-                      Fecha de creación
-                    </Typography>
-                    <Typography variant='body2'>{formatDate(article.createdAt)}</Typography>
-                  </Box>
-
-                  <Box>
-                    <Typography variant='subtitle2' color='text.secondary'>
-                      Última actualización
-                    </Typography>
-                    <Typography variant='body2'>{formatDate(article.updatedAt)}</Typography>
+              {/* Tags */}
+              {article.tags && article.tags.length > 0 && (
+                <Box>
+                  <Typography variant='subtitle2' color='text.secondary' sx={{ mb: 1 }}>
+                    Etiquetas
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                    {article.tags.map(tag => (
+                      <Chip key={tag.id} label={tag.name} size='small' variant='outlined' />
+                    ))}
                   </Box>
                 </Box>
-              </CardContent>
-            </Card>
+              )}
+
+              {/* Author */}
+              {article.author && (
+                <Box>
+                  <Typography variant='subtitle2' color='text.secondary'>
+                    Autor
+                  </Typography>
+                  <Typography variant='body2'>{article.author.name}</Typography>
+                  <Typography variant='caption' color='text.secondary'>
+                    {article.author.email}
+                  </Typography>
+                </Box>
+              )}
+
+              {/* Dates */}
+              <Box>
+                <Typography variant='subtitle2' color='text.secondary'>
+                  Fecha de creación
+                </Typography>
+                <Typography variant='body2'>{formatDate(article.createdAt)}</Typography>
+              </Box>
+
+              <Box>
+                <Typography variant='subtitle2' color='text.secondary'>
+                  Última actualización
+                </Typography>
+                <Typography variant='body2'>{formatDate(article.updatedAt)}</Typography>
+              </Box>
+            </Box>
 
             {/* Actions */}
-            <Card>
-              <CardContent>
-                <Typography variant='h6' sx={{ mb: 2 }}>
-                  Acciones
-                </Typography>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  <Button
-                    variant='contained'
-                    href={`/articulos/editar/${article.id}`}
-                    startIcon={<i className='ri-pencil-line' />}
-                    fullWidth
-                  >
-                    Editar Artículo
-                  </Button>
-                  <Button
-                    variant='outlined'
-                    href='/articulos'
-                    startIcon={<i className='ri-arrow-left-line' />}
-                    fullWidth
-                  >
-                    Volver a la Lista
-                  </Button>
-                </Box>
-              </CardContent>
-            </Card>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <Button
+                variant='contained'
+                href={`/articulos/editar/${article.id}`}
+                startIcon={<i className='ri-pencil-line' />}
+                fullWidth
+              >
+                Editar Artículo
+              </Button>
+              <Button
+                variant='outlined'
+                href='/articulos'
+                startIcon={<i className='ri-arrow-left-line' />}
+                fullWidth
+              >
+                Volver a la Lista
+              </Button>
+            </Box>
           </Box>
         </Grid>
       </Grid>

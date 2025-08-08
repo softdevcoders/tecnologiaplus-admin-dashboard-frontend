@@ -27,6 +27,7 @@ import { useArticles } from '@/hooks/useArticles'
 // Components
 import CursorFixedWYSIWYGEditor from '@/components/CursorFixedWYSIWYGEditor'
 import ImageUpload from '@/components/ImageUpload'
+import Breadcrumb from '@/components/Breadcrumb'
 
 // Utils
 import { isValidSlug } from '@/utils/slug'
@@ -175,6 +176,22 @@ const EditarArticuloPage = () => {
 
   return (
     <Box sx={{ p: 3 }}>
+      {/* Breadcrumb */}
+      <Breadcrumb
+        items={[
+          {
+            label: 'Artículos',
+            href: '/articulos',
+            icon: 'ri-article-line'
+          },
+          {
+            label: 'Editar artículo',
+            icon: 'ri-edit-line'
+          }
+        ]}
+        currentPage="Editando artículo"
+      />
+
       {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant='h4' component='h1'>
@@ -246,7 +263,7 @@ const EditarArticuloPage = () => {
                   >
                     {categories.map(category => (
                       <MenuItem key={category.id} value={category.id}>
-                        {category.label}
+                        {category.name}
                       </MenuItem>
                     ))}
                   </Select>

@@ -36,6 +36,7 @@ import { useNotification } from '@/contexts/NotificationContext'
 import CursorFixedWYSIWYGEditor from '@/components/CursorFixedWYSIWYGEditor'
 import ImageUpload from '@/components/ImageUpload'
 import { ArticlePreviewModal } from '@/components/ArticlePreviewModal'
+import Breadcrumb from '@/components/Breadcrumb'
 
 // Utils
 import { generateSlug, isValidSlug } from '@/utils/slug'
@@ -317,6 +318,22 @@ const CrearArticuloPage = () => {
 
   return (
     <Box sx={{ p: 3 }}>
+      {/* Breadcrumb */}
+      <Breadcrumb
+        items={[
+          {
+            label: 'Artículos',
+            href: '/articulos',
+            icon: 'ri-article-line'
+          },
+          {
+            label: 'Crear artículo',
+            icon: 'ri-add-line'
+          }
+        ]}
+        currentPage="Nuevo artículo"
+      />
+
       {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Box>
