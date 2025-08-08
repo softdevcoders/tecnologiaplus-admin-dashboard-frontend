@@ -324,19 +324,42 @@ const CursorFixedWYSIWYGEditor: React.FC<CursorFixedWYSIWYGEditorProps> = ({
       return
     }
 
-    const imageHTML = `<img src="${imageUrl}" alt="${imageAlt}" style="max-width: 100%; height: auto;" />`
+    // Crear el HTML de la imagen con estilos responsivos
+    const imageHTML = `<img src="${imageUrl}" alt="${imageAlt || 'Imagen'}" style="max-width: 100%; height: auto; display: block; margin: 1em auto;" />`
+    
+    // Insertar la imagen en el editor
     execCommand('insertHTML', imageHTML)
 
+    // Limpiar el estado
     setImageUrl('')
     setImageAlt('')
+    setImageUploadError(null)
     setImageDialogOpen(false)
   }
 
   const handleImageUpload = async (file: File) => {
     try {
+      // Validar el tipo de archivo
+      if (!file.type.startsWith('image/')) {
+        setImageUploadError('El archivo debe ser una imagen')
+        return
+      }
+
+      // Validar el tamaño (máximo 5MB)
+      const maxSize = 5 * 1024 * 1024 // 5MB
+      if (file.size > maxSize) {
+        setImageUploadError('La imagen no puede ser mayor a 5MB')
+        return
+      }
+
+      // Limpiar errores anteriores
+      setImageUploadError(null)
+      
+      // Subir la imagen
       await uploadImage(file)
     } catch (error) {
       console.error('Error uploading image:', error)
+      setImageUploadError('Error al subir la imagen. Inténtalo de nuevo.')
     }
   }
 
@@ -1087,6 +1110,57 @@ const CursorFixedWYSIWYGEditor: React.FC<CursorFixedWYSIWYGEditorProps> = ({
             <Typography variant='subtitle2' sx={{ mb: 1 }}>
               O subir una imagen:
             </Typography>
+            
+            {/* Área de Drag and Drop */}
+            <Box
+              sx={{
+                border: '2px dashed',
+                borderColor: 'grey.300',
+                borderRadius: 2,
+                p: 3,
+                textAlign: 'center',
+                backgroundColor: 'grey.50',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                '&:hover': {
+                  borderColor: 'primary.main',
+                  backgroundColor: 'primary.50'
+                },
+                '&.drag-over': {
+                  borderColor: 'primary.main',
+                  backgroundColor: 'primary.100'
+                }
+              }}
+              onDragOver={(e) => {
+                e.preventDefault()
+                e.currentTarget.classList.add('drag-over')
+              }}
+              onDragLeave={(e) => {
+                e.preventDefault()
+                e.currentTarget.classList.remove('drag-over')
+              }}
+              onDrop={(e) => {
+                e.preventDefault()
+                e.currentTarget.classList.remove('drag-over')
+                const files = Array.from(e.dataTransfer.files)
+                if (files.length > 0 && files[0].type.startsWith('image/')) {
+                  handleImageUpload(files[0])
+                }
+              }}
+              onClick={() => document.getElementById('image-upload')?.click()}
+            >
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                <i className='ri-image-line' style={{ fontSize: '2rem', color: 'grey.500' }} />
+                <Typography variant='body2' color='text.secondary'>
+                  Arrastra y suelta una imagen aquí
+                </Typography>
+                <Typography variant='caption' color='text.secondary'>
+                  o haz clic para seleccionar
+                </Typography>
+              </Box>
+            </Box>
+            
+            {/* Input file oculto */}
             <input
               type='file'
               accept='image/*'
@@ -1099,21 +1173,40 @@ const CursorFixedWYSIWYGEditor: React.FC<CursorFixedWYSIWYGEditorProps> = ({
               style={{ display: 'none' }}
               id='image-upload'
             />
-            <label htmlFor='image-upload'>
-              <Button variant='outlined' component='span' disabled={uploading}>
-                {uploading ? <CircularProgress size={20} /> : 'Seleccionar imagen'}
-              </Button>
-            </label>
+            
+            {/* Estado de carga */}
+            {uploading && (
+              <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                <CircularProgress size={20} />
+                <Typography variant='body2'>Subiendo imagen...</Typography>
+              </Box>
+            )}
+            
+            {/* Error de carga */}
             {imageUploadError && (
               <Alert severity='error' sx={{ mt: 1 }}>
                 {imageUploadError}
               </Alert>
             )}
+            
+            {/* Imagen subida exitosamente */}
+            {imageUrl && !uploading && !imageUploadError && (
+              <Alert severity='success' sx={{ mt: 1 }}>
+                <Typography variant='body2'>
+                  Imagen subida exitosamente: {imageUrl}
+                </Typography>
+              </Alert>
+            )}
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setImageDialogOpen(false)}>Cancelar</Button>
-          <Button onClick={handleImageSubmit} variant='contained'>
+          <Button onClick={() => {
+            setImageDialogOpen(false)
+            setImageUrl('')
+            setImageAlt('')
+            setImageUploadError(null)
+          }}>Cancelar</Button>
+          <Button onClick={handleImageSubmit} variant='contained' disabled={!imageUrl.trim()}>
             Insertar
           </Button>
         </DialogActions>
