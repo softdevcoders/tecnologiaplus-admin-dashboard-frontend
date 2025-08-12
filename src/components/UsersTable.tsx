@@ -25,6 +25,7 @@ interface UsersTableProps {
   onEdit: (user: User) => void;
   onDelete: (user: User) => void;
   onView: (user: User) => void;
+  onActivate: (user: User) => void;
   onPageChange: (page: number) => void;
   onLimitChange: (limit: number) => void;
 }
@@ -37,6 +38,7 @@ const UsersTable: React.FC<UsersTableProps> = ({
   onEdit,
   onDelete,
   onView,
+  onActivate,
   onPageChange,
   onLimitChange,
 }) => {
@@ -61,6 +63,17 @@ const UsersTable: React.FC<UsersTableProps> = ({
         return 'error';
       case 'EDITOR':
         return 'primary';
+      default:
+        return 'default';
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'ACTIVE':
+        return 'success';
+      case 'DEACTIVATED':
+        return 'default';
       default:
         return 'default';
     }
@@ -101,6 +114,7 @@ const UsersTable: React.FC<UsersTableProps> = ({
               <TableCell>Nombre</TableCell>
               <TableCell>Email</TableCell>
               <TableCell>Rol</TableCell>
+              <TableCell>Estado</TableCell>
               <TableCell>Artículos</TableCell>
               <TableCell>Fecha de Creación</TableCell>
               <TableCell>Acciones</TableCell>
@@ -138,6 +152,14 @@ const UsersTable: React.FC<UsersTableProps> = ({
                   />
                 </TableCell>
                 <TableCell>
+                  <Chip
+                    label={user.status === 'ACTIVE' ? 'Activo' : 'Desactivado'}
+                    color={getStatusColor(user.status)}
+                    size="small"
+                    variant="outlined"
+                  />
+                </TableCell>
+                <TableCell>
                   <Typography variant="body2" color="text.secondary">
                     {user.articles?.length || 0} artículos
                   </Typography>
@@ -168,15 +190,29 @@ const UsersTable: React.FC<UsersTableProps> = ({
                       </IconButton>
                     </Tooltip>
                     {currentUserId !== user.id && (
-                      <Tooltip title={user.articles && user.articles.length > 0 ? "Desactivar usuario" : "Eliminar usuario"}>
-                        <IconButton
-                          size="small"
-                          onClick={() => onDelete(user)}
-                          color={user.articles && user.articles.length > 0 ? "warning" : "error"}
-                        >
-                          <i className={user.articles && user.articles.length > 0 ? "ri-user-unfollow-line" : "ri-delete-bin-line"} />
-                        </IconButton>
-                      </Tooltip>
+                      <>
+                        {user.status === 'ACTIVE' ? (
+                          <Tooltip title={user.articles && user.articles.length > 0 ? "Desactivar usuario" : "Eliminar usuario"}>
+                            <IconButton
+                              size="small"
+                              onClick={() => onDelete(user)}
+                              color={user.articles && user.articles.length > 0 ? "warning" : "error"}
+                            >
+                              <i className={user.articles && user.articles.length > 0 ? "ri-user-unfollow-line" : "ri-delete-bin-line"} />
+                            </IconButton>
+                          </Tooltip>
+                        ) : (
+                          <Tooltip title="Activar usuario">
+                            <IconButton
+                              size="small"
+                              onClick={() => onActivate(user)}
+                              color="success"
+                            >
+                              <i className="ri-user-follow-line" />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                      </>
                     )}
                     {currentUserId === user.id && (
                       <Tooltip title="No puedes eliminar o desactivar tu propia cuenta">

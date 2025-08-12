@@ -6,8 +6,6 @@ import {
   Box,
   Typography,
   Button,
-  Alert,
-  Snackbar,
   Container,
   Fade,
 } from '@mui/material';
@@ -18,6 +16,7 @@ import UsersFilters from '@/components/UsersFilters';
 import UsersTable from '@/components/UsersTable';
 import UserForm from '@/components/UserForm';
 import DeleteUserDialog from '@/components/DeleteUserDialog';
+import ActivateUserDialog from '@/components/ActivateUserDialog';
 import UserViewDialog from '@/components/UserViewDialog';
 import AdminGuard from '@/hocs/AdminGuard';
 
@@ -25,14 +24,13 @@ const UsuariosPage = () => {
   const {
     users,
     loading,
-    error,
     meta,
     fetchUsers,
     createUser,
     updateUser,
     updateUserStatus,
     deleteUser,
-    clearError,
+    checkAdminPermissions,
     canManageUsers,
     currentUser,
   } = useUsers();
@@ -41,6 +39,7 @@ const UsuariosPage = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showActivateDialog, setShowActivateDialog] = useState(false);
   const [showViewDialog, setShowViewDialog] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [filters, setFilters] = useState({
@@ -52,8 +51,11 @@ const UsuariosPage = () => {
 
   // Cargar usuarios al montar el componente
   useEffect(() => {
-    fetchUsers(filters);
-  }, [filters]);
+    // Verificar permisos de admin antes de cargar usuarios
+    if (checkAdminPermissions()) {
+      fetchUsers(filters);
+    }
+  }, [filters, checkAdminPermissions]);
 
   // Manejadores de eventos
   const handleCreateUser = async (data: CreateUserDto) => {
@@ -116,6 +118,22 @@ const UsuariosPage = () => {
     setShowViewDialog(true);
   };
 
+  const handleActivate = (user: User) => {
+    setSelectedUser(user);
+    setShowActivateDialog(true);
+  };
+
+  const handleConfirmActivate = async () => {
+    if (selectedUser) {
+      const success = await updateUserStatus(selectedUser.id, 'ACTIVE');
+      if (success) {
+        setShowActivateDialog(false);
+        setSelectedUser(null);
+        fetchUsers(filters);
+      }
+    }
+  };
+
   const handleFiltersChange = (newFilters: any) => {
     setFilters(newFilters);
   };
@@ -160,6 +178,9 @@ const UsuariosPage = () => {
             <UsersFilters
               onFiltersChange={handleFiltersChange}
               loading={loading}
+              onFiltersApplied={() => {
+                // El toast se mostrará automáticamente cuando se carguen los usuarios
+              }}
             />
 
                       {/* Tabla de usuarios */}
@@ -171,6 +192,7 @@ const UsuariosPage = () => {
             onEdit={handleEdit}
             onDelete={handleDelete}
             onView={handleView}
+            onActivate={handleActivate}
             onPageChange={handlePageChange}
             onLimitChange={handleLimitChange}
           />
@@ -197,6 +219,7 @@ const UsuariosPage = () => {
               user={selectedUser}
               isEdit={true}
               loading={loading}
+              currentUserId={currentUser?.id}
             />
 
             <DeleteUserDialog
@@ -210,6 +233,17 @@ const UsuariosPage = () => {
               loading={loading}
             />
 
+            <ActivateUserDialog
+              open={showActivateDialog}
+              onClose={() => {
+                setShowActivateDialog(false);
+                setSelectedUser(null);
+              }}
+              onConfirm={handleConfirmActivate}
+              user={selectedUser}
+              loading={loading}
+            />
+
             <UserViewDialog
               open={showViewDialog}
               onClose={() => {
@@ -219,17 +253,7 @@ const UsuariosPage = () => {
               user={selectedUser}
             />
 
-            {/* Snackbar para errores */}
-            <Snackbar
-              open={!!error}
-              autoHideDuration={6000}
-              onClose={clearError}
-              anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-            >
-              <Alert onClose={clearError} severity="error" sx={{ width: '100%' }}>
-                {error}
-              </Alert>
-            </Snackbar>
+
           </Box>
         </Fade>
       </Container>

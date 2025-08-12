@@ -24,6 +24,7 @@ interface UserFormProps {
   user?: User | null;
   isEdit?: boolean;
   loading?: boolean;
+  currentUserId?: string;
 }
 
 const UserForm: React.FC<UserFormProps> = ({
@@ -33,6 +34,7 @@ const UserForm: React.FC<UserFormProps> = ({
   user,
   isEdit = false,
   loading = false,
+  currentUserId,
 }) => {
   const [formData, setFormData] = useState<CreateUserDto>({
     name: '',
@@ -124,7 +126,7 @@ const UserForm: React.FC<UserFormProps> = ({
       </DialogTitle>
       <form onSubmit={handleSubmit}>
         <DialogContent>
-          <Box display="flex" flexDirection="column" gap={2}>
+          <Box display="flex" flexDirection="column" gap={8}>
             <TextField
               label="Nombre completo"
               value={formData.name}
@@ -163,10 +165,16 @@ const UserForm: React.FC<UserFormProps> = ({
                 value={formData.role}
                 label="Rol"
                 onChange={(e) => handleChange('role', e.target.value)}
+                disabled={isEdit && currentUserId === user?.id && user?.role === 'ADMIN'}
               >
                 <MenuItem value="EDITOR">Editor</MenuItem>
                 <MenuItem value="ADMIN">Administrador</MenuItem>
               </Select>
+              {isEdit && currentUserId === user?.id && user?.role === 'ADMIN' && (
+                <Typography variant="caption" color="warning.main" sx={{ mt: 0.5 }}>
+                  No puedes cambiar tu propio rol de Administrador por seguridad
+                </Typography>
+              )}
             </FormControl>
 
             {isEdit && (

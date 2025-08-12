@@ -18,11 +18,13 @@ import { UsersFilters as UsersFiltersType } from '@/services/users.service';
 interface UsersFiltersProps {
   onFiltersChange: (filters: UsersFiltersType) => void;
   loading?: boolean;
+  onFiltersApplied?: () => void;
 }
 
 const UsersFilters: React.FC<UsersFiltersProps> = ({
   onFiltersChange,
   loading = false,
+  onFiltersApplied,
 }) => {
   const [filters, setFilters] = useState<UsersFiltersType>({
     page: 1,
@@ -58,6 +60,11 @@ const UsersFilters: React.FC<UsersFiltersProps> = ({
     };
     setFilters(clearedFilters);
     onFiltersChange(clearedFilters);
+    
+    // Mostrar toast de éxito si hay callback
+    if (onFiltersApplied) {
+      onFiltersApplied();
+    }
   };
 
   const handleApplyFilters = () => {
@@ -66,6 +73,11 @@ const UsersFilters: React.FC<UsersFiltersProps> = ({
       page: 1, // Reset to first page when applying filters
     };
     onFiltersChange(filtersToApply);
+    
+    // Mostrar toast de éxito si hay callback
+    if (onFiltersApplied) {
+      onFiltersApplied();
+    }
   };
 
   const hasActiveFilters = filters.search || filters.role;

@@ -1,4 +1,5 @@
 import React from 'react';
+
 import {
   Dialog,
   DialogTitle,
@@ -8,9 +9,9 @@ import {
   Typography,
   Box,
   Chip,
-  Paper,
 } from '@mui/material';
-import { User } from '@/services/users.service';
+
+import type { User } from '@/services/users.service';
 
 interface UserViewDialogProps {
   open: boolean;
@@ -55,7 +56,7 @@ const UserViewDialog: React.FC<UserViewDialogProps> = ({
       <DialogContent>
         <Box display="flex" flexDirection="column" gap={3}>
           {/* Información básica */}
-          <Paper sx={{ p: 2 }}>
+          <Box sx={{ p: 2 }}>
             <Typography variant="h6" gutterBottom>
               Información Personal
             </Typography>
@@ -89,10 +90,10 @@ const UserViewDialog: React.FC<UserViewDialogProps> = ({
                 />
               </Box>
             </Box>
-          </Paper>
+          </Box>
 
           {/* Fechas */}
-          <Paper sx={{ p: 2 }}>
+          <Box sx={{ p: 2 }}>
             <Typography variant="h6" gutterBottom>
               Información de Cuenta
             </Typography>
@@ -115,7 +116,7 @@ const UserViewDialog: React.FC<UserViewDialogProps> = ({
                 </Typography>
               </Box>
             </Box>
-          </Paper>
+          </Box>
 
 
         </Box>

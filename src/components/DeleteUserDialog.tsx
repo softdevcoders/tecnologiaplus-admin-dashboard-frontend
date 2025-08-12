@@ -34,7 +34,7 @@ const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle color={isDeactivation ? "warning" : "error"}>
+      <DialogTitle color={isDeactivation ? "info" : "error"}>
         {isDeactivation ? "Confirmar Desactivación de Usuario" : "Confirmar Eliminación de Usuario"}
       </DialogTitle>
       
@@ -57,20 +57,20 @@ const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({
           </Typography>
 
           {hasArticles && (
-            <Alert severity="warning">
+            <Alert severity="info">
               <Typography variant="body2">
-                <strong>¡Atención!</strong> Este usuario tiene {user.articles.length} artículo(s) publicado(s). 
-                Al desactivar el usuario, sus artículos se mantendrán pero no podrá iniciar sesión.
+                <strong>Información:</strong> Este usuario tiene {user.articles.length} artículo(s) publicado(s). 
+                Al desactivar el usuario, sus artículos seguirán siendo visibles públicamente y no se verán afectados.
               </Typography>
             </Alert>
           )}
 
-          <Alert severity={isDeactivation ? "warning" : "error"}>
+          <Alert severity={isDeactivation ? "info" : "error"}>
             <Typography variant="body2">
               {isDeactivation ? (
                 <>
-                  <strong>El usuario será desactivado.</strong> Sus artículos se mantendrán 
-                  y podrá ser reactivado posteriormente si es necesario.
+                  <strong>El usuario será desactivado.</strong> Sus artículos seguirán siendo visibles públicamente 
+                  y no se verán afectados. El usuario no podrá acceder al dashboard pero podrá ser reactivado posteriormente.
                 </>
               ) : (
                 <>
@@ -89,7 +89,7 @@ const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({
         </Button>
         <Button
           onClick={onConfirm}
-          color={isDeactivation ? "warning" : "error"}
+          color={isDeactivation ? "info" : "error"}
           variant="contained"
           disabled={loading}
           startIcon={loading ? <CircularProgress size={16} /> : null}
