@@ -14,6 +14,7 @@ import { Menu, MenuItem, MenuSection } from '@menu/vertical-menu'
 
 // Hook Imports
 import useVerticalNav from '@menu/hooks/useVerticalNav'
+import { useAuth } from '@/hooks/useAuth'
 
 // Styled Component Imports
 import StyledVerticalNavExpandIcon from '@menu/styles/vertical/StyledVerticalNavExpandIcon'
@@ -44,9 +45,12 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
   // Hooks
   const theme = useTheme()
   const verticalNavOptions = useVerticalNav()
+  const { getSessionInfo } = useAuth()
 
   // Vars
   const { isBreakpointReached, transitionDuration } = verticalNavOptions
+  const currentUser = getSessionInfo().user
+  const isAdmin = currentUser?.role === 'ADMIN'
 
   const ScrollWrapper = isBreakpointReached ? 'div' : PerfectScrollbar
 
@@ -85,11 +89,13 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
         <MenuItem href={`/etiquetas`} exactMatch={true} icon={<i className='ri-price-tag-3-line' />}>
           {'Etiquetas'}
         </MenuItem>
-        <MenuSection label={'Administración'}>
-          <MenuItem href={`/usuarios`} exactMatch={true} icon={<i className='ri-account-circle-line' />}>
-            {'Usuarios'}
-          </MenuItem>
-        </MenuSection>
+        {isAdmin && (
+          <MenuSection label={'Administración'}>
+            <MenuItem href={`/usuarios`} exactMatch={true} icon={<i className='ri-account-circle-line' />}>
+              {'Usuarios'}
+            </MenuItem>
+          </MenuSection>
+        )}
       </Menu>
     </ScrollWrapper>
   )

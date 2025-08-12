@@ -55,7 +55,7 @@ export type Config = {
 
 const themeConfig: Config = {
   templateName: 'Tecnologiaplus',
-  homePageUrl: '/dashboards',
+  homePageUrl: '/',
   settingsCookieName: 'tecnologiaplus-admin-dashboard-frontend',
   mode: 'light', // 'system', 'light', 'dark'
   skin: 'bordered', // 'default', 'bordered'
