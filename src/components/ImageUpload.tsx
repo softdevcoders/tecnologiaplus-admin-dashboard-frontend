@@ -153,7 +153,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
               alt='Vista previa'
               sx={{
                 width: '100%',
-                height: 600,
+                height: 400,
                 objectFit: 'contain',
                 display: 'block'
               }}

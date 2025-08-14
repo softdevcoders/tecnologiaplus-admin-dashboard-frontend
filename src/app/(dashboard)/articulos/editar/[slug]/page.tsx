@@ -246,11 +246,11 @@ const EditarArticuloPage = () => {
               {/* Imagen Principal */}
               <Grid item xs={12}>
                 <ImageUpload
-                  value={formData.coverImage}
+                  value={`https://res.cloudinary.com/ddqh0mkx9/image/upload/${formData.coverImage}`}
                   onChange={imageUrl => handleInputChange('coverImage', imageUrl)}
                   label='Imagen Principal'
                   helperText='Imagen destacada del artículo. Recomendado: 1200x630px'
-                  maxSize={5}
+                  maxSize={1}
                 />
               </Grid>
 
