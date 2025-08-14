@@ -12,6 +12,7 @@ export interface Article {
   metaKeywords?: string
   metaDescription?: string
   coverImage?: string
+  coverImageAlt?: string
   images?: string
   isPublished: boolean
   isPublishedInProduction: boolean

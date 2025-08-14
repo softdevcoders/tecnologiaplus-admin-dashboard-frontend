@@ -236,6 +236,16 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
         )}
       </Paper>
 
+      {helperText && (
+        <Typography
+          variant='caption'
+          color={error ? 'error.main' : 'text.secondary'}
+          sx={{ mt: 0.5, display: 'block' }}
+        >
+          {helperText}
+        </Typography>
+      )}
+
       {/* Campo de texto alternativo */}
       {value && (
         <TextField
@@ -261,15 +271,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
         </Alert>
       )}
 
-      {helperText && (
-        <Typography
-          variant='caption'
-          color={error ? 'error.main' : 'text.secondary'}
-          sx={{ mt: 0.5, display: 'block' }}
-        >
-          {helperText}
-        </Typography>
-      )}
+
     </Box>
   )
 }

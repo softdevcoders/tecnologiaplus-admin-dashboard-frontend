@@ -231,6 +231,31 @@ const CursorFixedWYSIWYGEditor: React.FC<CursorFixedWYSIWYGEditorProps> = ({
     }
   }
 
+  // Función para normalizar URLs
+  const normalizeUrl = (url: string): string => {
+    console.log('normalizeUrl llamada con:', url)
+    
+    if (!url.trim()) return url
+    
+    // Si ya es una URL absoluta con http/https, dejarla como está
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      console.log('URL ya es absoluta, manteniendo:', url)
+      return url
+    }
+    
+    // Si es una URL relativa (empieza con /), agregar el dominio
+    if (url.startsWith('/')) {
+      const result = `https://tecnologiaplus.com${url}`
+      console.log('URL relativa, convirtiendo a absoluta:', { original: url, result })
+      return result
+    }
+    
+    // Si no empieza con /, asumir que es relativa y agregar /
+    const result = `https://tecnologiaplus.com/${url}`
+    console.log('URL sin slash, convirtiendo a absoluta:', { original: url, result })
+    return result
+  }
+
   const handleLinkSubmit = () => {
     if (!linkUrl.trim()) {
       alert('La URL es obligatoria')
@@ -242,9 +267,12 @@ const CursorFixedWYSIWYGEditor: React.FC<CursorFixedWYSIWYGEditorProps> = ({
       return
     }
 
+    // Normalizar la URL antes de usarla
+    const normalizedUrl = normalizeUrl(linkUrl)
+
     if (isEditingLink && selectedLinkElement) {
       // Editar enlace existente
-      selectedLinkElement.href = linkUrl
+      selectedLinkElement.href = normalizedUrl
       selectedLinkElement.textContent = linkText
       selectedLinkElement.target = linkTargetBlank ? '_blank' : ''
       selectedLinkElement.rel = linkTargetBlank ? 'noopener noreferrer' : ''
@@ -261,7 +289,7 @@ const CursorFixedWYSIWYGEditor: React.FC<CursorFixedWYSIWYGEditorProps> = ({
         // Restaurar la selección y reemplazar el texto seleccionado
         restoreSelection()
         const targetAttr = linkTargetBlank ? ' target="_blank" rel="noopener noreferrer"' : ''
-        const linkHTML = `<a href="${linkUrl}"${targetAttr}>${linkText}</a>`
+        const linkHTML = `<a href="${normalizedUrl}"${targetAttr}>${linkText}</a>`
         
         // Usar execCommand para insertar el HTML en la selección
         document.execCommand('insertHTML', false, linkHTML)
@@ -271,7 +299,7 @@ const CursorFixedWYSIWYGEditor: React.FC<CursorFixedWYSIWYGEditorProps> = ({
       } else {
         // Fallback: insertar al final si no hay selección
         const targetAttr = linkTargetBlank ? ' target="_blank" rel="noopener noreferrer"' : ''
-        const linkHTML = `<a href="${linkUrl}"${targetAttr}>${linkText}</a>`
+        const linkHTML = `<a href="${normalizedUrl}"${targetAttr}>${linkText}</a>`
         execCommand('insertHTML', linkHTML)
       }
     }
@@ -443,8 +471,24 @@ const CursorFixedWYSIWYGEditor: React.FC<CursorFixedWYSIWYGEditorProps> = ({
       e.stopPropagation()
       
       const linkElement = target as HTMLAnchorElement
+      const originalUrl = linkElement.href
+      
+      // Debug: mostrar la URL original
+      console.log('URL original del enlace:', originalUrl)
+      
+      // Normalización directa y simple
+      let normalizedUrl = originalUrl
+      if (originalUrl.includes('localhost:3000')) {
+        normalizedUrl = originalUrl.replace('http://localhost:3000', 'https://tecnologiaplus.com')
+        // Quitar trailing slash si existe
+        if (normalizedUrl.endsWith('/')) {
+          normalizedUrl = normalizedUrl.slice(0, -1)
+        }
+        console.log('URL normalizada:', normalizedUrl)
+      }
+      
       setSelectedLinkElement(linkElement)
-      setLinkUrl(linkElement.href)
+      setLinkUrl(normalizedUrl)
       setLinkText(linkElement.textContent || '')
       setLinkTargetBlank(linkElement.target === '_blank')
       setIsEditingLink(true)
