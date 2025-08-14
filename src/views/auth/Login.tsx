@@ -68,7 +68,7 @@ const Login = () => {
     resolver: valibotResolver(schema),
     defaultValues: {
       email: 'admin@tecnologiaplus.com',
-      password: 'admin123'
+      password: 'password'
     }
   })
 

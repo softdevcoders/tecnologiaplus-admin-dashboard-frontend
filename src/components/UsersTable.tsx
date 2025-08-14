@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+
 import {
   Table,
   TableBody,
@@ -15,7 +16,7 @@ import {
   Tooltip,
 } from '@mui/material';
 
-import { User } from '@/services/users.service';
+import type { User } from '@/services/users.service';
 
 interface UsersTableProps {
   users: User[];
@@ -216,6 +217,7 @@ const UsersTable: React.FC<UsersTableProps> = ({
                     )}
                     {currentUserId === user.id && (
                       <Tooltip title="No puedes eliminar o desactivar tu propia cuenta">
+                        <>
                         <IconButton
                           size="small"
                           disabled
@@ -223,9 +225,10 @@ const UsersTable: React.FC<UsersTableProps> = ({
                         >
                           <i className="ri-shield-line" />
                         </IconButton>
-                        <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
-                          Tu cuenta
-                        </Typography>
+                          <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
+                            Tu cuenta
+                          </Typography>
+                        </>
                       </Tooltip>
                     )}
                   </Box>

@@ -1,8 +1,11 @@
 import { useState, useCallback } from 'react';
-import { usersService, User, CreateUserDto, UpdateUserDto, UsersFilters, UsersResponse } from '@/services/users.service';
+
+import { useRouter } from 'next/navigation';
+
+import { usersService, type User, type CreateUserDto, type UpdateUserDto, type UsersFilters, type  UsersResponse } from '@/services/users.service';
+
 import { useAuth } from './useAuth';
 import { useNotification } from '@/contexts/NotificationContext';
-import { useRouter } from 'next/navigation';
 
 export const useUsers = () => {
   const [users, setUsers] = useState<User[]>([]);

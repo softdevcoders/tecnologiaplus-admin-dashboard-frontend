@@ -117,6 +117,8 @@ export const useArticles = (initialFilters: ArticlesFilters = {}): UseArticlesRe
     try {
       const response = await articlesService.getArticleBySlug(slug)
 
+      console.log('response', response)
+
       if (response.success) {
         setState(prev => ({ ...prev, loading: false }))
 

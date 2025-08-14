@@ -1,4 +1,5 @@
 import React from 'react';
+
 import {
   Dialog,
   DialogTitle,
@@ -10,7 +11,8 @@ import {
   Alert,
   CircularProgress,
 } from '@mui/material';
-import { User } from '@/services/users.service';
+
+import type { User } from '@/services/users.service';
 
 interface DeleteUserDialogProps {
   open: boolean;
@@ -59,7 +61,7 @@ const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({
           {hasArticles && (
             <Alert severity="info">
               <Typography variant="body2">
-                <strong>Información:</strong> Este usuario tiene {user.articles.length} artículo(s) publicado(s). 
+                <strong>Información:</strong> Este usuario tiene {user.articles?.length || 0} artículo(s) publicado(s). 
                 Al desactivar el usuario, sus artículos seguirán siendo visibles públicamente y no se verán afectados.
               </Typography>
             </Alert>

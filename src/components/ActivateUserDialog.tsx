@@ -1,4 +1,5 @@
 import React from 'react';
+
 import {
   Dialog,
   DialogTitle,
@@ -10,7 +11,8 @@ import {
   Alert,
   CircularProgress,
 } from '@mui/material';
-import { User } from '@/services/users.service';
+
+import type { User } from '@/services/users.service';
 
 interface ActivateUserDialogProps {
   open: boolean;

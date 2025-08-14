@@ -28,7 +28,7 @@ import { canDeleteArticle } from '@/utils/permissions'
 
 interface ArticlesListViewProps {
   articles: Article[]
-  onEdit?: (articleId: string) => void
+  onEdit?: (articleSlug: string) => void
   onView?: (articleSlug: string) => void
   onDelete?: (articleId: string) => void
   onPublish?: (articleId: string) => void
@@ -246,7 +246,12 @@ const ArticlesListView: React.FC<ArticlesListViewProps> = ({
         {onEdit && (
           <MenuItem
             sx={{ display: 'flex', alignItems: 'center', gap: 2 }}
-            onClick={() => handleAction(() => onEdit(selectedArticleId!))}
+            onClick={() => {
+              const article = articles.find(a => a.id === selectedArticleId)
+              if (article) {
+                handleAction(() => onEdit(article.slug))
+              }
+            }}
           >
             <ListItemIcon sx={{ color: 'primary.main' }}>
               <i className='ri-pencil-line' />

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+
 import {
   Dialog,
   DialogTitle,
@@ -15,7 +16,8 @@ import {
   Alert,
   CircularProgress,
 } from '@mui/material';
-import { User, CreateUserDto, UpdateUserDto } from '@/services/users.service';
+
+import type { User, CreateUserDto, UpdateUserDto } from '@/services/users.service';
 
 interface UserFormProps {
   open: boolean;

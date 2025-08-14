@@ -27,7 +27,7 @@ import { canDeleteArticle } from '@/utils/permissions'
 
 interface ArticlesGridViewProps {
   articles: Article[]
-  onEdit?: (articleId: string) => void
+  onEdit?: (articleSlug: string) => void
   onView?: (articleSlug: string) => void
   onDelete?: (articleId: string) => void
   onPublish?: (articleId: string) => void
@@ -267,7 +267,12 @@ const ArticlesGridView: React.FC<ArticlesGridViewProps> = ({
         {onEdit && (
           <MenuItem
             sx={{ display: 'flex', alignItems: 'center', gap: 2 }}
-            onClick={() => selectedArticleId && onEdit && handleAction(() => onEdit(selectedArticleId))}
+            onClick={() => {
+              const article = articles.find(a => a.id === selectedArticleId)
+              if (article && onEdit) {
+                handleAction(() => onEdit(article.slug))
+              }
+            }}
           >
             <ListItemIcon sx={{ color: 'primary.main' }}>
               <i className='ri-pencil-line' />

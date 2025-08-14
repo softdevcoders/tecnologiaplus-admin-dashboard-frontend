@@ -242,7 +242,7 @@ const ArticulosPage = () => {
           {viewMode === 'list' ? (
             <ArticlesListView
               articles={articles}
-              onEdit={id => router.push(`/articulos/editar/${id}`)}
+              onEdit={slug => router.push(`/articulos/editar/${slug}`)}
               onView={slug => router.push(`/articulos/ver/${slug}`)}
               onDelete={handleDeleteArticle}
               onPublish={handlePublishArticle}
@@ -252,7 +252,7 @@ const ArticulosPage = () => {
           ) : (
             <ArticlesGridView
               articles={articles}
-              onEdit={id => router.push(`/articulos/editar/${id}`)}
+              onEdit={slug => router.push(`/articulos/editar/${slug}`)}
               onView={slug => router.push(`/articulos/ver/${slug}`)}
               onDelete={handleDeleteArticle}
               onPublish={handlePublishArticle}

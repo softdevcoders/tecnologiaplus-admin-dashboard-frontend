@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+
 import {
   Paper,
   Box,
@@ -13,7 +14,7 @@ import {
   Typography,
 } from '@mui/material';
 
-import { UsersFilters as UsersFiltersType } from '@/services/users.service';
+import type { UsersFilters as UsersFiltersType } from '@/services/users.service';
 
 interface UsersFiltersProps {
   onFiltersChange: (filters: UsersFiltersType) => void;
@@ -189,7 +190,7 @@ const UsersFilters: React.FC<UsersFiltersProps> = ({
                   <MenuItem value={25}>25</MenuItem>
                 </Select>
               </FormControl>
-              <Typography variant="text.secondary">
+              <Typography variant="body2" color="text.secondary">
                 por página
               </Typography>
             </Box>
@@ -207,7 +208,7 @@ const UsersFilters: React.FC<UsersFiltersProps> = ({
                 
                 {filters.search && (
                   <Typography variant="body2" color="primary">
-                    Búsqueda: "{filters.search}"
+                    Búsqueda: &quot;{filters.search}&quot;
                   </Typography>
                 )}
                 

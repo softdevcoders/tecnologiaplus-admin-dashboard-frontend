@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import Link from 'next/link'
 
 import type { Metadata } from 'next'
 
@@ -46,13 +47,13 @@ export default function EtiquetasPage() {
 
             {/* Botón simple */}
             <div className="pt-4">
-              <a
+              <Link
                 href="/articulos"
                 className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-700 transition-colors"
               >
                 <i className="ri-arrow-left-line"></i>
                 <span>Volver a artículos</span>
-              </a>
+              </Link>
             </div>
           </div>
         </div>

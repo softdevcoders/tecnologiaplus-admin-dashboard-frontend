@@ -34,6 +34,7 @@ import { isValidSlug } from '@/utils/slug'
 
 // Types
 interface ArticleFormData {
+  id: string
   title: string
   summary: string
   content: string
@@ -50,12 +51,13 @@ interface ArticleFormData {
 const EditarArticuloPage = () => {
   const router = useRouter()
   const params = useParams()
-  const articleId = params.id as string
+  const articleSlug = params.slug as string
 
   const { categories, loading: categoriesLoading } = useCategories()
-  const { getArticleById, updateArticle, loading: updateLoading, error, clearError } = useArticles()
+  const { getArticleBySlug, updateArticle, loading: updateLoading, error, clearError } = useArticles()
 
   const [formData, setFormData] = useState<ArticleFormData>({
+    id: '',
     title: '',
     summary: '',
     content: '',
@@ -75,12 +77,13 @@ const EditarArticuloPage = () => {
   // Cargar datos del artículo
   useEffect(() => {
     const loadArticle = async () => {
-      if (articleId) {
+      if (articleSlug) {
         try {
-          const article = await getArticleById(articleId)
+          const article = await getArticleBySlug(articleSlug)
 
           if (article) {
             setFormData({
+              id: article.id,
               title: article.title,
               summary: article.summary || '',
               content: article.content,
@@ -91,7 +94,7 @@ const EditarArticuloPage = () => {
               coverImage: article.coverImage || '',
               categoryId: article.category?.id || '',
               isPublished: article.isPublished,
-              tags: article.tags.map(tag => tag.id) || []
+              tags: article.tags.map((tag: any) => tag.id) || []
             })
           }
         } catch (error) {
@@ -103,7 +106,7 @@ const EditarArticuloPage = () => {
     }
 
     loadArticle()
-  }, [articleId, getArticleById])
+  }, [articleSlug, getArticleBySlug])
 
   const handleInputChange = (field: keyof ArticleFormData, value: any) => {
     setFormData(prev => ({
@@ -141,7 +144,7 @@ const EditarArticuloPage = () => {
 
     try {
       const updatedArticle = await updateArticle({
-        id: articleId,
+        id: formData.id,
         title: formData.title,
         summary: formData.summary,
         content: formData.content,
@@ -263,7 +266,7 @@ const EditarArticuloPage = () => {
                   >
                     {categories.map(category => (
                       <MenuItem key={category.id} value={category.id}>
-                        {category.name}
+                        {category.label}
                       </MenuItem>
                     ))}
                   </Select>

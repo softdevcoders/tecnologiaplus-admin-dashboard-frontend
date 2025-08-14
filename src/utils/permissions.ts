@@ -1,4 +1,4 @@
-import { Article } from '@/types/article'
+import type { Article } from '@/services/articles.service'
 
 interface CurrentUser {
   id: string
