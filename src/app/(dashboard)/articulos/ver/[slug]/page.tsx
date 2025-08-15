@@ -212,12 +212,12 @@ async function VerArticuloPorSlugPage({ params }: PageProps) {
               <Box sx={{ mb: 3 }}>
                 <Box
                   component='img'
-                  src={article.coverImage}
+                  src={`https://res.cloudinary.com/ddqh0mkx9/image/upload/f_webp,w_1000/${article.coverImage}`} 
                   alt={article.title}
                   sx={{
                     width: '100%',
-                    height: 300,
-                    objectFit: 'cover',
+                    height: 'auto',
+                    objectFit: 'contain',
                     borderRadius: 1
                   }}
                 />
